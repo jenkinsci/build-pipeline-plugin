@@ -25,7 +25,7 @@ class BuildPipelineDashboardTest extends Specification {
         def bpv = cut.getBuildPipelineView()
 
         expect:
-            !bpv.hasBuildPermission(null)
+            !bpv.hasBuildPermission()
     }
 
     def "should not have any permission"() {

@@ -120,19 +120,10 @@ public class BuildPipelineView extends View {
      */
     /* Feature flags - START */
 
-    /** Indicates whether the progress bar should be displayed */
-    private boolean displayProgressBar;
-
     /* Feature flags - END */
 
     /** A Logger object is used to log messages */
     private static final Logger LOGGER = Logger.getLogger(BuildPipelineView.class.getName());
-    /** Constant that represents the Stapler Request upstream build number. */
-    private static final String REQ_UPSTREAM_BUILD_NUMBER = "upstreamBuildNumber"; //$NON-NLS-1$
-    /** Constant that represents the Stapler Request trigger project name. */
-    private static final String REQ_TRIGGER_PROJECT_NAME = "triggerProjectName"; //$NON-NLS-1$
-    /** Constant that represents the Stapler Request upstream project name. */
-    private static final String REQ_UPSTREAM_PROJECT_NAME = "upstreamProjectName"; //$NON-NLS-1$
 
     /**
      * An instance of {@link Cause.UserIdCause} related to the current user. Must be transient, or xstream will include it in the
@@ -215,7 +206,6 @@ public class BuildPipelineView extends View {
      * @param triggerOnlyLatestJob
      *            Indicates whether only the latest job will be triggered.
      */
-    @DataBoundConstructor
     public BuildPipelineView(final String name, final String buildViewTitle,
              final ProjectGridBuilder gridBuilder, final String noOfDisplayedBuilds,
              final boolean triggerOnlyLatestJob) {

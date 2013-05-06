@@ -24,6 +24,7 @@
  */
 package au.com.centrumsystems.hudson.plugin.buildpipeline;
 
+import hudson.model.Action;
 import hudson.model.Item;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
@@ -176,6 +177,27 @@ public class PipelineBuild {
             }
             final PipelineBuild newPB = new PipelineBuild(returnedBuild, proj, this.currentBuild);
             pbList.add(newPB);
+        }
+        if (Hudson.getInstance().getPlugin("parameterized-trigger") != null) {
+            for (Action action : currentProject.getActions()) {
+                if (action.getClass().equals(hudson.plugins.parameterizedtrigger.SubProjectsAction.class)) {
+                    final hudson.plugins.parameterizedtrigger.SubProjectsAction subProjectsAction =
+                        (hudson.plugins.parameterizedtrigger.SubProjectsAction) action;
+                    for (hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig config : subProjectsAction.getConfigs()) {
+                        for (final AbstractProject<?, ?> dependency : config.getProjectList(currentProject.getParent(), null)) {
+                            AbstractBuild<?, ?> returnedBuild = null;
+                            if (this.currentBuild != null) {
+                                returnedBuild = BuildUtil.getDownstreamBuild(dependency, currentBuild);
+                            }
+                            final PipelineBuild candidate = new PipelineBuild(returnedBuild, dependency, this.currentBuild);
+                            // if subprojects come back as downstreams someday, no duplicates wanted
+                            if (!pbList.contains(candidate)) {
+                                pbList.add(candidate);
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         return pbList;

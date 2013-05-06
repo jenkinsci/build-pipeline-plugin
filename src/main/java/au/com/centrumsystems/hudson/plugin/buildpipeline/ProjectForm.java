@@ -1,7 +1,9 @@
 package au.com.centrumsystems.hudson.plugin.buildpipeline;
 
+import hudson.model.Action;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.Hudson;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -88,6 +90,23 @@ public class ProjectForm {
         dependencies = new ArrayList<ProjectForm>();
         for (final AbstractProject<?, ?> dependency : project.getDownstreamProjects()) {
             dependencies.add(new ProjectForm(dependency));
+        }
+        if (Hudson.getInstance().getPlugin("parameterized-trigger") != null) {
+            for (Action action : project.getActions()) {
+                if (action.getClass().equals(hudson.plugins.parameterizedtrigger.SubProjectsAction.class)) {
+                    final hudson.plugins.parameterizedtrigger.SubProjectsAction subProjectsAction =
+                        (hudson.plugins.parameterizedtrigger.SubProjectsAction) action;
+                    for (hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig config : subProjectsAction.getConfigs()) {
+                        for (final AbstractProject<?, ?> dependency : config.getProjectList(project.getParent(), null)) {
+                            final ProjectForm candidate = new ProjectForm(dependency);
+                            // if subprojects come back as downstreams someday, no duplicates wanted
+                            if (!dependencies.contains(candidate)) {
+                                dependencies.add(candidate);
+                            }
+                        }
+                    }
+                }
+            }
         }
         this.displayTrigger = true;
 
