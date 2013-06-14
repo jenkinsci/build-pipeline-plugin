@@ -83,7 +83,7 @@ public class ProjectForm {
 
         final PipelineBuild pipelineBuild = new PipelineBuild(project.getLastBuild(), project, null);
 
-        name = pipelineBuild.getProject().getName();
+        name = pipelineBuild.getProject().getFullName();
         result = pipelineBuild.getCurrentBuildResult();
         health = pipelineBuild.getProject().getBuildHealth().getIconUrl().replaceAll("\\.gif", "\\.png");
         url = pipelineBuild.getProjectURL();

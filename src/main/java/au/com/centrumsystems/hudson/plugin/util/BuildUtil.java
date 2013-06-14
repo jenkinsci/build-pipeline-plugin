@@ -63,7 +63,7 @@ public final class BuildUtil {
                     for (final Cause cause : action.getCauses()) {
                         if (cause instanceof UpstreamCause) {
                             final UpstreamCause upstreamCause = (UpstreamCause) cause;
-                            if (upstreamCause.getUpstreamProject().equals(upstreamBuild.getProject().getName())
+                            if (upstreamCause.getUpstreamProject().equals(upstreamBuild.getProject().getFullName())
                                     && (upstreamCause.getUpstreamBuild() == upstreamBuild.getNumber())) {
                                 return innerBuild;
                             }

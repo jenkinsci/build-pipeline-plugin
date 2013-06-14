@@ -3,7 +3,6 @@ package au.com.centrumsystems.hudson.plugin.buildpipeline;
 import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.Hudson;
 import hudson.model.Item;
 import hudson.model.ItemGroup;
 import hudson.util.AdaptedIterator;
@@ -215,11 +214,10 @@ public class DownstreamProjectGridBuilder extends ProjectGridBuilder {
          *      What to resolve relative job names against?
          * @return ListBoxModel
          */
-        // TODO: this does not handle relative path in the current context correctly
         public ListBoxModel doFillFirstJobItems(@AncestorInPath ItemGroup<?> context) {
             final hudson.util.ListBoxModel options = new hudson.util.ListBoxModel();
-            for (final String jobName : Hudson.getInstance().getJobNames()) {
-                options.add(jobName);
+            for (final AbstractProject<?,?> p : Jenkins.getInstance().getAllItems(AbstractProject.class)) {
+                options.add(/* TODO 1.515: p.getRelativeDisplayNameFrom(context) */p.getFullDisplayName(), p.getRelativeNameFrom(context));
             }
             return options;
         }

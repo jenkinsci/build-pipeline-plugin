@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import au.com.centrumsystems.hudson.plugin.buildpipeline.trigger.BuildPipelineTrigger;
+import jenkins.model.Jenkins;
 
 /**
  * Provides helper methods for #hudson.model.AbstractProject
@@ -104,7 +105,7 @@ public final class ProjectUtil {
                     final String manualDownstreamProjects = ((BuildPipelineTrigger) upstreamPub).getDownstreamProjectNames();
                     final String[] downstreamProjs = manualDownstreamProjects.split(",");
                     for (final String nextProj : downstreamProjs) {
-                        if (downstreamProject.getName().equalsIgnoreCase(nextProj.trim())) {
+                        if (Jenkins.getInstance().getItem(nextProj.trim(), upstreamProject) == downstreamProject) {
                             manualTrigger = true;
                             break;
                         }

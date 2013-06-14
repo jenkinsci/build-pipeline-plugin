@@ -240,7 +240,7 @@
 					</div>
 					<div class="icon-container">
 						<div>
-							<a href='../../manage'>
+							<a href='${rootURL}/manage'>
 								<img src="${rootURL}/images/24x24/setting.png" class="icon-with-caption" />
 							</a>
 						</div>

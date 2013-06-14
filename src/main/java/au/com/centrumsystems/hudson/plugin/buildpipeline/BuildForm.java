@@ -59,7 +59,7 @@ public class BuildForm {
             dependencies.add(new BuildForm(downstream));
         }
         id = hashCode();
-        projectId = pipelineBuild.getProject().getName().hashCode();
+        projectId = pipelineBuild.getProject().getFullName().hashCode();
     }
 
     public String getStatus() {
