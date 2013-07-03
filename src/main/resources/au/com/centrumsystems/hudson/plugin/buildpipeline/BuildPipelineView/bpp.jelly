@@ -166,10 +166,11 @@
 	</tbody>
 </table>
 	</script>
+	<st:bind var="buildPipelineViewProxy" value="${from}" />
 	<script type="text/javascript">
 		var buildCardTemplateSource = jQuery("#build-card-template").html();
 		var projectCardTemplateSource = jQuery("#project-card-template").html();
-		var buildPipeline = new BuildPipeline(<st:bind value="${from}" />, Handlebars.compile(buildCardTemplateSource), Handlebars.compile(projectCardTemplateSource), ${from.getRefreshFrequencyInMillis()});
+		var buildPipeline = new BuildPipeline(buildPipelineViewProxy, Handlebars.compile(buildCardTemplateSource), Handlebars.compile(projectCardTemplateSource), ${from.getRefreshFrequencyInMillis()});
 	</script>
 	<style>
 	.trigger {
