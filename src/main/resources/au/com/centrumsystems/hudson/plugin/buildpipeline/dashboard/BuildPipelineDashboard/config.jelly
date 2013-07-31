@@ -15,18 +15,18 @@
     <!-- st:include page="au/com/centrumsystems/hudson/plugin/buildpipeline/BuildPipelineView/configure-entries.jelly" / -->
     <!-- TODO: this is code duplication from configure-entries.jelly -->
 <!--    <f:entry title="Build Pipeline View Title" field="buildViewTitle">
-        <f:textbox name="buildViewTitle"/> 
+        <f:textbox name="buildViewTitle"/>
     </f:entry>-->
     <f:entry title="Display name">
         <f:textbox field="name" default="${descriptor.getDisplayName()}" />
     </f:entry>
-  	  
-    <f:entry title="Description" field="description">    
+
+    <f:entry title="Description" field="description">
         <f:textbox />
     </f:entry>
-  
+
     <f:dropdownDescriptorSelector field="gridBuilder" title="${%Layout}" />
-  
+
     <f:entry title="No Of Displayed Builds" field="noOfDisplayedBuilds">
         <f:select />
     </f:entry>

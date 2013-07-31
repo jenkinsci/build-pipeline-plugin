@@ -1,5 +1,12 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt">
+
 	<link href="${rootURL}/plugin/build-pipeline-plugin/css/main.css" type="text/css" rel="stylesheet" />
+
+	<!-- If the user specifies a custom CSS link, load it.-->
+	<j:if test="${!empty(from.cssUrl)}">
+		<link href="${from.cssUrl}" type="text/css" rel="stylesheet" />
+	</j:if>
+
 	<link rel="stylesheet" href="${rootURL}/plugin/build-pipeline-plugin/css/redmond/jquery-ui-1.8.14.custom.css"></link>
 	<link rel="stylesheet" href="${rootURL}/plugin/build-pipeline-plugin/css/jquery.fancybox-1.3.4.css"></link>
 	<link rel="stylesheet" href="${rootURL}/plugin/build-pipeline-plugin/css/jquery.tooltip.css"></link>
@@ -277,7 +284,9 @@
 										</script>
 										<j:if test="${(y + 1 != buildPipelineForm.getGridWidth())}">
 											<td class="next">
-												<j:if test="${!(project.getDependencies().length() == 0)}">
+
+												<!-- Changing length to size() to get rid of arrows when there are no more child jobs.-->
+												<j:if test="${!(project.getDependencies().size() == 0)}">
 													<span class="status next">
 														<img src="${rootURL}/images/24x24/next.png" />
 													</span>
@@ -395,7 +404,9 @@
 											</j:if>
 										</script>
 										<j:if test="${(y + 1 != buildPipelineForm.getGridWidth())}">
-											<td class="next"><j:if test="${!(build.getDependencies().length() == 0)}">
+
+											<!-- Changing length to size() to get rid of arrows when there are no more child jobs.-->
+											<td class="next"><j:if test="${!(build.getDependencies().size() == 0)}">
 													<span class="status next"><img src="${rootURL}/images/24x24/next.png" /></span>
 												</j:if></td>
 										</j:if>

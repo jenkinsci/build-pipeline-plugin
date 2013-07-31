@@ -28,7 +28,7 @@ import au.com.centrumsystems.hudson.plugin.buildpipeline.Strings;
 
 /**
  * This class provides the entry point to use this plugin in the dashboard-plugin
- * 
+ *
  * @author Ingo Richter (irichter@adobe.com)
  * @since 03/30/2012
  */
@@ -55,8 +55,13 @@ public class BuildPipelineDashboard extends DashboardPortlet {
     private String description;
 
     /**
+     * URL for custom CSS file.
+     */
+    private String cssUrl;
+
+    /**
      * Constructor
-     * 
+     *
      * @param name
      *            the name of this view
      * @param description
@@ -121,8 +126,16 @@ public class BuildPipelineDashboard extends DashboardPortlet {
         this.description = description;
     }
 
+    public void setCssUrl(final String cssUrl) {
+        this.cssUrl = cssUrl;
+    }
+
+    public String getCssUrl() {
+        return cssUrl;
+    }
+
     public BuildPipelineView getBuildPipelineView() {
-        return new ReadOnlyBuildPipelineView(getDisplayName(), getDescription(), getGridBuilder(), getNoOfDisplayedBuilds(), false);
+        return new ReadOnlyBuildPipelineView(getDisplayName(), getDescription(), getGridBuilder(), getNoOfDisplayedBuilds(), false, getCssUrl());
     }
 
     /**
@@ -139,7 +152,7 @@ public class BuildPipelineDashboard extends DashboardPortlet {
 
         /**
          * Display Job List Item in the Edit View Page
-         * 
+         *
          * @return ListBoxModel
          */
         public hudson.util.ListBoxModel doFillSelectedJobItems() {
@@ -152,7 +165,7 @@ public class BuildPipelineDashboard extends DashboardPortlet {
 
         /**
          * Display No Of Builds Items in the Edit View Page
-         * 
+         *
          * @return ListBoxModel
          */
         public hudson.util.ListBoxModel doFillNoOfDisplayedBuildsItems() {

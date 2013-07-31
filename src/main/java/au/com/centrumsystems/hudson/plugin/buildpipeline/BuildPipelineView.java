@@ -95,6 +95,9 @@ public class BuildPipelineView extends View {
     /** buildViewTitle. */
     private String buildViewTitle = ""; //$NON-NLS-1$
 
+    /** URL for custom CSS file */
+    private String cssUrl = "";
+
     /** Indicates whether only the latest job will be triggered. **/
     private boolean triggerOnlyLatestJob;
 
@@ -103,7 +106,7 @@ public class BuildPipelineView extends View {
 
     /** showPipelineParameters. */
     private boolean showPipelineParameters = true;
-    
+
     /** showPipelineParametersInHeaders */
     private boolean showPipelineParametersInHeaders;
 
@@ -205,15 +208,18 @@ public class BuildPipelineView extends View {
      *            a count of the number of builds displayed on the view
      * @param triggerOnlyLatestJob
      *            Indicates whether only the latest job will be triggered.
+     * @param cssUrl
+     *            URL for the custom CSS file.
      */
     public BuildPipelineView(final String name, final String buildViewTitle,
              final ProjectGridBuilder gridBuilder, final String noOfDisplayedBuilds,
-             final boolean triggerOnlyLatestJob) {
+             final boolean triggerOnlyLatestJob, final String cssUrl) {
         super(name, Hudson.getInstance());
         this.buildViewTitle = buildViewTitle;
         this.gridBuilder = gridBuilder;
         this.noOfDisplayedBuilds = noOfDisplayedBuilds;
         this.triggerOnlyLatestJob = triggerOnlyLatestJob;
+        this.cssUrl = cssUrl;
     }
 
     /**
@@ -233,19 +239,21 @@ public class BuildPipelineView extends View {
      * @param showPipelineParameters
      *            Indicates whether pipeline parameter values should be shown.
      * @param showPipelineParametersInHeaders
-     *            Indicates whether the pipeline headers should show the 
+     *            Indicates whether the pipeline headers should show the
      *            pipeline parameter values for the last successful instance.
      * @param showPipelineDefinitionHeader
      *            Indicates whether the pipeline headers should be shown.
      * @param refreshFrequency
      *            Frequency at which the build pipeline plugin refreshes build cards
+     * @param cssUrl
+     *            URL for the custom CSS file.
      */
     @DataBoundConstructor
     public BuildPipelineView(final String name, final String buildViewTitle, final ProjectGridBuilder gridBuilder,
             final String noOfDisplayedBuilds,
             final boolean triggerOnlyLatestJob, final boolean alwaysAllowManualTrigger, final boolean showPipelineParameters,
-            final boolean showPipelineParametersInHeaders, final boolean showPipelineDefinitionHeader, final int refreshFrequency) {
-        this(name, buildViewTitle, gridBuilder, noOfDisplayedBuilds, triggerOnlyLatestJob);
+            final boolean showPipelineParametersInHeaders, final boolean showPipelineDefinitionHeader, final int refreshFrequency, final String cssUrl) {
+        this(name, buildViewTitle, gridBuilder, noOfDisplayedBuilds, triggerOnlyLatestJob, cssUrl);
         this.alwaysAllowManualTrigger = alwaysAllowManualTrigger;
         this.showPipelineParameters = showPipelineParameters;
         this.showPipelineParametersInHeaders = showPipelineParametersInHeaders;
@@ -637,6 +645,14 @@ public class BuildPipelineView extends View {
         this.buildViewTitle = buildViewTitle;
     }
 
+    public String getCssUrl() {
+        return cssUrl;
+    }
+
+    public void setCssUrl(final String cssUrl) {
+        this.cssUrl = cssUrl;
+    }
+
     public String getNoOfDisplayedBuilds() {
         return noOfDisplayedBuilds;
     }
@@ -684,11 +700,11 @@ public class BuildPipelineView extends View {
     public boolean isShowPipelineParametersInHeaders() {
         return showPipelineParametersInHeaders;
     }
-    
+
     public String getShowPipelineParametersInHeaders() {
         return Boolean.toString(showPipelineParametersInHeaders);
     }
-    
+
     public void setShowPipelineParametersInHeaders(final boolean showPipelineParametersInHeaders) {
         this.showPipelineParametersInHeaders = showPipelineParametersInHeaders;
     }

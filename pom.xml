@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.jenkins-ci.plugins</groupId>
 		<artifactId>plugin</artifactId>
-		<version>1.519</version>
+		<version>1.521</version>
 	</parent>
 	<artifactId>build-pipeline-plugin</artifactId>
 	<version>1.4-SNAPSHOT</version>
@@ -82,7 +82,7 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<!-- enables mocking of classes without default constructor (together with 
+			<!-- enables mocking of classes without default constructor (together with
 				CGLIB) -->
 			<groupId>org.objenesis</groupId>
 			<artifactId>objenesis</artifactId>
@@ -237,7 +237,7 @@
 		</plugins>
 		<pluginManagement>
 			<plugins>
-				<!--This plugin's configuration is used to store Eclipse m2e settings 
+				<!--This plugin's configuration is used to store Eclipse m2e settings
 					only. It has no influence on the Maven build itself. -->
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
