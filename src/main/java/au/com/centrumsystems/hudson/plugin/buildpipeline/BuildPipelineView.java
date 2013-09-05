@@ -491,7 +491,9 @@ public class BuildPipelineView extends View {
         LOGGER.fine("Triggering build for project: " + triggerProject.getFullDisplayName()); //$NON-NLS-1$
         final Cause.UpstreamCause upstreamCause = (null == upstreamBuild) ? null : new Cause.UpstreamCause((Run<?, ?>) upstreamBuild);
         final List<Action> buildActions = new ArrayList<Action>();
-        buildActions.add(new CauseAction(new MyUserIdCause()));
+        CauseAction causeAction = new CauseAction(new MyUserIdCause());
+        causeAction.getCauses().add(upstreamCause);
+        buildActions.add(causeAction);
         ParametersAction parametersAction =
                 buildParametersAction instanceof ParametersAction
                         ? (ParametersAction) buildParametersAction : new ParametersAction();
@@ -522,7 +524,7 @@ public class BuildPipelineView extends View {
 
         buildActions.add(parametersAction);
 
-        triggerProject.scheduleBuild(triggerProject.getQuietPeriod(), upstreamCause, buildActions.toArray(new Action[buildActions.size()]));
+        triggerProject.scheduleBuild(triggerProject.getQuietPeriod(), null, buildActions.toArray(new Action[buildActions.size()]));
         return triggerProject.getNextBuildNumber();
     }
 
