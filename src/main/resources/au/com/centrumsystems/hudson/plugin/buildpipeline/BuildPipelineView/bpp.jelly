@@ -79,9 +79,24 @@
 				<div class="icons" id="icons-{{id}}">
 					{{#unless build.isPending}}
 						{{#unless build.isReadyToBeManuallyBuilt}}
-						<span class="pointer" onclick="buildPipeline.fillDialog('{{build.url}}console', 'Console output for {{project.name}} #{{build.number}}')">
-							<img title="console" alt="console" src="${rootURL}/images/16x16/terminal.png" />
-						</span>
+							<j:set var="consoleOutputIconUrl" value="${rootURL}/images/16x16/terminal.png" />
+							<j:choose>
+								<j:when test="${from.newWindowConsoleOutputLinkStyle}">
+									<a href="{{build.url}}console" target="_blank">
+										<img title="console" alt="console" src="${consoleOutputIconUrl}" />
+									</a>
+								</j:when>
+								<j:when test="${from.thisWindowConsoleOutputLinkStyle}">
+									<a href="{{build.url}}console">
+										<img title="console" alt="console" src="${consoleOutputIconUrl}" />
+									</a>
+								</j:when>
+								<j:otherwise>
+									<span class="pointer" onclick="buildPipeline.fillDialog('{{build.url}}console', 'Console output for {{project.name}} #{{build.number}}')">
+										<img title="console" alt="console" src="${consoleOutputIconUrl}" />
+									</span>
+								</j:otherwise>
+							</j:choose>
 						{{/unless}}
 					{{/unless}}
 					{{#if build.isRerunable}}

@@ -40,4 +40,8 @@
 		<f:textbox />
 	</f:entry>
 
+	<f:entry title="Console Output Link Style" field="consoleOutputLinkStyle">
+		<f:select />
+	</f:entry>
+
 </j:jelly>
