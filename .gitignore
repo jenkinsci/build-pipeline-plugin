@@ -4,3 +4,9 @@
 target
 work
 /target
+
+# IntelliJ
+.idea/
+*.iml
+*.ipr
+*.iws
