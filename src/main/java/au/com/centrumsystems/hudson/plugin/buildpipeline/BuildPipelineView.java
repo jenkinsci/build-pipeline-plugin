@@ -642,8 +642,13 @@ public class BuildPipelineView extends View {
             return options;
         }
 
+        /**
+         * Display Console Output Link Style Items in the Edit View Page
+         *
+         * @return ListBoxModel
+         */
         public ListBoxModel doFillConsoleOutputLinkStyleItems() {
-            hudson.util.ListBoxModel options = new hudson.util.ListBoxModel();
+            final hudson.util.ListBoxModel options = new hudson.util.ListBoxModel();
             options.add(LinkStyle.LIGHTBOX);
             options.add(LinkStyle.NEW_WINDOW);
             options.add(LinkStyle.THIS_WINDOW);
@@ -799,9 +804,15 @@ public class BuildPipelineView extends View {
         return Hudson.getInstance().doCreateItem(req, rsp);
     }
 
+    /**
+     * A class that groups together the console output link style options
+     */
     private static final class LinkStyle {
+        /** lightbox link style option */
         static final String LIGHTBOX = "Lightbox"; //$NON-NLS-1$
+        /** new window link style option */
         static final String NEW_WINDOW = "New Window"; //$NON-NLS-1$
+        /** this window link style option */
         static final String THIS_WINDOW = "This Window"; //$NON-NLS-1$
     }
 }
