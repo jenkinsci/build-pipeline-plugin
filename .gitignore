@@ -1,6 +1,11 @@
 .classpath
 .project
 .settings
+
+*.iml
+
+**/*.iml
+
 target
 work
 /target
