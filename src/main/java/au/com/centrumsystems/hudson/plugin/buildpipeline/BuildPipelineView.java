@@ -46,6 +46,7 @@ import hudson.model.ViewDescriptor;
 import hudson.plugins.parameterizedtrigger.AbstractBuildParameters;
 import hudson.util.LogTaskListener;
 import hudson.util.ListBoxModel;
+import jenkins.model.Jenkins;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -770,7 +771,29 @@ public class BuildPipelineView extends View {
 
     @Override
     public Collection<TopLevelItem> getItems() {
-        return Hudson.getInstance().getItems();
+        final Collection<TopLevelItem> items = new ArrayList<TopLevelItem>();
+        try {
+            final ProjectGrid grid = getBuildPipelineForm().getProjectGrid();
+            for (int row = 0; row < grid.getRows(); row++) {
+                for (int col = 0; col < grid.getColumns(); col++) {
+                    final ProjectForm form = grid.get(row, col);
+                    if (form != null) {
+                        try {
+                            final TopLevelItem item = Jenkins.getInstance().getItem(form.getName());
+                            if (item != null) {
+                                items.add(item);
+                            }
+                        } catch (final Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+            return items;
+        } catch (final URISyntaxException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     @Override

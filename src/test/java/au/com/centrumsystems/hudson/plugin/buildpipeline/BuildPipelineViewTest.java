@@ -33,6 +33,7 @@ import hudson.model.FreeStyleProject;
 import hudson.model.Hudson;
 import hudson.model.Job;
 import hudson.model.Run;
+import jenkins.model.Jenkins;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -293,6 +294,27 @@ public class BuildPipelineViewTest extends HudsonTestCase {
 		assertEquals(testView.getJob(proj1), project1);
 		project1.renameTo(proj3);
 		assertEquals(testView.getJob(proj3), project1);
+	}
+
+	@Test
+	public void testGetItems() throws IOException {
+		final String bpViewName = "MyTestView";
+		final String bpViewTitle = "MyTestViewTitle";
+		final String proj1 = "Proj1";
+		final String noOfBuilds = "5";
+		final FreeStyleProject project1 = createFreeStyleProject(proj1);
+
+		final BuildPipelineView testView = new BuildPipelineView(bpViewName, bpViewTitle,
+                new DownstreamProjectGridBuilder(proj1), noOfBuilds, false, null);
+		TopLevelItem item1 = Jenkins.getInstance().getItem(proj1);
+		assertNotNull(item1);
+		assertTrue(testView.getItems().contains(item1));
+
+		final String proj2 = "Proj2";
+		final FreeStyleProject project2 = createFreeStyleProject(proj2);
+		TopLevelItem item2 = Jenkins.getInstance().getItem(proj2);
+		assertNotNull(item2);
+		assertFalse(testView.getItems().contains(item2));
 	}
 
     /**
