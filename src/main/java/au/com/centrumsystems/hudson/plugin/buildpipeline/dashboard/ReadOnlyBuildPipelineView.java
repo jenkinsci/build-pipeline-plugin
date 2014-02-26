@@ -38,8 +38,8 @@ public class ReadOnlyBuildPipelineView extends BuildPipelineView {
      *            URL for the custom CSS file.
      */
     public ReadOnlyBuildPipelineView(final String displayName, final String description, final ProjectGridBuilder gridBuilder,
-            final String noOfDisplayedBuilds, final boolean triggerOnlyLatestJob, final String cssUrl) {
-        super(displayName, displayName, gridBuilder, noOfDisplayedBuilds, triggerOnlyLatestJob, cssUrl);
+            final String noOfDisplayedBuilds, final boolean triggerOnlyLatestJob, final String cssUrl, final boolean startsWithParameters) {
+        super(displayName, displayName, gridBuilder, noOfDisplayedBuilds, triggerOnlyLatestJob, cssUrl, startsWithParameters);
         // this is ugly, but there is no other way to set the description of the view
         super.description = description;
     }

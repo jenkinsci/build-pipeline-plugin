@@ -25,6 +25,7 @@
 package au.com.centrumsystems.hudson.plugin.buildpipeline;
 
 import com.google.common.collect.Iterables;
+
 import hudson.Extension;
 import hudson.model.Action;
 import hudson.model.Item;
@@ -39,6 +40,8 @@ import hudson.model.CauseAction;
 import hudson.model.Descriptor.FormException;
 import hudson.model.Hudson;
 import hudson.model.ParametersAction;
+import hudson.model.ParametersDefinitionProperty;
+import hudson.model.Project;
 import hudson.model.Run;
 import hudson.model.User;
 import hudson.model.View;
@@ -113,6 +116,11 @@ public class BuildPipelineView extends View {
 
     /** showPipelineParametersInHeaders */
     private boolean showPipelineParametersInHeaders;
+    
+    /**
+     * informs if the first job has parameters
+     */
+    private boolean startsWithParameters;
 
     /**
      * Frequency at which the Build Pipeline Plugin updates the build cards in seconds
@@ -214,16 +222,20 @@ public class BuildPipelineView extends View {
      *            Indicates whether only the latest job will be triggered.
      * @param cssUrl
      *            URL for the custom CSS file.
+     *            
+     * @param startsWithParameters
+     * 			  Indicates whether the first job of the pipeline takes parameters
      */
     public BuildPipelineView(final String name, final String buildViewTitle,
              final ProjectGridBuilder gridBuilder, final String noOfDisplayedBuilds,
-             final boolean triggerOnlyLatestJob, final String cssUrl) {
+             final boolean triggerOnlyLatestJob, final String cssUrl, final boolean startsWithParameters) {
         super(name, Hudson.getInstance());
         this.buildViewTitle = buildViewTitle;
         this.gridBuilder = gridBuilder;
         this.noOfDisplayedBuilds = noOfDisplayedBuilds;
         this.triggerOnlyLatestJob = triggerOnlyLatestJob;
         this.cssUrl = cssUrl;
+        this.startsWithParameters = startsWithParameters;
     }
 
     /**
@@ -253,19 +265,21 @@ public class BuildPipelineView extends View {
      *            URL for the custom CSS file.
      * @param selectedJob
      *            the first job name in the pipeline. it can be set to null when gridBuilder is passed.
+     * @param startsWithParameters
+     * 			  Indicates whether the first job of the pipeline takes parameters
      */
     @DataBoundConstructor
     public BuildPipelineView(final String name, final String buildViewTitle, final ProjectGridBuilder gridBuilder,
             final String noOfDisplayedBuilds,
             final boolean triggerOnlyLatestJob, final boolean alwaysAllowManualTrigger, final boolean showPipelineParameters,
             final boolean showPipelineParametersInHeaders, final boolean showPipelineDefinitionHeader,
-            final int refreshFrequency, final String cssUrl, final String selectedJob) {
-        this(name, buildViewTitle, gridBuilder, noOfDisplayedBuilds, triggerOnlyLatestJob, cssUrl);
+            final int refreshFrequency, final String cssUrl, final String selectedJob, final boolean startsWithParameters) {
+        this(name, buildViewTitle, gridBuilder, noOfDisplayedBuilds, triggerOnlyLatestJob, cssUrl, startsWithParameters);
         this.alwaysAllowManualTrigger = alwaysAllowManualTrigger;
         this.showPipelineParameters = showPipelineParameters;
         this.showPipelineParametersInHeaders = showPipelineParametersInHeaders;
         this.showPipelineDefinitionHeader = showPipelineDefinitionHeader;
-        
+        this.startsWithParameters = startsWithParameters;
         this.selectedJob = selectedJob;
         //not exactly understanding the lifecycle here, but I want a default of 3
         //(this is what the class variable is set to 3, if it's 0, set it to default, refresh of 0 does not make sense anyway)
@@ -367,7 +381,7 @@ public class BuildPipelineView extends View {
     public boolean hasDownstreamProjects(final AbstractProject<?, ?> currentProject) {
         return (getDownstreamProjects(currentProject).size() > 0);
     }
-
+    
     /**
      * Returns BuildPipelineForm containing the build pipeline to display.
      *
@@ -748,6 +762,18 @@ public class BuildPipelineView extends View {
     public void setShowPipelineParameters(final boolean showPipelineParameters) {
         this.showPipelineParameters = showPipelineParameters;
     }
+    
+    public boolean isStartsWithParameters() {
+        return startsWithParameters;
+    }
+
+    public String getStartsWithParameters() {
+        return Boolean.toString(startsWithParameters);
+    }
+
+    public void setStartsWithParameters(final boolean startsWithParameters) {
+        this.startsWithParameters = startsWithParameters;
+    }    
 
     public boolean isShowPipelineParametersInHeaders() {
         return showPipelineParametersInHeaders;

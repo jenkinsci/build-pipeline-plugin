@@ -5,11 +5,13 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Item;
 import hudson.model.ItemGroup;
+import hudson.model.ParametersDefinitionProperty;
 import hudson.util.AdaptedIterator;
 import hudson.util.HttpResponses;
 import hudson.util.ListBoxModel;
 import jenkins.model.Jenkins;
 import jenkins.util.TimeDuration;
+
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.HttpResponse;
@@ -18,6 +20,7 @@ import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.interceptor.RequirePOST;
 
 import javax.servlet.ServletException;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Iterator;
@@ -156,6 +159,13 @@ public class DownstreamProjectGridBuilder extends ProjectGridBuilder {
     public boolean hasBuildPermission(BuildPipelineView owner) {
         final AbstractProject<?, ?> job = getFirstJob(owner);
         return job != null && job.hasPermission(Item.BUILD);
+    }
+    
+    @Override
+    public boolean startsWithParameters(BuildPipelineView owner) {
+        AbstractProject<?,?> firstJob = this.getFirstJob(owner);
+        ParametersDefinitionProperty pdp = firstJob.getProperty(ParametersDefinitionProperty.class);
+        return pdp != null;
     }
 
     @Override

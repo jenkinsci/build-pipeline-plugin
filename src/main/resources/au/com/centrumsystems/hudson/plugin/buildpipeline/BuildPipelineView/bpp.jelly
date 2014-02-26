@@ -77,6 +77,10 @@
 				</div>
 
 				<div class="icons" id="icons-{{id}}">
+					{{#if project.parameters.length}}
+						<j:set var="hasParameterIconUrl" value="${rootURL}/plugin/build-pipeline-plugin/images/has-parameter.png" />
+						<img title="This job has parameters" alt="This job has parameters" src="${hasParameterIconUrl}"/>
+					{{/if}}		
 					{{#unless build.isPending}}
 						{{#unless build.isReadyToBeManuallyBuilt}}
 							<j:set var="consoleOutputIconUrl" value="${rootURL}/images/16x16/terminal.png" />
@@ -224,11 +228,18 @@
         <j:set var="hasBuildPermission" type="boolean" value="${from.hasBuildPermission()}" />
         <j:if test="${hasBuildPermission}">
           <div class="icon-container">
+		<j:if test="${from.startsWithParameters}">
+			<div onclick="buildPipeline.fillDialog('${rootURL}/job/${from.gridBuilder.firstJob}/build?delay=0sec', 'Starts the pipeline with parameters')">
+                <img src="${rootURL}/images/24x24/clock.png" alt="Trigger a Pipeline" class="icon-with-caption"/>
+            </div>
+		</j:if>
+		<j:if test="${!from.startsWithParameters}">
             <div>
               <a id="trigger-pipeline-button" href='#' onclick="$('triggerPipelineForm').submit()">
                 <img src="${rootURL}/images/24x24/clock.png" alt="Trigger a Pipeline" class="icon-with-caption"/>
               </a>
             </div>
+   		</j:if>
             <div>Run</div>
           </div>
         </j:if>

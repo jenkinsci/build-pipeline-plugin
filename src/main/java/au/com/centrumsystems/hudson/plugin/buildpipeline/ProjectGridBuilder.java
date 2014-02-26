@@ -57,6 +57,16 @@ public abstract class ProjectGridBuilder extends AbstractDescribableImpl<Project
     public abstract boolean hasBuildPermission(BuildPipelineView owner);
 
     /**
+     * If the first job of the grid produced by this builder has parameters
+     *
+     * @param owner
+     *      View that this builder is operating under.
+     * @return
+     *      True if the first job has parameters.
+     */
+    public abstract boolean startsWithParameters(BuildPipelineView owner);
+
+    /**
      * Called to start a new pipeline instance
      * (normally by triggering some job.)
      *

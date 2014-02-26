@@ -1145,10 +1145,12 @@
 		onCancel : function(){},
 		onComplete : function(){},
 		onCleanup : function(){},
-		onClosed : function(){},
+		onClosed : function(){
+			location.reload();
+		},
 		onError : function(){}
 	};
-
+	
 	$(document).ready(function() {
 		$.fancybox.init();
 	});

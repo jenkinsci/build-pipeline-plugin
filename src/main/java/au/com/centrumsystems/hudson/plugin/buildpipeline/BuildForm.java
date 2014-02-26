@@ -1,6 +1,8 @@
 package au.com.centrumsystems.hudson.plugin.buildpipeline;
 
 import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
+import hudson.model.ParametersDefinitionProperty;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +49,12 @@ public class BuildForm {
      */
     private List<BuildForm> dependencies = new ArrayList<BuildForm>();
 
+    
+    /**
+     * project stringfied list of parameters for the project
+     * */
+    private final ArrayList<String> parameters;
+    
     /**
      * @param pipelineBuild
      *            pipeline build domain used to see the form
@@ -59,7 +67,16 @@ public class BuildForm {
             dependencies.add(new BuildForm(downstream));
         }
         id = hashCode();
-        projectId = pipelineBuild.getProject().getFullName().hashCode();
+        AbstractProject<?,?> project = pipelineBuild.getProject();
+        projectId = project.getFullName().hashCode();
+        ParametersDefinitionProperty params = project.getProperty(ParametersDefinitionProperty.class);
+        ArrayList<String> paramList = new ArrayList<String>();
+        if(params != null) {
+	        for(String p : params.getParameterDefinitionNames()) {
+	        	paramList.add(p);
+	        }
+        }
+        parameters = paramList;
     }
 
     public String getStatus() {
@@ -86,7 +103,7 @@ public class BuildForm {
      */
     @JavaScriptMethod
     public String asJSON() {
-        return BuildJSONBuilder.asJSON(pipelineBuild, id, projectId, getDependencyIds());
+        return BuildJSONBuilder.asJSON(pipelineBuild, id, projectId, getDependencyIds(), getParameterList());
     }
 
     public int getId() {
@@ -125,6 +142,10 @@ public class BuildForm {
 
     public Map<String, String> getParameters() {
         return pipelineBuild.getBuildParameters();
+    }
+    
+    public ArrayList<String> getParameterList() {
+    	return parameters;
     }
 
     public Integer getProjectId() {

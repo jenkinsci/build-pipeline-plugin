@@ -6,7 +6,7 @@ import hudson.model.Item
 
 class BuildJSONBuilder {
 
-	static String asJSON(PipelineBuild pipelineBuild, Integer formId, Integer projectId, List<Integer> buildDependencyIds) {
+	static String asJSON(PipelineBuild pipelineBuild, Integer formId, Integer projectId, List<Integer> buildDependencyIds, ArrayList<String> params) {
 		def builder = new JsonBuilder()
 		def buildStatus = pipelineBuild.currentBuildResult
 		def root = builder {
@@ -44,6 +44,7 @@ class BuildJSONBuilder {
 				url(pipelineBuild.projectURL)
 				health(pipelineBuild.projectHealth)
 				id(projectId)
+				parameters(params)
 			}
 			upstream {
 				projectName(pipelineBuild.upstreamPipelineBuild?.project?.name)
