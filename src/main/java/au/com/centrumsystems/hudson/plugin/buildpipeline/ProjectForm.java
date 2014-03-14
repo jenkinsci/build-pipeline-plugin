@@ -1,5 +1,6 @@
 package au.com.centrumsystems.hudson.plugin.buildpipeline;
 
+import au.com.centrumsystems.hudson.plugin.util.BuildUtil;
 import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
@@ -109,7 +110,8 @@ public class ProjectForm {
 
         final AbstractBuild<?, ?> lastSuccessfulBuild = pipelineBuild.getProject().getLastSuccessfulBuild();
         lastSuccessfulBuildNumber = (null == lastSuccessfulBuild) ? "" : "" + lastSuccessfulBuild.getNumber();
-        lastSuccessfulBuildParams = (null == lastSuccessfulBuild) ? new HashMap<String, String>() : lastSuccessfulBuild.getBuildVariables();
+        lastSuccessfulBuildParams = BuildUtil.getUnsensitiveParameters(lastSuccessfulBuild);
+
         this.project = project;
     }
 

@@ -33,8 +33,11 @@ import hudson.model.Cause.UpstreamCause;
 import hudson.model.CauseAction;
 import hudson.model.ParametersAction;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Provides helper methods for #hudson.model.AbstractBuild
@@ -141,6 +144,30 @@ public final class BuildUtil {
         }
 
         return new ParametersAction(params.values().toArray(new ParameterValue[params.size()]));
+    }
+
+    /**
+     * Retrieve build parameters in String format without sensitive parameters (passwords, ...)
+     *
+     * @param build the build we retrieve the parameters from
+     * @return a map of parameters names and values
+     */
+    public static Map<String, String> getUnsensitiveParameters(final AbstractBuild<?, ?> build) {
+        final Map<String, String> retval = new HashMap<String, String>();
+        if (build != null) {
+            retval.putAll(build.getBuildVariables());
+            final Set<String> sensitiveBuildVariables = build.getSensitiveBuildVariables();
+            if (sensitiveBuildVariables != null) {
+                for (String paramName : sensitiveBuildVariables) {
+                    if (retval.containsKey(paramName)) {
+                        // We have the choice to hide the parameter or to replace it with special characters
+                        retval.remove(paramName);
+                    }
+                }
+            }
+        }
+
+        return retval;
     }
 
 }

@@ -34,7 +34,6 @@ import hudson.model.Hudson;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -515,12 +514,7 @@ public class PipelineBuild {
      * @return a map including build parameters
      */
     public Map<String, String> getBuildParameters() {
-        final Map<String, String> retval = new HashMap<String, String>();
-        if (currentBuild != null) {
-            retval.putAll(currentBuild.getBuildVariables());
-        }
-
-        return retval;
+        return BuildUtil.getUnsensitiveParameters(currentBuild);
     }
 
     public boolean isProjectDisabled() {
