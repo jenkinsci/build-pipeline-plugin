@@ -26,17 +26,16 @@ package au.com.centrumsystems.hudson.plugin.buildpipeline.trigger;
 
 import hudson.Extension;
 import hudson.Launcher;
-import hudson.PluginWrapper;
 import hudson.Util;
+import hudson.PluginWrapper;
 import hudson.model.BuildListener;
-import hudson.model.DependecyDeclarer;
 import hudson.model.DependencyGraph;
 import hudson.model.Item;
+import hudson.model.ItemGroup;
 import hudson.model.Items;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Descriptor;
-import hudson.model.Hudson;
 import hudson.model.Project;
 import hudson.model.listeners.ItemListener;
 import hudson.plugins.parameterizedtrigger.AbstractBuildParameters;
@@ -54,13 +53,14 @@ import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import jenkins.model.DependencyDeclarer;
+import jenkins.model.Jenkins;
+
+import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
 import au.com.centrumsystems.hudson.plugin.buildpipeline.Strings;
-import hudson.model.ItemGroup;
-import jenkins.model.Jenkins;
-import org.kohsuke.stapler.AncestorInPath;
 
 /**
  * The build pipeline trigger allows the creation of downstream jobs which aren't triggered automatically. This allows us to have manual
@@ -68,7 +68,8 @@ import org.kohsuke.stapler.AncestorInPath;
  *
  * @author Centrum Systems
  */
-public class BuildPipelineTrigger extends Notifier implements DependecyDeclarer {
+@SuppressWarnings("unchecked")
+public class BuildPipelineTrigger extends Notifier implements DependencyDeclarer {
     /**
      * logger
      */
@@ -258,7 +259,7 @@ public class BuildPipelineTrigger extends Notifier implements DependecyDeclarer 
          * @return true if it is possible to add parameters to the trigger
          */
         public boolean canAddParameters() {
-            final PluginWrapper plugin = Hudson.getInstance().getPluginManager().getPlugin("parameterized-trigger"); //$NON-NLS-1$
+            final PluginWrapper plugin = Jenkins.getInstance().getPluginManager().getPlugin("parameterized-trigger"); //$NON-NLS-1$
             return plugin != null && plugin.isActive();
         }
 
@@ -296,7 +297,7 @@ public class BuildPipelineTrigger extends Notifier implements DependecyDeclarer 
          * @param context - the context
          * @return hudson.util.FormValidation
          */
-        public FormValidation doCheckDownstreamProjectNames(@AncestorInPath ItemGroup context,
+        public FormValidation doCheckDownstreamProjectNames(@AncestorInPath ItemGroup<?> context,
                                                             @QueryParameter("downstreamProjectNames") final String value) {
             final StringTokenizer tokens = new StringTokenizer(Util.fixNull(value), ","); //$NON-NLS-1$
             boolean some = false;
@@ -322,7 +323,7 @@ public class BuildPipelineTrigger extends Notifier implements DependecyDeclarer 
         }
 
         public List<Descriptor<AbstractBuildParameters>> getBuilderConfigDescriptors() {
-            return Hudson.getInstance().<AbstractBuildParameters,
+            return Jenkins.getInstance().<AbstractBuildParameters,
                     Descriptor<AbstractBuildParameters>>getDescriptorList(AbstractBuildParameters.class);
         }
 

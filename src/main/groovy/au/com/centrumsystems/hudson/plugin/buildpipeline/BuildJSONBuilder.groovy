@@ -18,9 +18,10 @@ class BuildJSONBuilder {
 				extId(pipelineBuild.currentBuild?.externalizableId)
 				hasPermission(pipelineBuild.project?.hasPermission(Item.BUILD));
 				hasUpstreamBuild(null != pipelineBuild.upstreamBuild)
+				isQueued(buildStatus == 'QUEUED')
 				isBuilding(buildStatus == 'BUILDING')
-				isComplete(buildStatus != 'BUILDING' && buildStatus != 'PENDING' && buildStatus != 'MANUAL')
-				isPending(buildStatus == 'PENDING')
+                isComplete(buildStatus != 'BUILDING' && buildStatus != 'PENDING' && buildStatus != 'MANUAL' && buildStatus != 'QUEUED')
+                isPending(buildStatus == 'PENDING')
 				isSuccess(buildStatus == 'SUCCESS')
 				isReadyToBeManuallyBuilt(pipelineBuild.isReadyToBeManuallyBuilt())
 				isManualTrigger(pipelineBuild.isManualTrigger())
@@ -37,6 +38,10 @@ class BuildJSONBuilder {
 				url(pipelineBuild.buildResultURL ? pipelineBuild.buildResultURL : pipelineBuild.projectURL)
 				userId(pipelineBuild.currentBuild?.getCause(Cause.UserIdCause.class)?.getUserId())
 				estimatedRemainingTime(pipelineBuild.currentBuild?.executor?.estimatedRemainingTime)
+                queuedForDate(pipelineBuild.formattedQueuedForDate)
+                queuedForTime(pipelineBuild.formattedQueuedForTime)
+                queueWaitDuration(pipelineBuild.queueWaitDuration)
+                queueId(pipelineBuild.queueId)
 			}
 			project {
 				disabled(pipelineBuild.projectDisabled)

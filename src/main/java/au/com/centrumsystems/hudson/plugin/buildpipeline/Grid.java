@@ -92,4 +92,35 @@ public abstract class Grid<T> {
         }
         return false;
     }
+
+    /**
+     * Search for dependencies of the starting project further down the rows.
+     * 
+     * @param startRow - the row of the project to search from
+     * @param startCol - the col of the project to search from
+     * @return boolean - whether there is a project further down from the current position
+     */
+    public boolean hasDependencyFurtherDown(int startRow, int startCol) {
+        // Search for a further down projectForm
+        final int nextRow = startRow + 1;
+        final int nextCol = startCol + 1;
+        int nextTRow = -1;
+        for (int locRow = nextRow; locRow < getRows(); locRow++) {
+            if (get(locRow, nextCol) != null) {
+                nextTRow = locRow;
+                break;
+            }
+        }
+        // Now test, that there is no other project between startRow and row of nextPf
+        // only if there is none, then the furtherDown project is correct for the current starting point
+        if (nextTRow != -1) {
+            for (int locRow = nextRow; locRow <= nextTRow; locRow++) {
+                if (get(locRow, startCol) != null) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;        
+    }
 }

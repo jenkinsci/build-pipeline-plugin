@@ -1,6 +1,8 @@
 package au.com.centrumsystems.hudson.plugin.buildpipeline;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -37,7 +39,8 @@ public abstract class DefaultProjectGridImpl extends ProjectGrid {
             data.put(row, c);
         }
         c.put(col, p);
-
+        p.setCoords(row, col);
+        
         rows = Math.max(rows, row + 1);
         cols = Math.max(cols, col + 1);
     }
@@ -60,7 +63,7 @@ public abstract class DefaultProjectGridImpl extends ProjectGrid {
         }
         return cols.get(col);
     }
-
+    
     @Override
     public int getColumns() {
         return cols;
@@ -71,4 +74,14 @@ public abstract class DefaultProjectGridImpl extends ProjectGrid {
         return rows;
     }
 
+    @Override
+    public void correctProjectForms(Iterable<BuildGrid> buildGrids) {
+        final Collection<Map<Integer, ProjectForm>> maps = data.values();
+        for (Map<Integer, ProjectForm> map : maps) {
+            final Collection<ProjectForm> forms = map.values();
+            for (ProjectForm projectForm : forms) {
+                projectForm.correctLastSuccessfulBuilds(buildGrids);
+            }
+        }        
+    }
 }
