@@ -3,19 +3,13 @@ package au.com.centrumsystems.hudson.plugin.buildpipeline;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.ParametersDefinitionProperty;
-import hudson.model.Queue.WaitingItem;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 import org.kohsuke.stapler.bind.JavaScriptMethod;
-
-import au.com.centrumsystems.hudson.plugin.util.ScheduleUtil;
 
 /**
  * @author Centrum Systems
@@ -55,11 +49,12 @@ public class BuildForm {
      */
     private List<BuildForm> dependencies = new ArrayList<BuildForm>();
 
+    
     /**
      * project stringfied list of parameters for the project
      * */
     private final ArrayList<String> parameters;
-
+    
     /**
      * @param pipelineBuild
      *            pipeline build domain used to see the form
@@ -128,28 +123,6 @@ public class BuildForm {
         if (newBuild != null) {
             updated = true;
             pipelineBuild = new PipelineBuild(newBuild, newBuild.getProject(), pipelineBuild.getUpstreamBuild());
-        } else {
-            // try to see if the build went into queueing
-            final WaitingItem wItem = ScheduleUtil.getQueuedWaitingItem(pipelineBuild.getProject().getDisplayName());
-            if (wItem != null) {
-                updated = true;
-            }
-        }
-        return updated;
-    }
-
-    /**
-     * 
-     * @param queueId the id of the queue-item that was cancelled
-     * 
-     * @return is the queued item cancelled.
-     */
-    @JavaScriptMethod
-    public boolean cancelQueued(final int queueId) {
-        boolean updated = false;
-        final WaitingItem wItem = ScheduleUtil.getQueuedWaitingItem(pipelineBuild.getProject().getDisplayName());
-        if (wItem == null) {
-            updated = true;
         }
         return updated;
     }
@@ -162,10 +135,6 @@ public class BuildForm {
         return pipelineBuild.getPipelineVersion();
     }
 
-    public String getFullBuildName() {
-        return pipelineBuild.getProject().getDisplayName() + " #" + pipelineBuild.getCurrentBuildNumber();
-    }
-    
     @JavaScriptMethod
     public boolean isManualTrigger() {
         return pipelineBuild.isManualTrigger();
@@ -174,39 +143,13 @@ public class BuildForm {
     public Map<String, String> getParameters() {
         return pipelineBuild.getBuildParameters();
     }
-
-    public Map<String, String> getFilteredParameters() {
-        return filterSensitiveBuildVariables(pipelineBuild.getCurrentBuild());
-    }
-
+    
     public ArrayList<String> getParameterList() {
         return parameters;
     }
 
     public Integer getProjectId() {
         return projectId;
-    }
-
-    /**
-     * Filter last successful build variables with sensitive information.
-     * 
-     * @param build
-     *            the Build object to get the Variables from
-     * 
-     * @return Map<String, String> the vars, pixeled out sensitive information
-     */
-    private Map<String, String> filterSensitiveBuildVariables(AbstractBuild<?, ?> build) {
-        final Map<String, String> allVars = build.getBuildVariables();
-        final Set<String> sensitives = build.getSensitiveBuildVariables();
-        final HashMap<String, String> resultVars = new HashMap<String, String>();
-        for (Entry<String, String> item : allVars.entrySet()) {
-            if (sensitives.contains(item.getKey())) {
-                resultVars.put(item.getKey(), "******");
-            } else {
-                resultVars.put(item.getKey(), item.getValue());
-            }
-        }
-        return resultVars;
     }
 
 }

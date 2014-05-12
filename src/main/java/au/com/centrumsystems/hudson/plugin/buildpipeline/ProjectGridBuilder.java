@@ -2,12 +2,11 @@ package au.com.centrumsystems.hudson.plugin.buildpipeline;
 
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.Item;
-
-import java.io.IOException;
-
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.HttpResponse;
 import org.kohsuke.stapler.StaplerRequest;
+
+import java.io.IOException;
 
 /**
  * Encapsulates the definition of how to layout projects into a {@link ProjectGrid}.

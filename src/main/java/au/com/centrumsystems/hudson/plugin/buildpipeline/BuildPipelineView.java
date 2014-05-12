@@ -24,6 +24,8 @@
  */
 package au.com.centrumsystems.hudson.plugin.buildpipeline;
 
+import com.google.common.collect.Iterables;
+
 import hudson.Extension;
 import hudson.model.Action;
 import hudson.model.Item;
@@ -46,6 +48,7 @@ import hudson.plugins.parameterizedtrigger.AbstractBuildParameters;
 import hudson.security.Permission;
 import hudson.util.LogTaskListener;
 import hudson.util.ListBoxModel;
+import jenkins.model.Jenkins;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -60,9 +63,6 @@ import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 
-import jenkins.model.Jenkins;
-
-import org.jvnet.hudson.plugins.m2release.M2ReleaseAction;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
@@ -71,24 +71,21 @@ import org.kohsuke.stapler.bind.JavaScriptMethod;
 import au.com.centrumsystems.hudson.plugin.buildpipeline.trigger.BuildPipelineTrigger;
 import au.com.centrumsystems.hudson.plugin.util.BuildUtil;
 import au.com.centrumsystems.hudson.plugin.util.ProjectUtil;
-import au.com.centrumsystems.hudson.plugin.util.ScheduleUtil;
-
-import com.google.common.collect.Iterables;
 
 /**
- * This view displays the set of jobs that are related based on their
- * upstream\downstream relationships as a pipeline. Each build pipeline becomes
- * a row on the view.
- * 
+ * This view displays the set of jobs that are related
+ * based on their upstream\downstream relationships as a pipeline. Each
+ * build pipeline becomes a row on the view.
+ *
  * @author Centrum Systems
- * 
+ *
  */
 public class BuildPipelineView extends View {
 
     /**
-     * @deprecated For backward compatibility. Back when we didn't have
-     *             {@link #gridBuilder}, this field stored the first job to
-     *             display.
+     * @deprecated
+     *      For backward compatibility. Back when we didn't have {@link #gridBuilder},
+     *      this field stored the first job to display.
      */
     @Deprecated
     private volatile String selectedJob;
@@ -119,15 +116,14 @@ public class BuildPipelineView extends View {
 
     /** showPipelineParametersInHeaders */
     private boolean showPipelineParametersInHeaders;
-
+    
     /**
      * informs if the first job has parameters
      */
     private boolean startsWithParameters;
 
     /**
-     * Frequency at which the Build Pipeline Plugin updates the build cards in
-     * seconds
+     * Frequency at which the Build Pipeline Plugin updates the build cards in seconds
      */
     private int refreshFrequency = 3;
 
@@ -135,8 +131,7 @@ public class BuildPipelineView extends View {
     private boolean showPipelineDefinitionHeader;
 
     /*
-     * Keep feature flag properties in one place so that it is easy to refactor
-     * them out later.
+     * Keep feature flag properties in one place so that it is easy to refactor them out later.
      */
     /* Feature flags - START */
 
@@ -146,8 +141,8 @@ public class BuildPipelineView extends View {
     private static final Logger LOGGER = Logger.getLogger(BuildPipelineView.class.getName());
 
     /**
-     * An instance of {@link Cause.UserIdCause} related to the current user.
-     * Must be transient, or xstream will include it in the serialization
+     * An instance of {@link Cause.UserIdCause} related to the current user. Must be transient, or xstream will include it in the
+     * serialization
      */
     private class MyUserIdCause extends Cause.UserIdCause {
         /**
@@ -160,8 +155,7 @@ public class BuildPipelineView extends View {
          */
         public MyUserIdCause() {
             try {
-                // this block can generate a
-                // CyclicGraphDetector.CycleDetectedException
+                // this block can generate a CyclicGraphDetector.CycleDetectedException
                 // in cases that I haven't quite figured out yet
                 // also an org.acegisecurity.AccessDeniedException when the user
                 // is not logged in
@@ -215,7 +209,7 @@ public class BuildPipelineView extends View {
     }
 
     /**
-     * 
+     *
      * @param name
      *            the name of the pipeline build view.
      * @param buildViewTitle
@@ -232,9 +226,10 @@ public class BuildPipelineView extends View {
      *            Indicates whether the first job of the pipeline takes
      *            parameters
      */
-    public BuildPipelineView(final String name, final String buildViewTitle, final ProjectGridBuilder gridBuilder,
-            final String noOfDisplayedBuilds, final boolean triggerOnlyLatestJob, final String cssUrl, final boolean startsWithParameters) {
-        super(name, Jenkins.getInstance());
+    public BuildPipelineView(final String name, final String buildViewTitle,
+             final ProjectGridBuilder gridBuilder, final String noOfDisplayedBuilds,
+             final boolean triggerOnlyLatestJob, final String cssUrl, final boolean startsWithParameters) {
+        super(name, Hudson.getInstance());
         this.buildViewTitle = buildViewTitle;
         this.gridBuilder = gridBuilder;
         this.noOfDisplayedBuilds = noOfDisplayedBuilds;
@@ -244,7 +239,7 @@ public class BuildPipelineView extends View {
     }
 
     /**
-     * 
+     *
      * @param name
      *            the name of the pipeline build view.
      * @param buildViewTitle
@@ -265,23 +260,20 @@ public class BuildPipelineView extends View {
      * @param showPipelineDefinitionHeader
      *            Indicates whether the pipeline headers should be shown.
      * @param refreshFrequency
-     *            Frequency at which the build pipeline plugin refreshes build
-     *            cards
+     *            Frequency at which the build pipeline plugin refreshes build cards
      * @param cssUrl
      *            URL for the custom CSS file.
      * @param selectedJob
-     *            the first job name in the pipeline. it can be set to null when
-     *            gridBuilder is passed.
+     *            the first job name in the pipeline. it can be set to null when gridBuilder is passed.
      * @param startsWithParameters
-     *            indicates whether the first job of the pipeline takes
-     *            parameters
+     *            indicates whether the first job of the pipeline takes parameters
      */
     @DataBoundConstructor
     public BuildPipelineView(final String name, final String buildViewTitle, final ProjectGridBuilder gridBuilder,
-            final String noOfDisplayedBuilds, final boolean triggerOnlyLatestJob, final boolean alwaysAllowManualTrigger,
-            final boolean showPipelineParameters, final boolean showPipelineParametersInHeaders,
-            final boolean showPipelineDefinitionHeader, final int refreshFrequency, final String cssUrl, final String selectedJob,
-            final boolean startsWithParameters) {
+            final String noOfDisplayedBuilds,
+            final boolean triggerOnlyLatestJob, final boolean alwaysAllowManualTrigger, final boolean showPipelineParameters,
+            final boolean showPipelineParametersInHeaders, final boolean showPipelineDefinitionHeader,
+            final int refreshFrequency, final String cssUrl, final String selectedJob, final boolean startsWithParameters) {
         this(name, buildViewTitle, gridBuilder, noOfDisplayedBuilds, triggerOnlyLatestJob, cssUrl, startsWithParameters);
         this.alwaysAllowManualTrigger = alwaysAllowManualTrigger;
         this.showPipelineParameters = showPipelineParameters;
@@ -289,23 +281,21 @@ public class BuildPipelineView extends View {
         this.showPipelineDefinitionHeader = showPipelineDefinitionHeader;
         this.startsWithParameters = startsWithParameters;
         this.selectedJob = selectedJob;
-        // not exactly understanding the lifecycle here, but I want a default of
-        // 3
-        // (this is what the class variable is set to 3, if it's 0, set it to
-        // default, refresh of 0 does not make sense anyway)
+        //not exactly understanding the lifecycle here, but I want a default of 3
+        //(this is what the class variable is set to 3, if it's 0, set it to default, refresh of 0 does not make sense anyway)
         if (refreshFrequency < 1) {
             this.refreshFrequency = 3;
         } else {
             this.refreshFrequency = refreshFrequency;
         }
-
-        // for remote api support
+        
+        //for remote api support
         if (this.gridBuilder == null) {
             if (this.selectedJob != null) {
                 this.gridBuilder = new DownstreamProjectGridBuilder(this.selectedJob);
             }
         }
-
+        
         if (this.selectedJob == null) {
             if (this.gridBuilder != null && this.gridBuilder instanceof DownstreamProjectGridBuilder) {
                 this.selectedJob = ((DownstreamProjectGridBuilder) this.gridBuilder).getFirstJob();
@@ -314,7 +304,8 @@ public class BuildPipelineView extends View {
     }
 
     /**
-     * @return must be always 'this'
+     * @return
+     *      must be always 'this'
      */
     protected Object readResolve() {
         if (gridBuilder == null) {
@@ -327,7 +318,7 @@ public class BuildPipelineView extends View {
 
     /**
      * Handles the configuration submission
-     * 
+     *
      * @param req
      *            Stapler Request
      * @throws FormException
@@ -343,11 +334,9 @@ public class BuildPipelineView extends View {
     }
 
     /**
-     * Checks whether the user has a permission to start a new instance of the
-     * pipeline.
-     * 
-     * @return - true: Has Build permission; false: Does not have Build
-     *         permission
+     * Checks whether the user has a permission to start a new instance of the pipeline.
+     *
+     * @return - true: Has Build permission; false: Does not have Build permission
      * @see hudson.model.Item
      */
     public boolean hasBuildPermission() {
@@ -356,9 +345,8 @@ public class BuildPipelineView extends View {
 
     /**
      * Checks whether the user has Configure permission for the current project.
-     * 
-     * @return - true: Has Configure permission; false: Does not have Configure
-     *         permission
+     *
+     * @return - true: Has Configure permission; false: Does not have Configure permission
      */
     public boolean hasConfigurePermission() {
         return this.hasPermission(CONFIGURE);
@@ -374,7 +362,7 @@ public class BuildPipelineView extends View {
 
     /**
      * Get a List of downstream projects.
-     * 
+     *
      * @param currentProject
      *            - The project from which we want the downstream projects
      * @return - A List of downstream projects
@@ -385,35 +373,35 @@ public class BuildPipelineView extends View {
 
     /**
      * Determines if the current project has any downstream projects
-     * 
+     *
      * @param currentProject
      *            - The project from which we are testing.
-     * @return - true; has downstream projects; false: does not have downstream
-     *         projects
+     * @return - true; has downstream projects; false: does not have downstream projects
      */
     public boolean hasDownstreamProjects(final AbstractProject<?, ?> currentProject) {
         return (getDownstreamProjects(currentProject).size() > 0);
     }
-
+    
     /**
      * Returns BuildPipelineForm containing the build pipeline to display.
-     * 
-     * @return - Representation of the projects and their related builds making
-     *         up the build pipeline view
+     *
+     * @return - Representation of the projects and their related builds making up the build pipeline view
      */
     public BuildPipelineForm getBuildPipelineForm() {
         final int maxNoOfDisplayBuilds = Integer.valueOf(noOfDisplayedBuilds);
 
-        final ProjectGrid projectGrid = gridBuilder.build(this);
-        if (projectGrid.isEmpty()) {
+        final ProjectGrid project = gridBuilder.build(this);
+        if (project.isEmpty()) {
             return null;
         }
-        return new BuildPipelineForm(projectGrid, Iterables.limit(projectGrid.builds(), maxNoOfDisplayBuilds));
+        return new BuildPipelineForm(
+                project,
+                Iterables.limit(project.builds(), maxNoOfDisplayBuilds));
     }
 
     /**
      * Retrieves the project URL
-     * 
+     *
      * @param project
      *            - The project
      * @return URL - of the project
@@ -427,7 +415,7 @@ public class BuildPipelineView extends View {
 
     /**
      * Trigger a manual build
-     * 
+     *
      * @param upstreamBuildNumber
      *            upstream build number
      * @param triggerProjectName
@@ -452,8 +440,7 @@ public class BuildPipelineView extends View {
             buildParametersAction = BuildUtil.getAllBuildParametersAction(upstreamBuild, triggerProject);
         }
 
-        return triggerBuild(triggerProject, upstreamBuild, buildParametersAction,
-                ScheduleUtil.calcDelay(ProjectUtil.getProjectParametersAction(triggerProject)));
+        return triggerBuild(triggerProject, upstreamBuild, buildParametersAction);
     }
 
     /**
@@ -496,15 +483,13 @@ public class BuildPipelineView extends View {
     }
 
     /**
-     * Given an AbstractProject and a build number the associated AbstractBuild
-     * will be retrieved.
-     * 
+     * Given an AbstractProject and a build number the associated AbstractBuild will be retrieved.
+     *
      * @param buildNo
      *            - Build number
      * @param project
      *            - AbstractProject
-     * @return The AbstractBuild associated with the AbstractProject and build
-     *         number.
+     * @return The AbstractBuild associated with the AbstractProject and build number.
      */
     @SuppressWarnings("unchecked")
     private AbstractBuild<?, ?> retrieveBuild(final int buildNo, final AbstractProject<?, ?> project) {
@@ -524,34 +509,29 @@ public class BuildPipelineView extends View {
 
     /**
      * Schedules a build to start.
-     * 
-     * The build will take an upstream build as its Cause and a set of
-     * ParametersAction from the upstream build.
-     * 
+     *
+     * The build will take an upstream build as its Cause and a set of ParametersAction from the upstream build.
+     *
      * @param triggerProject
      *            - Schedule a build to start on this AbstractProject
      * @param upstreamBuild
-     *            - The upstream AbstractBuild that will be used as a Cause for
-     *            the triggerProject's build.
+     *            - The upstream AbstractBuild that will be used as a Cause for the triggerProject's build.
      * @param buildParametersAction
-     *            - The upstream ParametersAction that will be used as an Action
-     *            for the triggerProject's build.
-     * @param delay
-     *            - The delay for the build to be scheduled
+     *            - The upstream ParametersAction that will be used as an Action for the triggerProject's build.
      * @return next build number
      */
     private int triggerBuild(final AbstractProject<?, ?> triggerProject, final AbstractBuild<?, ?> upstreamBuild,
-            final Action buildParametersAction, final int delay) {
+            final Action buildParametersAction) {
         LOGGER.fine("Triggering build for project: " + triggerProject.getFullDisplayName()); //$NON-NLS-1$
         final Cause.UpstreamCause upstreamCause = (null == upstreamBuild) ? null : new Cause.UpstreamCause((Run<?, ?>) upstreamBuild);
         final List<Action> buildActions = new ArrayList<Action>();
         final CauseAction causeAction = new CauseAction(new MyUserIdCause());
-        // TODO hack obsolete as of 1.531 when CauseAction.<init>(Cause...)
-        // available:
+        // TODO hack obsolete as of 1.531 when CauseAction.<init>(Cause...) available:
         causeAction.getCauses().add(upstreamCause);
         buildActions.add(causeAction);
-        ParametersAction parametersAction = buildParametersAction instanceof ParametersAction ? (ParametersAction) buildParametersAction
-                : new ParametersAction();
+        ParametersAction parametersAction =
+                buildParametersAction instanceof ParametersAction
+                        ? (ParametersAction) buildParametersAction : new ParametersAction();
 
         if (upstreamBuild != null) {
 
@@ -579,19 +559,19 @@ public class BuildPipelineView extends View {
 
         buildActions.add(parametersAction);
 
-        triggerProject.scheduleBuild(triggerProject.getQuietPeriod() + delay, null, buildActions.toArray(new Action[buildActions.size()]));
+        triggerProject.scheduleBuild(triggerProject.getQuietPeriod(), null, buildActions.toArray(new Action[buildActions.size()]));
         return triggerProject.getNextBuildNumber();
     }
 
     /**
-     * From parameterized trigger plugin
-     * src/main/java/hudson/plugins/parameterizedtrigger/BuildTriggerConfig.java
-     * 
+     * From parameterized trigger plugin src/main/java/hudson/plugins/parameterizedtrigger/BuildTriggerConfig.java
+     *
      * @param base
-     *            One of the two parameters to merge.
+     *      One of the two parameters to merge.
      * @param overlay
-     *            The other parameters to merge
-     * @return Result of the merge.
+     *      The other parameters to merge
+     * @return
+     *      Result of the merge.
      */
     private static ParametersAction mergeParameters(final ParametersAction base, final ParametersAction overlay) {
         final LinkedHashMap<String, ParameterValue> params = new LinkedHashMap<String, ParameterValue>();
@@ -605,13 +585,11 @@ public class BuildPipelineView extends View {
     }
 
     /**
-     * Checks whether the given {@link Action} contains a reference to a
-     * {@link UserIdCause} object.
-     * 
+     * Checks whether the given {@link Action} contains a reference to a {@link UserIdCause} object.
+     *
      * @param buildAction
      *            the action to check.
-     * @return <code>true</code> if the action has a reference to a userId
-     *         cause.
+     * @return <code>true</code> if the action has a reference to a userId cause.
      */
     private boolean isUserIdCauseAction(final Action buildAction) {
         boolean retval = false;
@@ -627,12 +605,10 @@ public class BuildPipelineView extends View {
     }
 
     /**
-     * Removes any UserId cause action from the given actions collection. This
-     * is used by downstream builds that inherit upstream actions. The
-     * downstream build can be initiated by another user that is different from
-     * the user who initiated the upstream build, so the downstream build needs
-     * to remove the old user action inherited from upstream, and add its own.
-     * 
+     * Removes any UserId cause action from the given actions collection. This is used by downstream builds that inherit upstream actions.
+     * The downstream build can be initiated by another user that is different from the user who initiated the upstream build, so the
+     * downstream build needs to remove the old user action inherited from upstream, and add its own.
+     *
      * @param actions
      *            a collection of build actions.
      * @return a collection of build actions with all UserId causes removed.
@@ -649,14 +625,13 @@ public class BuildPipelineView extends View {
 
     /**
      * This descriptor class is required to configure the View Page
-     * 
+     *
      */
     @Extension
     public static final class DescriptorImpl extends ViewDescriptor {
 
         /**
-         * descriptor impl constructor This empty constructor is required for
-         * stapler. If you remove this constructor, text name of
+         * descriptor impl constructor This empty constructor is required for stapler. If you remove this constructor, text name of
          * "Build Pipeline View" will be not displayed in the "NewView" page
          */
         public DescriptorImpl() {
@@ -665,7 +640,7 @@ public class BuildPipelineView extends View {
 
         /**
          * get the display name
-         * 
+         *
          * @return display name
          */
         @Override
@@ -675,7 +650,7 @@ public class BuildPipelineView extends View {
 
         /**
          * Display No Of Builds Items in the Edit View Page
-         * 
+         *
          * @return ListBoxModel
          */
         public ListBoxModel doFillNoOfDisplayedBuildsItems() {
@@ -700,7 +675,7 @@ public class BuildPipelineView extends View {
 
         /**
          * Display Console Output Link Style Items in the Edit View Page
-         * 
+         *
          * @return ListBoxModel
          */
         public ListBoxModel doFillConsoleOutputLinkStyleItems() {
@@ -787,9 +762,9 @@ public class BuildPipelineView extends View {
     public void setShowPipelineParameters(final boolean showPipelineParameters) {
         this.showPipelineParameters = showPipelineParameters;
     }
-
-    public boolean isStartsWithParameters() {        
-        return startsWithParameters && gridBuilder.startsWithParameters(this);
+    
+    public boolean isStartsWithParameters() {
+        return startsWithParameters;
     }
 
     public String getStartsWithParameters() {
@@ -798,7 +773,7 @@ public class BuildPipelineView extends View {
 
     public void setStartsWithParameters(final boolean startsWithParameters) {
         this.startsWithParameters = startsWithParameters;
-    }
+    }    
 
     public boolean isShowPipelineParametersInHeaders() {
         return showPipelineParametersInHeaders;
@@ -863,16 +838,15 @@ public class BuildPipelineView extends View {
     }
 
     /**
-     * If a project name is changed we check if the selected job for this view
-     * also needs to be changed.
-     * 
+     * If a project name is changed we check if the selected job for this view also needs to be changed.
+     *
      * @param item
      *            - The Item that has been renamed
      * @param oldName
      *            - The old name of the Item
      * @param newName
      *            - The new name of the Item
-     * 
+     *
      */
     @Override
     public void onJobRenamed(final Item item, final String oldName, final String newName) {
@@ -900,43 +874,20 @@ public class BuildPipelineView extends View {
         /** this window link style option */
         static final String THIS_WINDOW = "This Window"; //$NON-NLS-1$
     }
-
+    
     @Override
     public boolean hasPermission(final Permission p) {
         boolean display = true;
-        // tester la liste vide seulement en lecture
+        //tester la liste vide seulement en lecture
         if (READ.name.equals(p.name)) {
             if (this.getItems() == null || this.getItems().isEmpty()) {
                 display = false;
             }
         } else {
-            // Pas en lecture => permission standard
+            //Pas en lecture => permission standard
             display = super.hasPermission(p);
         }
 
         return display;
     }
-
-    /**
-     * Check for M2ReleaseAction, if present, then provide an icon on top
-     * 
-     * @return boolean - whether the first job is a m2release job
-     */
-    public boolean isM2Release() {
-        if (Jenkins.getInstance().getPlugin("m2release") == null) {
-            return false;
-        }
-        final String firstJobName = ((DownstreamProjectGridBuilder) gridBuilder).getFirstJob();
-        final AbstractProject<?, ?> project = Jenkins.getInstance().getItem(firstJobName, this.getOwnerItemGroup(), AbstractProject.class);
-        if (project != null) {
-            // If a M2ReleaseAction is found
-            for (final Action nextAction : project.getAllActions()) {
-                if (nextAction instanceof M2ReleaseAction) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
 }

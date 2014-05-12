@@ -61,7 +61,7 @@
     height: 48px;
     margin-left: auto;
     margin-right: auto;
-    width: 392px;
+    width: 340px;
 }
 
 .icon-container {
@@ -132,11 +132,6 @@
 }
 
 .build-duration-container {
-	text-align: left;
-	text-overflow: clip;
-	overflow: hidden;
-	white-space: nowrap;
-	font-size: 0.9em;
 	width: 135px;
 }
 
@@ -290,11 +285,6 @@ tr.spacerRow td {
     color: #222;
 }
 
-.QUEUED {
-    background-color: #eb642d;
-    color: #222;
-}
-
 .BUILDING {
     background-color: #f7f94b;
     color: #222;
@@ -381,133 +371,4 @@ a:hover {
 
 .hidden {
 	display: none;
-}
-
-.tile {
-	background: url(../images/tile.png);
-	background-size: 100% 100%; 
-	background-repeat: no-repeat;
-	vertical-align: middle;
-}
-.tileCrossBottom {
-	background: url(../images/tile-cross-bottom.png);
-	background-size: 100% 100%; 
-	background-repeat: no-repeat;
-	vertical-align: middle;
-}
-.tileCross {
-	background: url(../images/tile-cross.png);
-	background-size: 100% 100%; 
-	background-repeat: no-repeat;
-	vertical-align: middle;
-}
-.tileDown {
-	background: url(../images/tile-down.png);
-	background-size: 100% 100%; 
-	background-repeat: no-repeat;
-	vertical-align: middle;
-}
-.tileLeft {
-	background: url(../images/tile-left.png);
-	background-size: 100% 100%; 
-	background-repeat: no-repeat;
-	vertical-align: middle;
-}
-.tileRight {
-	background: url(../images/tile-right.png);
-	background-size: 100% 100%; 
-	background-repeat: no-repeat;
-	vertical-align: middle;
-}
-.tileTopRight {
-	background: url(../images/tile-top-right.png);
-	background-size: 100% 100%; 
-	background-repeat: no-repeat;
-	vertical-align: middle;
-}
-
-.hTile {
-    background: url(../images/h-tile.png);
-	background-size: 100% 100%; 
-	background-repeat: no-repeat;
-	vertical-align: middle;
-}
-.hTileCrossBottom {
-	background: url(../images/h-tile-cross-bottom.png);
-	background-size: 100% 100%; 
-	background-repeat: no-repeat;
-	vertical-align: middle;
-}
-.hTileCross {
-	background: url(../images/h-tile-cross.png);
-	background-size: 100% 100%; 
-	background-repeat: no-repeat;
-	vertical-align: middle;
-}
-.hTileDown {
-	background: url(../images/h-tile-down.png);
-	background-size: 100% 100%; 
-	background-repeat: no-repeat;
-	vertical-align: middle;
-}
-.hTileLeft {
-	background: url(../images/h-tile-left.png);
-	background-size: 100% 100%; 
-	background-repeat: no-repeat;
-	vertical-align: middle;
-}
-.hTileRight {
-	background: url(../images/h-tile-right.png);
-	background-size: 100% 100%; 
-	background-repeat: no-repeat;
-	vertical-align: middle;
-}
-.hTileTopRight {
-	background: url(../images/h-tile-top-right.png);
-	background-size: 100% 100%; 
-	background-repeat: no-repeat;
-	vertical-align: middle;
-}
-
-.rTile {
-    background: url(../images/r-tile.png);
-	background-size: 100% 100%; 
-	background-repeat: no-repeat;
-	vertical-align: middle;
-}
-.rTileCrossBottom {
-	background: url(../images/r-tile-cross-bottom.png);
-	background-size: 100% 100%; 
-	background-repeat: no-repeat;
-	vertical-align: middle;
-}
-.rTileCross {
-	background: url(../images/r-tile-cross.png);
-	background-size: 100% 100%; 
-	background-repeat: no-repeat;
-	vertical-align: middle;
-}
-.rTileDown {
-	background: url(../images/r-tile-down.png);
-	background-size: 100% 100%; 
-	background-repeat: no-repeat;
-	vertical-align: middle;
-}
-.rTileLeft {
-	background: url(../images/r-tile-left.png);
-	background-size: 100% 100%; 
-	background-repeat: no-repeat;
-	vertical-align: middle;
-}
-.rTileRight {
-	background: url(../images/r-tile-right.png);
-	background-size: 100% 100%; 
-	background-repeat: no-repeat;
-	vertical-align: middle;
-}
-.rTileTopRight {
-	background: url(../images/r-tile-top-right.png);
-	background-size: 100% 100%; 
-	background-repeat: no-repeat;
-	vertical-align: middle;
 }
