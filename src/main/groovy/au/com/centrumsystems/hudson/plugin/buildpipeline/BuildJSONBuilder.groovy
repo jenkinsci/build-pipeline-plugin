@@ -41,14 +41,28 @@ class BuildJSONBuilder {
 			}
 			project {
 				disabled(pipelineBuild.projectDisabled)
-				name(pipelineBuild.project.getRelativeNameFrom(context))
+				try {
+				  // Attempt to use this API, which is introduced in 1.515,
+				  // but allows this to work despite the Item/ItemGroup
+				  // overload ambiguity, when a 'context' is also an Item.
+				  name(pipelineBuild.project.getRelativeNameFromGroup(context))
+				} catch (e) {
+				  name(pipelineBuild.project.getRelativeNameFrom(context))
+				}
 				url(pipelineBuild.projectURL)
 				health(pipelineBuild.projectHealth)
 				id(projectId)
 				parameters(params)
 			}
 			upstream {
-				projectName(pipelineBuild.upstreamPipelineBuild?.project?.getRelativeNameFrom(context))
+				try {
+				  // Attempt to use this API, which is introduced in 1.515,
+				  // but allows this to work despite the Item/ItemGroup
+				  // overload ambiguity, when a 'context' is also an Item.
+				  projectName(pipelineBuild.upstreamPipelineBuild?.project?.getRelativeNameFromGroup(context))
+				} catch (e) {
+				  projectName(pipelineBuild.upstreamPipelineBuild?.project?.getRelativeNameFrom(context))
+				}
 				buildNumber(pipelineBuild.upstreamBuild?.number)
 			}
 		}
