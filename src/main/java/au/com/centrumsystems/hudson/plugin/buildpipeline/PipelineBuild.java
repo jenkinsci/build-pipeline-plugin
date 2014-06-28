@@ -257,6 +257,9 @@ public class PipelineBuild {
             if (build.isBuilding()) {
                 buildResult = HudsonResult.BUILDING.toString();
             } else {
+                if (build.getResult() == null) {
+                    throw new IllegalStateException("Build with a null result after build has finished");
+                }
                 buildResult = HudsonResult.values()[build.getResult().ordinal].toString();
             }
         } else {
@@ -281,8 +284,8 @@ public class PipelineBuild {
 
         if (upstreamPB != null) {
             if (this.getUpstreamBuild() != null) {
-                if (getUpstreamBuildResult().equals(HudsonResult.SUCCESS.toString()) 
-            || 
+                if (getUpstreamBuildResult().equals(HudsonResult.SUCCESS.toString())
+            ||
             getUpstreamBuildResult().equals(HudsonResult.UNSTABLE.toString())) {
                     if (ProjectUtil.isManualTrigger(this.upstreamBuild.getProject(), this.project)) {
                         pendingStatus = HudsonResult.MANUAL.toString();
@@ -310,7 +313,7 @@ public class PipelineBuild {
         } else {
             upstreamBuildName = "";
         }
-        if (upstreamProjects.size() > 0) { 
+        if (upstreamProjects.size() > 0) {
             if (isManualTrigger()) {
                 for (AbstractProject upstreamProject : upstreamProjects) {
                     if (upstreamProject.getName().equals(upstreamBuildName)) {

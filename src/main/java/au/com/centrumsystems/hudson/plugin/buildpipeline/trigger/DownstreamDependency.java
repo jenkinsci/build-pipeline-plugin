@@ -38,7 +38,7 @@ import au.com.centrumsystems.hudson.plugin.util.ProjectUtil;
 
 /**
  * Defines downstream dependency for the build pipeline trigger
- * 
+ *
  * @author Centrum Systems
  */
 public class DownstreamDependency extends Dependency {
@@ -49,7 +49,7 @@ public class DownstreamDependency extends Dependency {
 
     /**
      * Downstream Dependency
-     * 
+     *
      * @param upstream
      *            the upstream job
      * @param downstream
@@ -69,10 +69,20 @@ public class DownstreamDependency extends Dependency {
 
         // If the upstream project has an automatic trigger to the downstream project
         // and the current build result was SUCCESS then return true.
-        final boolean retval = ((!ProjectUtil.isManualTrigger(build.getProject(), getDownstreamProject())) && (build.getResult()
-                .isBetterOrEqualTo(Result.SUCCESS)));
-        LOGGER.fine("" + retval);
+        if (ProjectUtil.isManualTrigger(build.getProject(), getDownstreamProject())) {
+          LOGGER.fine("(shouldn't trigger: manual)");
+          return false;
+        }
 
-        return retval;
+        final Result result = build.getResult();
+        if (result == null) {
+          throw new IllegalStateException("Build with a null result in DownstreamDependency#shouldTriggerBuilder");
+        }
+        if (result.isWorseThan(Result.SUCCESS)) {
+          LOGGER.fine("(shouldn't trigger: unsuccessful build)");
+          return false;
+        }
+        LOGGER.fine("(should trigger)");
+        return true;
     }
 }

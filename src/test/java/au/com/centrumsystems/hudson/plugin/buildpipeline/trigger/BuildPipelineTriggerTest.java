@@ -170,7 +170,7 @@ public class BuildPipelineTriggerTest extends HudsonTestCase {
         final BuildPipelineTrigger.DescriptorImpl di = new BuildPipelineTrigger.DescriptorImpl();
 
         assertEquals(FormValidation.ok(), di.doCheckDownstreamProjectNames(upstreamProject, proj1));
-        assertThat(FormValidation.error("No such project '" + proj2 + "'. Did you mean '" + proj1 + "'?").toString(), is(di
+        assertThat(FormValidation.error("No such project ‘" + proj2 + "’. Did you mean ‘" + proj1 + "’?").toString(), is(di
                 .doCheckDownstreamProjectNames(upstreamProject, proj2).toString()));
     }
 
