@@ -29,19 +29,21 @@ import hudson.model.Item;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.FreeStyleProject;
-import hudson.model.Hudson;
+import hudson.model.Queue.WaitingItem;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import jenkins.model.Jenkins;
 import au.com.centrumsystems.hudson.plugin.util.BuildUtil;
 import au.com.centrumsystems.hudson.plugin.util.HudsonResult;
 import au.com.centrumsystems.hudson.plugin.util.ProjectUtil;
+import au.com.centrumsystems.hudson.plugin.util.QueueEntry;
+import au.com.centrumsystems.hudson.plugin.util.QueueUtil;
 import hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig;
 import hudson.plugins.parameterizedtrigger.SubProjectsAction;
 
@@ -180,7 +182,7 @@ public class PipelineBuild {
             final PipelineBuild newPB = new PipelineBuild(returnedBuild, proj, this.currentBuild);
             pbList.add(newPB);
         }
-        if (Hudson.getInstance().getPlugin("parameterized-trigger") != null) {
+        if (Jenkins.getInstance().getPlugin("parameterized-trigger") != null) {
             for (SubProjectsAction action : Util.filter(currentProject.getActions(), SubProjectsAction.class)) {
                 for (BlockableBuildTriggerConfig config : action.getConfigs()) {
                     for (final AbstractProject<?, ?> dependency : config.getProjectList(currentProject.getParent(), null)) {
@@ -277,21 +279,25 @@ public class PipelineBuild {
      */
 
     private String getPendingStatus() {
-        String pendingStatus = HudsonResult.PENDING.toString();
-        final PipelineBuild upstreamPB = getUpstreamPipelineBuild();
+        // Retrieve the correct queued item based on the upstream build (display name + queue id)
+        if (upstreamBuild != null) {
+            // Search for Queue-Entry based on the upstream build
+            final QueueEntry queueEntry = QueueUtil.getQueueEntry(upstreamBuild);
+            if (queueEntry != null && QueueUtil.getQueuedItem(project, queueEntry) != null) {
+                return HudsonResult.QUEUED.toString();
+            }
+        }
 
-        if (upstreamPB != null) {
-            if (this.getUpstreamBuild() != null) {
-                if (getUpstreamBuildResult().equals(HudsonResult.SUCCESS.toString()) 
-            || 
-            getUpstreamBuildResult().equals(HudsonResult.UNSTABLE.toString())) {
-                    if (ProjectUtil.isManualTrigger(this.upstreamBuild.getProject(), this.project)) {
-                        pendingStatus = HudsonResult.MANUAL.toString();
-                    }
+        final PipelineBuild upstreamPB = getUpstreamPipelineBuild();
+        if (upstreamPB != null && this.getUpstreamBuild() != null) {
+            if (getUpstreamBuildResult().equals(HudsonResult.SUCCESS.toString())
+                    || getUpstreamBuildResult().equals(HudsonResult.UNSTABLE.toString())) {
+                if (ProjectUtil.isManualTrigger(this.upstreamBuild.getProject(), this.project)) {
+                    return HudsonResult.MANUAL.toString();
                 }
             }
         }
-        return pendingStatus;
+        return HudsonResult.PENDING.toString();
     }
 
 
@@ -311,13 +317,11 @@ public class PipelineBuild {
         } else {
             upstreamBuildName = "";
         }
-        if (upstreamProjects.size() > 0) { 
-            if (isManualTrigger()) {
-                for (AbstractProject upstreamProject : upstreamProjects) {
-                    if (upstreamProject.getName().equals(upstreamBuildName)) {
-                        previousProject = upstreamProject;
-                      break;
-                    }
+        if (upstreamProjects.size() > 0) {
+            for (AbstractProject<?, ?> upstreamProject : upstreamProjects) {
+                if (upstreamProject.getName().equals(upstreamBuildName)) {
+                    previousProject = upstreamProject;
+                    break;
                 }
             }
             if (previousProject == null) {
@@ -339,6 +343,35 @@ public class PipelineBuild {
             return this.currentBuild.getDurationString();
         } else {
             return ""; //$NON-NLS-1$
+        }
+    }
+
+    /**
+     * Returns the current wait duration (when queued).
+     * 
+     * @return - Current wait duration or an empty String if no queueing in
+     *         progress is null.
+     */
+    public String getQueueWaitDuration() {
+        final WaitingItem wItem = QueueUtil.getQueuedWaitingItem(project, getUpstreamBuild());
+        if (wItem != null) {
+            return Util.getTimeSpanString(wItem.timestamp.getTimeInMillis() - System.currentTimeMillis());
+        } else {
+            return ""; //$NON-NLS-1$
+        }
+    }
+
+    /**
+     * Returns the current id of the queue item.
+     * 
+     * @return - Current id of the queue item
+     */
+    public Integer getQueueId() {
+        final WaitingItem wItem = QueueUtil.getQueuedWaitingItem(project, getUpstreamBuild());
+        if (wItem != null) {
+            return wItem.id;
+        } else {
+            return 0; //$NON-NLS-1$
         }
     }
 
@@ -408,7 +441,7 @@ public class PipelineBuild {
             final String displayName = currentBuild.getDisplayName();
             if (displayName == null || displayName.trim().length() == 0) {
                 version = currentBuild.getNumber() > 0 ? String.valueOf(currentBuild.getNumber()) : Strings
-                    .getString("PipelineBuild.RevisionNotAvailable");
+                        .getString("PipelineBuild.RevisionNotAvailable");
             } else {
                 version = displayName;
             }
@@ -427,7 +460,7 @@ public class PipelineBuild {
     public boolean hasBuildPermission() {
         boolean buildPermission = false;
         // If no security is enabled then allow builds
-        if (!Hudson.getInstance().isUseSecurity()) {
+        if (!Jenkins.getInstance().isUseSecurity()) {
             LOGGER.fine("Security is not enabled.");
             buildPermission = true;
         } else if (this.project != null) {
@@ -442,14 +475,13 @@ public class PipelineBuild {
      * @return is ready to be manually built.
      */
     public boolean isReadyToBeManuallyBuilt() {
-     return isManualTrigger() && this.currentBuild == null && (upstreamBuildSucceeded() || upstreamBuildUnstable()) && hasBuildPermission();
+        return isManualTrigger() && this.currentBuild == null && (upstreamBuildSucceeded() || upstreamBuildUnstable())
+                && hasBuildPermission() && (!"QUEUED".equals(getCurrentBuildResult()));
     }
 
     public boolean isRerunnable() {
-        return !isReadyToBeManuallyBuilt()
-                && !"PENDING".equals(getCurrentBuildResult())
-                && !"BUILDING".equals(getCurrentBuildResult())
-                && hasBuildPermission();
+        return !isReadyToBeManuallyBuilt() && !"PENDING".equals(getCurrentBuildResult()) && !"BUILDING".equals(getCurrentBuildResult())
+                && !"QUEUED".equals(getCurrentBuildResult()) && hasBuildPermission();
     }
 
     /**
@@ -459,13 +491,50 @@ public class PipelineBuild {
         return this.getUpstreamBuild() != null && HudsonResult.SUCCESS.toString().equals(getBuildResult(this.upstreamBuild));
     }
 
-   /**
-    * @return upstream build exists and unstable.
-    */
-   private boolean upstreamBuildUnstable() {
-       return this.getUpstreamBuild() != null && HudsonResult.UNSTABLE.toString().equals(getBuildResult(this.upstreamBuild));
-   }
+    /**
+     * @return upstream build exists and unstable.
+     */
+    private boolean upstreamBuildUnstable() {
+        return this.getUpstreamBuild() != null && HudsonResult.UNSTABLE.toString().equals(getBuildResult(this.upstreamBuild));
+    }
 
+    /**
+     * 
+     * @return whether this is the latest build of this pipeline view
+     */
+    public boolean isLatestBuild() {
+        if (currentBuild == null || project.getLastBuild() == null) {
+            return false;
+        }
+        // now check for last build on this pipeline view
+        // how do we find out, if the last build is run on this view?
+        return currentBuild.getNumber() == project.getLastBuild().getNumber();
+    }
+
+    /**
+     * 
+     * @return whether the upstream build is the latest for this pipeline view
+     */
+    public boolean isUpstreamBuildLatest() {
+        if (upstreamBuild == null || getUpstreamPipelineBuild() == null || getUpstreamPipelineBuild().getProject() == null
+                || getUpstreamPipelineBuild().getProject().getLastBuild() == null) {
+            return false;
+        }
+        return upstreamBuild.getNumber() == getUpstreamPipelineBuild().getProject().getLastBuild().getNumber();
+    }
+
+    /**
+     * 
+     * @return whether the upstream build is the latest successful one for this
+     *         pipeline view
+     */
+    public boolean isUpstreamBuildLatestSuccess() {
+        if (upstreamBuild == null || getUpstreamPipelineBuild() == null || getUpstreamPipelineBuild().getProject() == null
+                || getUpstreamPipelineBuild().getProject().getLastSuccessfulBuild() == null) {
+            return false;
+        }
+        return upstreamBuild.getNumber() == getUpstreamPipelineBuild().getProject().getLastSuccessfulBuild().getNumber();
+    }
 
     /**
      * Determine if the project is triggered manually, regardless of the state of its upstream builds
@@ -476,6 +545,13 @@ public class PipelineBuild {
         boolean manualTrigger = false;
         if (this.upstreamBuild != null) {
             manualTrigger = ProjectUtil.isManualTrigger(this.upstreamBuild.getProject(), this.project);
+        } else {
+            for (AbstractProject<?, ?> upstreamProject : this.project.getUpstreamProjects()) {
+                manualTrigger = ProjectUtil.isManualTrigger(upstreamProject, this.project);
+                if (manualTrigger) {
+                    break;
+                }
+            }
         }
         return manualTrigger;
     }
@@ -504,23 +580,42 @@ public class PipelineBuild {
      * @return Formatted start date
      */
     public String getFormattedStartDate() {
-        String formattedStartTime = ""; //$NON-NLS-1$
+        String formattedStartDate = ""; //$NON-NLS-1$
         if (getStartTime() != null) {
-            formattedStartTime = DateFormat.getDateInstance(DateFormat.MEDIUM).format(getStartTime());
+            formattedStartDate = DateFormat.getDateInstance(DateFormat.MEDIUM).format(getStartTime());
         }
-        return formattedStartTime;
+        return formattedStartDate;
+    }
+
+    /**
+     * @return Formatted queued for time
+     */
+    public String getFormattedQueuedForTime() {
+        String formattedQueuedForTime = ""; //$NON-NLS-1$
+        final WaitingItem wItem = QueueUtil.getQueuedWaitingItem(project, getUpstreamBuild());
+        if (wItem != null) {
+            formattedQueuedForTime = DateFormat.getTimeInstance(DateFormat.MEDIUM).format(wItem.timestamp.getTime());
+        }
+        return formattedQueuedForTime;
+    }
+
+    /**
+     * @return Formatted queued for date
+     */
+    public String getFormattedQueuedForDate() {
+        String formattedQueuedForDate = ""; //$NON-NLS-1$
+        final WaitingItem wItem = QueueUtil.getQueuedWaitingItem(project, getUpstreamBuild());
+        if (wItem != null) {
+            formattedQueuedForDate = DateFormat.getDateInstance(DateFormat.MEDIUM).format(wItem.timestamp.getTime());
+        }
+        return formattedQueuedForDate;
     }
 
     /**
      * @return a map including build parameters
      */
     public Map<String, String> getBuildParameters() {
-        final Map<String, String> retval = new HashMap<String, String>();
-        if (currentBuild != null) {
-            retval.putAll(currentBuild.getBuildVariables());
-        }
-
-        return retval;
+        return BuildUtil.getUnsensitiveParameters(currentBuild);
     }
 
     public boolean isProjectDisabled() {

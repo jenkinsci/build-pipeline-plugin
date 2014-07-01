@@ -9,6 +9,13 @@ import hudson.model.ParametersDefinitionProperty;
 import hudson.util.AdaptedIterator;
 import hudson.util.HttpResponses;
 import hudson.util.ListBoxModel;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Iterator;
+
+import javax.servlet.ServletException;
+
 import jenkins.model.Jenkins;
 import jenkins.util.TimeDuration;
 
@@ -18,12 +25,6 @@ import org.kohsuke.stapler.HttpResponse;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.interceptor.RequirePOST;
-
-import javax.servlet.ServletException;
-
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Iterator;
 
 /**
  * {@link ProjectGridBuilder} based on the upstream/downstream relationship.
@@ -54,9 +55,17 @@ public class DownstreamProjectGridBuilder extends ProjectGridBuilder {
         private final AbstractProject<?, ?> start;
 
         /**
-         * @param start The first project to lead the pipeline.
+         * The item group pipeline view belongs to
          */
-        private GridImpl(AbstractProject<?, ?> start) {
+        private final ItemGroup context;
+
+        /**
+         * @param context
+         *            item group pipeline view belongs to, used to compute relative item names
+         * @param start The first project to lead the pipeline.        
+         */
+        private GridImpl(ItemGroup context, AbstractProject<?, ?> start) {
+            this.context = context;
             this.start = start;
             placeProjectInGrid(0, 0, ProjectForm.as(start));
         }
@@ -78,8 +87,8 @@ public class DownstreamProjectGridBuilder extends ProjectGridBuilder {
             set(row, startingColumn, projectForm);
 
             final int childrensColumn = startingColumn + 1;
-            for (final ProjectForm downstreamProject : projectForm.getDependencies()) {
-                placeProjectInGrid(row, childrensColumn, downstreamProject);
+            for (final ProjectForm downstreamForm : projectForm.getDependencies()) {
+                placeProjectInGrid(row, childrensColumn, downstreamForm);
                 row++;
             }
         }
@@ -98,7 +107,7 @@ public class DownstreamProjectGridBuilder extends ProjectGridBuilder {
                 return new AdaptedIterator<AbstractBuild<?, ?>, BuildGrid>(base) {
                     @Override
                     protected BuildGrid adapt(AbstractBuild<?, ?> item) {
-                        return new BuildGridImpl(new BuildForm(new PipelineBuild(item)));
+                        return new BuildGridImpl(new BuildForm(context, new PipelineBuild(item)));
                     }
                 };
             }
@@ -194,7 +203,7 @@ public class DownstreamProjectGridBuilder extends ProjectGridBuilder {
 
     @Override
     public ProjectGrid build(BuildPipelineView owner) {
-        return new GridImpl(getFirstJob(owner));
+        return new GridImpl(owner.getOwnerItemGroup(), getFirstJob(owner));
     }
 
     @Override

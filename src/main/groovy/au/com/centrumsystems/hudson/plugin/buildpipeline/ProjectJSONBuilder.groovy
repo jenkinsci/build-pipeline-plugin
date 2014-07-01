@@ -16,6 +16,8 @@ class ProjectJSONBuilder {
         def builder = new JsonBuilder()
         def root = builder {
             id(projectForm.id)
+            row(projectForm.row)
+            col(projectForm.col)
             name(projectForm.name)
             health(projectForm.health)
             url(projectForm.url)

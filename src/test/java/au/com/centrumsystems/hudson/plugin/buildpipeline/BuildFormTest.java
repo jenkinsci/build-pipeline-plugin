@@ -38,7 +38,7 @@ public class BuildFormTest extends HudsonTestCase {
         waitUntilNoActivity();
 
         final PipelineBuild pb = new PipelineBuild(build1, project1, null);
-        final BuildForm bf = new BuildForm(pb);
+        final BuildForm bf = new BuildForm(jenkins, pb);
 
         assertThat(bf.getStatus(), is(pb.getCurrentBuildResult()));
     }
@@ -63,7 +63,7 @@ public class BuildFormTest extends HudsonTestCase {
         paramList.add("branch");
 
         final PipelineBuild pb = new PipelineBuild(build1, project1, null);
-        final BuildForm bf = new BuildForm(pb);
+        final BuildForm bf = new BuildForm(jenkins, pb);
 
         assertEquals(paramList, bf.getParameterList());
     }

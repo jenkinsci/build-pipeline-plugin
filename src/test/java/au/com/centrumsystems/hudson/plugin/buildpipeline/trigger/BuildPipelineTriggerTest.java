@@ -27,6 +27,8 @@ package au.com.centrumsystems.hudson.plugin.buildpipeline.trigger;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
+
+import hudson.model.AbstractProject;
 import hudson.model.Descriptor;
 import hudson.model.FreeStyleProject;
 import hudson.model.Hudson;
@@ -159,15 +161,17 @@ public class BuildPipelineTriggerTest extends HudsonTestCase {
 
     @Test
     public void testDoCheckDownstreamProjectNames() throws IOException, InterruptedException {
+        final AbstractProject upstreamProject = createFreeStyleProject("Upstream");
+
         final String proj1 = "Proj1";
         final String proj2 = "Proj2";
         createFreeStyleProject(proj1);
 
         final BuildPipelineTrigger.DescriptorImpl di = new BuildPipelineTrigger.DescriptorImpl();
 
-        assertEquals(FormValidation.ok(), di.doCheckDownstreamProjectNames(jenkins, proj1));
+        assertEquals(FormValidation.ok(), di.doCheckDownstreamProjectNames(upstreamProject, proj1));
         assertThat(FormValidation.error("No such project '" + proj2 + "'. Did you mean '" + proj1 + "'?").toString(), is(di
-                .doCheckDownstreamProjectNames(jenkins, proj2).toString()));
+                .doCheckDownstreamProjectNames(upstreamProject, proj2).toString()));
     }
 
     @Test

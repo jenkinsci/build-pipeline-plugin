@@ -38,17 +38,28 @@
 		</tr>
 		<tr class="build-body">
 			<td class="secondary-info">
-				<div class="build-time">
-					{{build.startDate}} {{build.startTime}}
-				</div>
+				{{#if build.isQueued}}
+				    <div class="build-time" title="Scheduled for {{build.queuedForDate}} {{build.queuedForTime}}">
+					    {{build.queuedForDate}} {{build.queuedForTime}}
+				    </div>
+				{{else}}
+				    <div class="build-time" title="Started at {{build.startDate}} {{build.startTime}}">
+					    {{build.startDate}} {{build.startTime}}
+				    </div>
+				{{/if}}
 				<div class="overflow-hidden build-duration-container">
+				{{#if build.isQueued}}
+					<span class="build-duration" title="Waiting for {{build.queueWaitDuration}}">
+						{{build.queueWaitDuration}}
+					</span>
+				{{/if}}
 				{{#if build.isComplete}}
-					<span class="build-duration" title="{{build.duration}}">
+					<span class="build-duration" title="Build-Time was {{build.duration}}">
 						{{build.duration}}
 					</span>
 				{{/if}}
 				{{#if build.isBuilding}}
-					<span class="build-duration" title="{{build.duration}}">
+					<span class="build-duration" title="Build-Time up to now {{build.duration}}">
 						{{build.duration}}
 					</span>
 				{{/if}}
@@ -77,33 +88,38 @@
 				</div>
 
 				<div class="icons" id="icons-{{id}}">
+					{{#if build.isManualTrigger}}
+						<img title="This job is manually triggered" alt="This job is manually triggered" src="${rootURL}/plugin/build-pipeline-plugin/images/manual.png" />
+					{{/if}}
 					{{#if project.parameters.length}}
 						<j:set var="hasParameterIconUrl" value="${rootURL}/plugin/build-pipeline-plugin/images/has-parameter.png" />
 						<img title="This job has parameters" alt="This job has parameters" src="${hasParameterIconUrl}"/>
 					{{/if}}		
 					{{#unless build.isPending}}
 						{{#unless build.isReadyToBeManuallyBuilt}}
-							<j:set var="consoleOutputIconUrl" value="${rootURL}/images/16x16/terminal.png" />
-							<j:choose>
-								<j:when test="${from.newWindowConsoleOutputLinkStyle}">
-									<a href="${rootURL}/{{build.url}}console" target="_blank">
-										<img title="console" alt="console" src="${consoleOutputIconUrl}" />
-									</a>
-								</j:when>
-								<j:when test="${from.thisWindowConsoleOutputLinkStyle}">
-									<a href="${rootURL}/{{build.url}}console">
-										<img title="console" alt="console" src="${consoleOutputIconUrl}" />
-									</a>
-								</j:when>
-								<j:otherwise>
-									<span class="pointer" onclick="buildPipeline.fillDialog('${rootURL}/{{build.url}}console', 'Console output for {{project.name}} #{{build.number}}')">
-										<img title="console" alt="console" src="${consoleOutputIconUrl}" />
-									</span>
-								</j:otherwise>
-							</j:choose>
+							{{#unless build.isQueued}}
+								<j:set var="consoleOutputIconUrl" value="${rootURL}/images/16x16/terminal.png" />
+								<j:choose>
+									<j:when test="${from.newWindowConsoleOutputLinkStyle}">
+										<a href="${rootURL}/{{build.url}}console" target="_blank">
+											<img title="console" alt="console" src="${consoleOutputIconUrl}" />
+										</a>
+									</j:when>
+									<j:when test="${from.thisWindowConsoleOutputLinkStyle}">
+										<a href="${rootURL}/{{build.url}}console">
+											<img title="console" alt="console" src="${consoleOutputIconUrl}" />
+										</a>
+									</j:when>
+									<j:otherwise>
+										<span class="pointer" onclick="buildPipeline.fillDialog('${rootURL}/{{build.url}}console', 'Console output for {{project.name}} #{{build.number}}')">
+											<img title="console" alt="console" src="${consoleOutputIconUrl}" />
+										</span>
+									</j:otherwise>
+								</j:choose>
+							{{/unless}}
 						{{/unless}}
 					{{/unless}}
-
+					
 
 					{{#if build.isRerunnable}}
 						{{#if build.isSuccess}}
@@ -142,6 +158,11 @@
 							<img title="trigger" alt="trigger" src="${rootURL}/images/16x16/clock.png" />
 						</span>
 						{{/if}}
+					{{/if}}
+					{{#if build.isQueued}}
+						<a onclick="buildPipeline.showSpinner({{id}}); new Ajax.Request(this.href); buildPipeline.cancelQueued({{id}}, {{build.queueId}}); return false" class="stop-button-link" href="${rootURL}/queue/cancelItem?id={{build.queueId}}">
+							<img alt="cancel this build" class="stop-button-icon" src="${rootURL}/images/16x16/stop.png" height="16" width="16" />
+						</a>
 					{{/if}}
 				</div>
 				{{/unless}}
@@ -228,20 +249,28 @@
         <j:set var="hasBuildPermission" type="boolean" value="${from.hasBuildPermission()}" />
         <j:if test="${hasBuildPermission}">
           <div class="icon-container">
-		<j:if test="${from.startsWithParameters}">
-			<div onclick="buildPipeline.fillDialog('${rootURL}/job/${from.gridBuilder.firstJob}/build?delay=0sec', 'Starts the pipeline with parameters')">
+		  <j:if test="${from.startsWithParameters}">
+			<div onclick="buildPipeline.fillDialog('${rootURL}/job/${from.gridBuilder.firstJob}/build?delay=0sec', 'Starts the pipeline with parameters')" class="pointer">
                 <img src="${rootURL}/images/24x24/clock.png" alt="Trigger a Pipeline" class="icon-with-caption"/>
             </div>
-		</j:if>
-		<j:if test="${!from.startsWithParameters}">
+		  </j:if>
+		  <j:if test="${!from.startsWithParameters}">
             <div>
               <a id="trigger-pipeline-button" href='#' onclick="$('triggerPipelineForm').submit()">
                 <img src="${rootURL}/images/24x24/clock.png" alt="Trigger a Pipeline" class="icon-with-caption"/>
               </a>
             </div>
-   		</j:if>
+   		  </j:if>
             <div>Run</div>
           </div>
+          <j:if test="${from.m2Release}">
+          <div class="icon-container">
+		    <div onclick="buildPipeline.fillDialog('${rootURL}/job/${from.gridBuilder.firstJob}/m2release', 'Starts the pipeline with a maven release build')" class="pointer">
+                <img src="${rootURL}/images/24x24/installer.gif" alt="M2Release in a Pipeline" class="icon-with-caption"/>
+            </div>
+            <div>Release</div>
+          </div>
+          </j:if>          
         </j:if>
 
 				<div class="icon-container">
@@ -300,66 +329,103 @@
 						<j:forEach begin="${0}" end="${buildPipelineForm.getGridHeight() - 1}" indexVar="x">
 							<tr id='project-pipeline'>
 								<!-- 1st cell empty, that's where revision will go for the builds -->
-								<td></td>
-								<td class="next"></td>
+								<td class="hTile"></td>
+								<td class="next hTile"></td>
 								<j:forEach begin="${0}" end="${buildPipelineForm.getGridWidth() - 1}" indexVar="y">
-								<j:set var="project" type="au.com.centrumsystems.hudson.plugin.buildpipeline.ProjectForm" value="${projectGrid.get(x,y)}"/>
+									<j:set var="project" type="au.com.centrumsystems.hudson.plugin.buildpipeline.ProjectForm" value="${projectGrid.get(x,y)}"/>
+									<j:set var="locProjectId" value="project-${project.getId()}-${x}-${y}" />
+									<j:set var="nextIndex" value="${y + 1}" />
+									<j:set var="hasProjectFurtherDown" value="${projectGrid.hasDependencyFurtherDown(x, y)}" />
 									<j:if test="${project != null}">
-										<!-- Checking if the cell to be added corresponds to the one containing build parameters. -->
 										<j:choose>
-											<j:when test="${(y == 0 &amp;&amp; x == 0)}">
-												<!-- Expanding the cell to multiple rows in order to fix an issue which stretches the UI. -->
-												<td id="project-${project.getId()}" rowspan="${buildPipelineForm.getGridHeight()}"></td>
+											<j:when test="${(buildPipelineForm.getGridWidth() == 1)}">
+												<td id="${locProjectId}" class="hTile"></td>
+											</j:when>
+											<j:when test="${(y == 0)}">
+												<td id="${locProjectId}" class="hTileRight"></td>
+											</j:when>
+											<j:when test="${(y + 1 == buildPipelineForm.getGridWidth())}">
+												<td id="${locProjectId}" class="hTileLeft"></td>
+											</j:when>
+											<j:when test="${(project.getDependencies().size() == 0)}">
+												<td id="${locProjectId}" class="hTileLeft"></td>
 											</j:when>
 											<j:otherwise>
-												<td id="project-${project.getId()}"></td>
+												<td id="${locProjectId}" class="hTileCross"></td>
 											</j:otherwise>
 										</j:choose>
 										<script>
                                             //save project proxies for future reference (being able to refresh project cards)
                                             buildPipeline.projectProxies[${project.getId()}] = <st:bind value="${project}" />;
-											jQuery("#project-${project.getId()}").append(buildPipeline.projectCardTemplate(${project.asJSON()}));
+											jQuery("#${locProjectId}").append(buildPipeline.projectCardTemplate(${project.asJSON()}));
 										</script>
-										<j:if test="${(y + 1 != buildPipelineForm.getGridWidth())}">
-											<td class="next">
-
-												<!-- Changing length to size() to get rid of arrows when there are no more child jobs.-->
-												<j:if test="${!(project.getDependencies().size() == 0)}">
-													<span class="status next">
-														<img src="${rootURL}/images/24x24/next.png" />
-													</span>
-												</j:if>
-											</td>
-										</j:if>
+										<j:choose>
+											<!-- Changing length to size() to get rid of arrows when there are no more child jobs.-->
+											<j:when test="${(project.getDependencies().size() == 0)}">
+												<td class="next hTile"></td>
+											</j:when>
+											<j:when test="${(x + 1 != buildPipelineForm.getGridHeight())}">
+												<j:choose>
+													<j:when test="${hasProjectFurtherDown}">
+														<td class="next hTileCrossBottom"></td>
+													</j:when>
+													<j:otherwise>
+														<td class="next hTileCross"></td>
+													</j:otherwise>
+												</j:choose>
+											</j:when>
+											<j:otherwise>
+												<td class="next hTileCross"></td>											
+											</j:otherwise>
+										</j:choose>
 									</j:if>
 									<j:if test="${project == null}">
-										<!-- Skipping the "filler" td for the first colulmn. -->
-										<j:if test="${y != 0}">
-											<td></td>
-										</j:if>
-										<j:if test="${y + 1 != buildPipelineForm.getGridWidth()}">
-											<j:set var="nextIndex" value="${y + 1}"/>
-												<td class="next">
-													<j:if test="${projectGrid.get(x,nextIndex)!=null}">
-														<span class="status next">
-															<img src="${rootURL}/images/24x24/next.png" />
-														</span>
-													</j:if>
-												</td>
-										</j:if>
+										<td class="hTile"></td>
+										<j:choose>
+											<j:when test="${projectGrid.get(x,nextIndex)!=null}">
+												<td class="next hTileTopRight"></td>
+											</j:when>
+											<j:when test="${(x + 1 == buildPipelineForm.getGridHeight())}">
+												<td class="next hTile"></td>
+											</j:when> 
+											<j:when test="${(y + 1 == buildPipelineForm.getGridWidth())}">
+												<td class="next hTile"></td>
+											</j:when> 
+											<j:otherwise>
+												<j:choose>
+													<j:when test="${hasProjectFurtherDown}">
+														<td class="next hTileDown"></td>
+													</j:when>
+													<j:otherwise>
+														<td class="next hTile"></td>
+													</j:otherwise>
+												</j:choose>
+											</j:otherwise>
+										</j:choose>
 									</j:if>
 								</j:forEach>
 							</tr>
 						</j:forEach>
 					</tbody>
+					<tr class="spacerRow">
+						<td colspan="${(buildPipelineForm.getGridWidth() + 1) * 2 - 1}" />
+					</tr>
 				</j:if>
 				<!-- builds -->
 				<j:forEach items="${buildPipelineForm.getBuildGrids()}" var="buildGrid" indexVar="i">
+					<j:choose>
+						<j:when test='${buildGrid.get(0,0).getParameters().get("MVN_RELEASE_VERSION") == null}'>
+							<j:set var="tilePrefix" value="tile" />
+						</j:when>
+						<j:otherwise>
+							<j:set var="tilePrefix" value="rTile" />
+						</j:otherwise>
+					</j:choose>
 					<tbody class="pipelineGroup">
 						<j:forEach begin="${0}" end="${buildGrid.rows - 1}" indexVar="x">
 							<tr class='build-pipeline'>
 									<!-- Only adding the revision-cell once. -->
-									<j:if test="${x == 0}"><td class="revision-cell" rowspan="${buildGrid.rows}">
+									<j:if test="${x == 0}"><td class="revision-cell ${tilePrefix}Right">
 										<table class="revision rounded build-card">
 											<tbody>
 												<tr class="header">
@@ -386,7 +452,7 @@
 																		<div class="build-parameters" id="build-parameters-${buildGrid.get(x,0).getId()}">
 																			<div>
 																				<table width="100%">
-																					<j:forEach items="${buildGrid.get(x,0).getParameters().entrySet()}" var="buildParam" indexVar="buildParamCtr">
+																					<j:forEach items="${buildGrid.get(x,0).getFilteredParameters().entrySet()}" var="buildParam" indexVar="buildParamCtr">
 																						<tr>
 																							<td class="param-name">${buildParam.getKey()}:</td>
 																							<td class="param-value">${buildParam.getValue()}</td>
@@ -415,12 +481,31 @@
 												</tr>
 											</tbody>
 										</table>
-									</td></j:if>
-								<td class="next"></td>
+									</td>
+									<td class="next ${tilePrefix}Cross"> </td>
+								</j:if>
+								<j:if test="${x == 1}">
+									<td class="${tilePrefix}" rowspan="${buildGrid.rows} - 1"> </td>
+								</j:if>
+								<j:if test="${x != 0}">
+									<td class="next ${tilePrefix}"> </td>
+								</j:if>
 								<j:forEach begin="${0}" end="${buildPipelineForm.getGridWidth() - 1}" indexVar="y">
 									<j:set var="build" type="au.com.centrumsystems.hudson.plugin.buildpipeline.BuildForm" value="${buildGrid.get(x,y)}" />
+									<j:set var="nextIndex" value="${y + 1}" />
+									<j:set var="hasBuildFurtherDown" value="${buildGrid.hasDependencyFurtherDown(x, y)}" />									
 									<j:if test="${build != null}">
-										<td id="build-${build.getId()}"></td>
+										<j:choose>
+											<j:when test="${(y + 1 == buildPipelineForm.getGridWidth())}">
+												<td id="build-${build.getId()}" class="${tilePrefix}Left"></td>
+											</j:when>							
+											<j:when test="${(build.getDependencies().size() == 0)}">
+												<td id="build-${build.getId()}" class="${tilePrefix}Left"></td>
+											</j:when>
+											<j:otherwise>
+												<td id="build-${build.getId()}" class="${tilePrefix}Cross"></td>
+											</j:otherwise>
+										</j:choose>
 										<script>
 											//generate build-card
 											var buildData = ${build.asJSON()};
@@ -445,23 +530,49 @@
 												});
 											</j:if>
 										</script>
-										<j:if test="${(y + 1 != buildPipelineForm.getGridWidth())}">
-
+										<j:choose>
 											<!-- Changing length to size() to get rid of arrows when there are no more child jobs.-->
-											<td class="next"><j:if test="${!(build.getDependencies().size() == 0)}">
-													<span class="status next"><img src="${rootURL}/images/24x24/next.png" /></span>
-												</j:if></td>
-										</j:if>
+											<j:when test="${(build.getDependencies().size() == 0)}">
+												<td class="next ${tilePrefix}"></td>
+											</j:when>
+											<j:when test="${(x + 1 != buildPipelineForm.getGridHeight())}">
+												<j:choose>
+													<j:when test="${hasBuildFurtherDown}">
+														<td class="next ${tilePrefix}CrossBottom"></td>
+													</j:when>
+													<j:otherwise>
+														<td class="next ${tilePrefix}Cross"></td>
+													</j:otherwise>
+												</j:choose>
+											</j:when>
+											<j:otherwise>
+												<td class="next ${tilePrefix}Cross"></td>											
+											</j:otherwise>
+										</j:choose>
 									</j:if>
 									<j:if test="${build == null}">
-										<td></td>
-										<j:if test="${y + 1 != buildPipelineForm.getGridWidth()}">
-											<j:set var="nextIndex" value="${y + 1}" />
-											<td class="next"><j:if test="${buildGrid.get(x,nextIndex)!=null}">
-													<span class="status next"> <img src="${rootURL}/images/24x24/next.png" />
-													</span>
-												</j:if></td>
-										</j:if>
+										<td class="${tilePrefix}"></td>
+										<j:choose>
+											<j:when test="${buildGrid.get(x,nextIndex)!=null}">
+												<td class="next ${tilePrefix}TopRight"></td>
+											</j:when>
+											<j:when test="${(x + 1 == buildPipelineForm.getGridHeight())}">
+												<td class="next ${tilePrefix}"></td>
+											</j:when> 
+											<j:when test="${(y + 1 == buildPipelineForm.getGridWidth())}">
+												<td class="next ${tilePrefix}"></td>
+											</j:when> 
+											<j:otherwise>
+												<j:choose>
+													<j:when test="${hasBuildFurtherDown}">
+														<td class="next ${tilePrefix}Down"></td>
+													</j:when>
+													<j:otherwise>
+														<td class="next ${tilePrefix}"></td>
+													</j:otherwise>
+												</j:choose>
+											</j:otherwise>
+										</j:choose>
 									</j:if>
 								</j:forEach>
 							</tr>

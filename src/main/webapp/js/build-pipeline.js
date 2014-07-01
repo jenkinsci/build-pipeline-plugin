@@ -60,8 +60,9 @@ BuildPipeline.prototype = {
 	},
 	updateProjectCardFromJSON : function(projectAsJSON, fadeIn) {
 		var buildPipeline = this;
-		jQuery("#project-" + projectAsJSON.id).empty();
-		jQuery(buildPipeline.projectCardTemplate(projectAsJSON)).hide().appendTo("#project-" + projectAsJSON.id).fadeIn(fadeIn ? 1000 : 0);
+		var projectId = "#project-" + projectAsJSON.id + "-" + projectAsJSON.row + "-" + projectAsJSON.col; 
+		jQuery(projectId).empty();
+		jQuery(buildPipeline.projectCardTemplate(projectAsJSON)).hide().appendTo(projectId).fadeIn(fadeIn ? 1000 : 0);
 	},
 	updateNextBuildAndShowProgress : function(id, nextBuildNumber, dependencies) {
 		var buildPipeline = this;
@@ -80,6 +81,17 @@ BuildPipeline.prototype = {
 		buildPipeline.viewProxy.triggerManualBuild(upstreamBuildNumber, triggerProjectName, upstreamProjectName, function(data){
 			buildPipeline.updateNextBuildAndShowProgress(id, data.responseObject(), dependencyIds);
 		});
+	},
+	cancelQueued : function(id, queueId) {
+		var buildPipeline = this;
+		var intervalId = setInterval(function(){
+			buildPipeline.buildProxies[id].cancelQueued(queueId, function(updated){
+				if (updated.responseObject()) {
+					buildPipeline.updateBuildCard(id);
+					clearInterval(intervalId);
+				}
+			});
+		}, buildPipeline.refreshFrequency);
 	},
 	retryBuild : function(id, triggerProjectName, dependencyIds) {
 		var buildPipeline = this;

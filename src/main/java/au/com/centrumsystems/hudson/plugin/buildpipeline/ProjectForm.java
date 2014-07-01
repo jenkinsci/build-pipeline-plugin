@@ -1,16 +1,18 @@
 package au.com.centrumsystems.hudson.plugin.buildpipeline;
 
+import au.com.centrumsystems.hudson.plugin.util.BuildUtil;
 import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.Hudson;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import jenkins.model.Jenkins;
 import hudson.plugins.parameterizedtrigger.SubProjectsAction;
+
 import org.kohsuke.stapler.bind.JavaScriptMethod;
 
 /**
@@ -48,17 +50,32 @@ public class ProjectForm {
     /**
      * the latest successful build number
      */
-    private final String lastSuccessfulBuildNumber;
+    private String lastSuccessfulBuildNumber;
 
     /**
      * the parameters used in the last successful build
      */
-    private final Map<String, String> lastSuccessfulBuildParams;
+    private Map<String, String> lastSuccessfulBuildParams;
 
     /**
      * keep reference to the project so that we can update it
      */
     private final AbstractProject<?, ?> project;
+
+    /**
+     * keep reference to the first project in the current pipeline view
+     */
+    private final AbstractProject<?, ?> firstProject;
+
+    /**
+     * Hold the row this project is placed in (handle duplicate project-ids)
+     */
+    private int row;
+
+    /**
+     * Hold the column this project is placed in (handle duplicate project-ids)
+     */
+    private int col;
 
     /**
      * @param name
@@ -74,6 +91,7 @@ public class ProjectForm {
         dependencies = new ArrayList<ProjectForm>();
         this.displayTrigger = true;
         project = null;
+        firstProject = null;
     }
 
     /**
@@ -81,6 +99,17 @@ public class ProjectForm {
      *            project
      */
     public ProjectForm(final AbstractProject<?, ?> project) {
+        this(project, null);
+    }
+
+    /**
+     * @param project
+     *            - the project to wrap
+     * @param firstProject
+     *            - the first project associated with the grid for this
+     *            projectform
+     */
+    public ProjectForm(final AbstractProject<?, ?> project, final AbstractProject<?, ?> firstProject) {
 
         final PipelineBuild pipelineBuild = new PipelineBuild(project.getLastBuild(), project, null);
 
@@ -90,13 +119,13 @@ public class ProjectForm {
         url = pipelineBuild.getProjectURL();
         dependencies = new ArrayList<ProjectForm>();
         for (final AbstractProject<?, ?> dependency : project.getDownstreamProjects()) {
-            dependencies.add(new ProjectForm(dependency));
+            dependencies.add(new ProjectForm(dependency, firstProject));
         }
-        if (Hudson.getInstance().getPlugin("parameterized-trigger") != null) {
+        if (Jenkins.getInstance().getPlugin("parameterized-trigger") != null) {
             for (SubProjectsAction action : Util.filter(project.getActions(), SubProjectsAction.class)) {
                 for (hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig config : action.getConfigs()) {
                     for (final AbstractProject<?, ?> dependency : config.getProjectList(project.getParent(), null)) {
-                        final ProjectForm candidate = new ProjectForm(dependency);
+                        final ProjectForm candidate = new ProjectForm(dependency, firstProject);
                         // if subprojects come back as downstreams someday, no duplicates wanted
                         if (!dependencies.contains(candidate)) {
                             dependencies.add(candidate);
@@ -107,26 +136,52 @@ public class ProjectForm {
         }
         this.displayTrigger = true;
 
-        final AbstractBuild<?, ?> lastSuccessfulBuild = pipelineBuild.getProject().getLastSuccessfulBuild();
-        lastSuccessfulBuildNumber = (null == lastSuccessfulBuild) ? "" : "" + lastSuccessfulBuild.getNumber();
-        lastSuccessfulBuildParams = (null == lastSuccessfulBuild) ? new HashMap<String, String>() : lastSuccessfulBuild.getBuildVariables();
+        // Adjust retrieval of lastSuccessfulBuild per pipeline (if jobs are
+        // used in different pipelines, to avoid wrong parameters in the
+        // headers)
+        handleLastSuccessfulBuild(pipelineBuild.getProject().getLastSuccessfulBuild());
+
         this.project = project;
+        this.firstProject = firstProject;
     }
 
     /**
      * Wraps possibly null {@link AbstractProject} into {@link ProjectForm}.
-     *
+     * This method is only called for a starting project in a pipeline view,
+     * therefore save it as such.
+     * 
      * @param p
      *      project to be wrapped.
      * @return
      *      possibly null.
      */
     public static ProjectForm as(AbstractProject<?, ?> p) {
-        return p != null ? new ProjectForm(p) : null;
+        return p != null ? new ProjectForm(p, p) : null;
     }
 
     public String getName() {
         return name;
+    }
+
+    public int getRow() {
+        return row;
+    }
+
+    public int getColumn() {
+        return col;
+    }
+
+    /**
+     * Set the coordinates for this project form.
+     * 
+     * @param row
+     *            - the row this form is set into
+     * @param col
+     *            - the column this form is set into
+     */
+    public void setCoords(int row, int col) {
+        this.row = row;
+        this.col = col;
     }
 
     public String getHealth() {
@@ -223,7 +278,56 @@ public class ProjectForm {
      */
     @JavaScriptMethod
     public String asJSON() {
-        return ProjectJSONBuilder.asJSON(new ProjectForm(project));
+        return ProjectJSONBuilder.asJSON(this); 
     }
 
+    /**
+     * Filter last successful build variables with sensitive information.
+     * 
+     * @param build
+     *            the Build object to get the Variables from
+     * 
+     * @return Map<String, String> the vars, pixeled out sensitive information
+     */
+    public Map<String, String> filterSensitiveBuildVariables(AbstractBuild<?, ?> build) {
+        return BuildUtil.getUnsensitiveParameters(build);
+    }
+
+    /**
+     * Correct the last successful build settings of this form, if that build is
+     * not on the current BuildPipelineView (when Jobs are used on multiple
+     * Pipelines)
+     * 
+     * @param buildGrids
+     *            - the build-grids present on this view
+     */
+    public void correctLastSuccessfulBuilds(Iterable<BuildGrid> buildGrids) {
+        AbstractBuild<?, ?> lastSuccessfulBuild = project.getLastSuccessfulBuild();
+
+        outer: while (lastSuccessfulBuild != null) {
+            // Search the buildGrid for the lastSuccessfulBuild given above
+            BuildForm buildForm = null;
+            for (BuildGrid buildGrid : buildGrids) {
+                buildForm = buildGrid.findBuildForm(lastSuccessfulBuild);
+                if (buildForm != null) {
+                    break outer;
+                }
+            }
+            lastSuccessfulBuild = lastSuccessfulBuild.getPreviousSuccessfulBuild();
+        }
+        // Set the (may be) newly found last successful build
+        handleLastSuccessfulBuild(lastSuccessfulBuild);
+    }
+
+    /**
+     * Set build-number and build-params for last successful build.
+     * 
+     * @param lastSuccessfulBuild
+     *            - the last successful build (can be null)
+     */
+    private void handleLastSuccessfulBuild(AbstractBuild<?, ?> lastSuccessfulBuild) {
+        lastSuccessfulBuildNumber = (null == lastSuccessfulBuild) ? "" : "" + lastSuccessfulBuild.getNumber();
+        lastSuccessfulBuildParams = (null == lastSuccessfulBuild) ? new HashMap<String, String>()
+                : filterSensitiveBuildVariables(lastSuccessfulBuild);
+    }
 }

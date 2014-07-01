@@ -1,5 +1,7 @@
 package au.com.centrumsystems.hudson.plugin.buildpipeline;
 
+import hudson.model.AbstractBuild;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,7 +14,7 @@ public class DefaultBuildGridImpl extends BuildGrid {
     /**
      * Actual data.
      */
-    private final Map<Integer/*row*/, Map<Integer/*height*/, BuildForm>> data = new HashMap<Integer, Map<Integer, BuildForm>>();
+    private final Map<Integer/* row */, Map<Integer/* height */, BuildForm>> data = new HashMap<Integer, Map<Integer, BuildForm>>();
 
     /**
      * Dimension of the {@link #data}
@@ -58,5 +60,23 @@ public class DefaultBuildGridImpl extends BuildGrid {
     @Override
     public int getRows() {
         return rows;
+    }
+
+    @Override
+    public BuildForm findBuildForm(AbstractBuild<?, ?> build) {
+        if (build != null) {
+            final String fullBuildName = build.getFullDisplayName();
+            for (int r = 0; r < rows; r++) {
+                for (int c = 0; c < cols; c++) {
+                    final BuildForm form = get(r, c);
+                    if (form != null) {
+                        if (fullBuildName.equals(form.getFullBuildName())) {
+                            return form;
+                        }
+                    }
+                }
+            }
+        }
+        return null;
     }
 }
