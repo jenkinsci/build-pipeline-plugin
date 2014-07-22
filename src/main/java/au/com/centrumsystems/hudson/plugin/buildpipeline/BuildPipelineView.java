@@ -589,7 +589,7 @@ public class BuildPipelineView extends View {
         final BuildPipelineTrigger manualTrigger = upstreamProjectPublishersList.get(BuildPipelineTrigger.class);
         if (manualTrigger != null) {
             final Set<String> downstreamProjectsNames =
-                    Sets.newHashSet(Splitter.on(",").split(manualTrigger.getDownstreamProjectNames()));
+                    Sets.newHashSet(Splitter.on(",").split(manualTrigger.getDownstreamProjectNames()).trimResults());
             if (downstreamProjectsNames.contains(project.getName())) {
                 configs = manualTrigger.getConfigs();
             }
@@ -598,7 +598,7 @@ public class BuildPipelineView extends View {
         final BuildTrigger autoTrigger = upstreamProjectPublishersList.get(BuildTrigger.class);
         if (autoTrigger != null) {
             for (BuildTriggerConfig config : autoTrigger.getConfigs()) {
-                final Set<String> downstreamProjectsNames = Sets.newHashSet(Splitter.on(",").split(config.getProjects()));
+                final Set<String> downstreamProjectsNames = Sets.newHashSet(Splitter.on(",").split(config.getProjects()).trimResults());
                 if (downstreamProjectsNames.contains(project.getName())) {
                     configs = config.getConfigs();
                 }
