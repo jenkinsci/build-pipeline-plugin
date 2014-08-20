@@ -498,12 +498,12 @@ public class PipelineBuild {
         return this.getUpstreamBuild() != null && HudsonResult.SUCCESS.toString().equals(getBuildResult(this.upstreamBuild));
     }
 
-    /**
-     * @return upstream build exists and unstable.
-     */
-    private boolean upstreamBuildUnstable() {
-        return this.getUpstreamBuild() != null && HudsonResult.UNSTABLE.toString().equals(getBuildResult(this.upstreamBuild));
-    }
+   /**
+    * @return upstream build exists and unstable.
+    */
+   private boolean upstreamBuildUnstable() {
+       return this.getUpstreamBuild() != null && HudsonResult.UNSTABLE.toString().equals(getBuildResult(this.upstreamBuild));
+   }
 
     /**
      * 

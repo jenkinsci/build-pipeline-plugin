@@ -20,9 +20,9 @@ import org.kohsuke.stapler.bind.JavaScriptMethod;
 
 /**
  * @author Centrum Systems
- * 
+ *
  *         Representation of a set of projects
- * 
+ *
  */
 public class ProjectForm {
     /**
