@@ -20,10 +20,6 @@
 		<f:booleanRadio default="false"/>
 	</f:entry>
 
-	<f:entry title="Pipeline starts with parameters" field="startsWithParameters">
-		<f:booleanRadio true="Yes" false="No" default="false"/>
-	</f:entry>
-
 	<f:entry title="Show pipeline project headers" field="showPipelineDefinitionHeader">
 		<f:booleanRadio true="Yes" false="No" default="false"/>
 	</f:entry>

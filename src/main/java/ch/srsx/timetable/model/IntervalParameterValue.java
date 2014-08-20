@@ -26,7 +26,6 @@ package ch.srsx.timetable.model;
 import hudson.EnvVars;
 import hudson.model.ParameterValue;
 import hudson.model.AbstractBuild;
-import hudson.model.Run;
 import hudson.util.VariableResolver;
 
 import java.util.Locale;
@@ -93,21 +92,11 @@ public class IntervalParameterValue extends ParameterValue {
         this.value = interval;
     }
 
-    /**
-     * Exposes the name/value as an environment variable.
-     * 
-     * @param build
-     *            - the run
-     * @param env
-     *            - the environment
-     */
+
     @Override
-    public void buildEnvironment(Run<?, ?> build, EnvVars env) {
+    public void buildEnvVars(AbstractBuild<?, ?> build, EnvVars env) {
         env.put(name, value.toString());
-        env.put(name.toUpperCase(Locale.ENGLISH), value.toString()); // backward
-                                                                     // compatibility
-                                                                     // pre
-                                                                     // 1.345
+        env.put(name.toUpperCase(Locale.ENGLISH), value.toString());
     }
 
     @Override

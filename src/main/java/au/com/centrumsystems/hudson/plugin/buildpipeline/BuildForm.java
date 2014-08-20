@@ -6,7 +6,10 @@ import hudson.model.ItemGroup;
 import hudson.model.ParametersDefinitionProperty;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -74,12 +77,27 @@ public class BuildForm {
      *            item group pipeline view belongs to, used to compute relative item names
      */
     public BuildForm(ItemGroup context, final PipelineBuild pipelineBuild) {
+        this(context, pipelineBuild, new LinkedHashSet<AbstractProject<?, ?>>(Arrays.asList(pipelineBuild.getProject())));
+    }
+
+    /**
+     * @param pipelineBuild
+     *            pipeline build domain used to see the form
+     * @param context
+     *            item group pipeline view belongs to, used to compute relative item names
+     * @param parentPath
+     *            already traversed projects
+     */
+    private BuildForm(ItemGroup context, final PipelineBuild pipelineBuild, final Collection<AbstractProject<?, ?>> parentPath) {
         this.context = context;
         this.pipelineBuild = pipelineBuild;
         status = pipelineBuild.getCurrentBuildResult();
         dependencies = new ArrayList<BuildForm>();
         for (final PipelineBuild downstream : pipelineBuild.getDownstreamPipeline()) {
-            dependencies.add(new BuildForm(context, downstream));
+            final Collection<AbstractProject<?, ?>> forkedPath = new LinkedHashSet<AbstractProject<?, ?>>(parentPath);
+            if (forkedPath.add(downstream.getProject())) {
+                dependencies.add(new BuildForm(context, downstream, forkedPath));
+            }
         }
         id = hashCode();
         final AbstractProject<?, ?> project = pipelineBuild.getProject();
@@ -164,8 +182,6 @@ public class BuildForm {
         if (upstreamBuild != null) {
             final QueueEntry qentry = QueueUtil.getQueueEntry(upstreamBuild);
             if (qentry.getQueueId() == queueId) {
-                QueueUtil.removeQueueEntry(qentry);
-                LOGGER.info("Removed queue entry from map: " + qentry.toString());
                 updated = true;
             }
         }
@@ -189,8 +205,14 @@ public class BuildForm {
         return pipelineBuild.isManualTrigger();
     }
 
+
+    /**
+     * @return Map<String, String> the map with the parameters, enriched with a version parameter.
+     */
     public Map<String, String> getParameters() {
-        return pipelineBuild.getBuildParameters();
+        final Map<String, String> params = new HashMap<String, String>();
+        params.putAll(pipelineBuild.getBuildParameters());
+        return params;
     }
 
     public Map<String, String> getFilteredParameters() {
@@ -226,5 +248,4 @@ public class BuildForm {
         }
         return resultVars;
     }
-
 }

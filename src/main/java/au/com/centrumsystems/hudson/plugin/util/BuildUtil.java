@@ -31,10 +31,15 @@ import hudson.model.AbstractProject;
 import hudson.model.Cause;
 import hudson.model.Cause.UpstreamCause;
 import hudson.model.CauseAction;
+import hudson.model.FileParameterValue;
 import hudson.model.ParametersAction;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Provides helper methods for #hudson.model.AbstractBuild
@@ -56,6 +61,11 @@ public final class BuildUtil {
     public static AbstractBuild<?, ?> getDownstreamBuild(final AbstractProject<?, ?> downstreamProject,
             final AbstractBuild<?, ?> upstreamBuild) {
         if ((downstreamProject != null) && (upstreamBuild != null)) {
+            // First, test the queue for any builds under way
+            final QueueEntry qentry = QueueUtil.getQueueEntry(upstreamBuild);
+            if (qentry != null) {
+                return null;
+            }
             @SuppressWarnings("unchecked")
             final List<AbstractBuild<?, ?>> downstreamBuilds = (List<AbstractBuild<?, ?>>) downstreamProject.getBuilds();
             for (final AbstractBuild<?, ?> innerBuild : downstreamBuilds) {

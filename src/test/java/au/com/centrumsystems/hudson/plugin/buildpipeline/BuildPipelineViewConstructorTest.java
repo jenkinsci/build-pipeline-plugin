@@ -24,11 +24,11 @@ public class BuildPipelineViewConstructorTest {
     @Test
     public void testAlwaysAllowManualTrigger() throws IOException {
         // True
-        BuildPipelineView testView = new BuildPipelineView(bpViewName, bpViewTitle, gridBuilder, noOfBuilds, true, true, false, false, false, 2, null, null, false);
+        BuildPipelineView testView = new BuildPipelineView(bpViewName, bpViewTitle, gridBuilder, noOfBuilds, true, true, false, false, false, 2, null, null);
         assertTrue(testView.isAlwaysAllowManualTrigger());
 
         // False
-        testView = new BuildPipelineView(bpViewName, bpViewTitle, nullGridBuilder, noOfBuilds, true, false, false, false, false, 2, null, null, false);
+        testView = new BuildPipelineView(bpViewName, bpViewTitle, nullGridBuilder, noOfBuilds, true, false, false, false, false, 2, null, null);
         assertFalse(testView.isAlwaysAllowManualTrigger());
     }
 
@@ -36,11 +36,11 @@ public class BuildPipelineViewConstructorTest {
     public void testShowPipelineParameters() throws IOException {
 
         // True
-        BuildPipelineView testView = new BuildPipelineView(bpViewName, bpViewTitle, gridBuilder, noOfBuilds, true, false, true, false, false, 2, null, null, false);
+        BuildPipelineView testView = new BuildPipelineView(bpViewName, bpViewTitle, gridBuilder, noOfBuilds, true, false, true, false, false, 2, null, null);
         assertTrue(testView.isShowPipelineParameters());
 
         // False
-        testView = new BuildPipelineView(bpViewName, bpViewTitle, nullGridBuilder, noOfBuilds, true, false, false, false, false, 2, null, null, false);
+        testView = new BuildPipelineView(bpViewName, bpViewTitle, nullGridBuilder, noOfBuilds, true, false, false, false, false, 2, null, null);
         assertFalse(testView.isShowPipelineParameters());
     }
 
@@ -48,11 +48,11 @@ public class BuildPipelineViewConstructorTest {
     public void testShowPipelineParametersInHeaders() throws IOException {
 
         // True
-        BuildPipelineView testView = new BuildPipelineView(bpViewName, bpViewTitle, gridBuilder, noOfBuilds, true, false, true, true, false, 2, null, null, false);
+        BuildPipelineView testView = new BuildPipelineView(bpViewName, bpViewTitle, gridBuilder, noOfBuilds, true, false, true, true, false, 2, null, null);
         assertTrue(testView.isShowPipelineParametersInHeaders());
 
         // False
-        testView = new BuildPipelineView(bpViewName, bpViewTitle, nullGridBuilder, noOfBuilds, true, false, false, false, false, 2, null, null, false);
+        testView = new BuildPipelineView(bpViewName, bpViewTitle, nullGridBuilder, noOfBuilds, true, false, false, false, false, 2, null, null);
         assertFalse(testView.isShowPipelineParametersInHeaders());
     }
 
@@ -60,21 +60,9 @@ public class BuildPipelineViewConstructorTest {
     public void testRefreshFrequency() throws IOException {
 
         // False
-        final BuildPipelineView testView = new BuildPipelineView(bpViewName, bpViewTitle, nullGridBuilder, noOfBuilds, true, false, false, false, false, 2, null, null, false);
+        final BuildPipelineView testView = new BuildPipelineView(bpViewName, bpViewTitle, nullGridBuilder, noOfBuilds, true, false, false, false, false, 2, null, null);
         assertThat(testView.getRefreshFrequency(), is(2));
         assertThat(testView.getRefreshFrequencyInMillis(), is(2000));
-    }
-    
-    @Test
-    public void testStartsWithParameters() throws IOException {
-
-        // True
-        BuildPipelineView testView = new BuildPipelineView(bpViewName, bpViewTitle, gridBuilder, noOfBuilds, true, false, true, false, false, 2, null, null, true);
-        assertTrue(testView.isStartsWithParameters());
-
-        // False
-        testView = new BuildPipelineView(bpViewName, bpViewTitle, nullGridBuilder, noOfBuilds, true, false, false, false, false, 2, null, null, false);
-        assertFalse(testView.isStartsWithParameters());
     }
     
     /**
@@ -83,8 +71,8 @@ public class BuildPipelineViewConstructorTest {
      */
     static class BuildPipelineViewFactory {
         public static BuildPipelineView getBuildPipelineView(final String bpViewName, final String bpViewTitle, final ProjectGridBuilder gridBuilder,
-                final String noOfBuilds, final boolean triggerOnlyLatestJob, final boolean startsWithParameters) {
-            return new BuildPipelineView(bpViewName, bpViewTitle, gridBuilder, noOfBuilds, triggerOnlyLatestJob, null, startsWithParameters) {
+                final String noOfBuilds, final boolean triggerOnlyLatestJob) {
+            return new BuildPipelineView(bpViewName, bpViewTitle, gridBuilder, noOfBuilds, triggerOnlyLatestJob, null) {
 
                 @Override
                 public ItemGroup<? extends TopLevelItem> getOwnerItemGroup() {

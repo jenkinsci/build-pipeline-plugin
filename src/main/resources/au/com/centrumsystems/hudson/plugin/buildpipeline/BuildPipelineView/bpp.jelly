@@ -125,7 +125,7 @@
 						{{#if build.isSuccess}}
 							{{#if ${!from.triggerOnlyLatestJob}}}
 							<j:if test="${from.hasBuildPermission()}">
-							<span class="pointer trigger" onclick="buildPipeline.showSpinner({{id}}); buildPipeline.rerunBuild({{id}}, '{{build.extId}}', [{{build.dependencyIds}}])">
+							<span class="pointer trigger" onclick="buildPipeline.showSpinner({{id}}); buildPipeline.rerunBuild({{id}}, {{build.number}}, '{{upstream.projectName}}', {{upstream.buildNumber}}, '{{project.name}}', [{{build.dependencyIds}}])">
 								<img title="re-run" alt="re-run" src="${rootURL}/images/16x16/redo.png" />
 							</span>
 							</j:if>
@@ -134,7 +134,7 @@
 							{{#if ${from.triggerOnlyLatestJob}}}
 								{{#if build.isLatestBuild}}
 									{{#if build.isUpstreamBuildLatest}}
-									<span class="pointer trigger" onclick="buildPipeline.showSpinner({{id}}); buildPipeline.rerunBuild({{id}}, '{{build.extId}}', [{{build.dependencyIds}}])">
+									<span class="pointer trigger" onclick="buildPipeline.showSpinner({{id}}); buildPipeline.rerunBuild({{id}}, {{build.number}}, '{{upstream.projectName}}', {{upstream.buildNumber}}, '{{project.name}}', [{{build.dependencyIds}}])">
 										<img title="retry" alt="retry" src="${rootURL}/images/16x16/redo.png" />
 									</span>
 									{{/if}}
@@ -226,7 +226,7 @@
 		background: url("${rootURL}/images/16x16/clock.png") no-repeat center center !important;
 	}
 	</style>
-  <form method="post" action="gridBuilder/build" id="triggerPipelineForm" />
+    <form method="post" action="gridBuilder/build" id="triggerPipelineForm" class="no-json"/>
 	<form method="post" name="pipelineViewForm" action="manualExecution" id="manualExecutionForm">
 
 		<input name="upstreamProjectName" id="upstreamProjectName" type="hidden" />
@@ -249,17 +249,15 @@
         <j:set var="hasBuildPermission" type="boolean" value="${from.hasBuildPermission()}" />
         <j:if test="${hasBuildPermission}">
           <div class="icon-container">
-		  <j:if test="${from.startsWithParameters}">
-			<div onclick="buildPipeline.fillDialog('${rootURL}/job/${from.gridBuilder.firstJob}/build?delay=0sec', 'Starts the pipeline with parameters')" class="pointer">
+		  <j:if test="${from.isProjectParameterized()}">
+			<span class="pointer" onclick="buildPipeline.fillDialog('${rootURL}/job/${from.gridBuilder.firstJob}/build?delay=0sec', 'Starts the pipeline with parameters')">
                 <img src="${rootURL}/images/24x24/clock.png" alt="Trigger a Pipeline" class="icon-with-caption"/>
-            </div>
+            </span>
 		  </j:if>
-		  <j:if test="${!from.startsWithParameters}">
-            <div>
-              <a id="trigger-pipeline-button" href='#' onclick="$('triggerPipelineForm').submit()">
-                <img src="${rootURL}/images/24x24/clock.png" alt="Trigger a Pipeline" class="icon-with-caption"/>
-              </a>
-            </div>
+		  <j:if test="${!from.isProjectParameterized()}">
+            <a id="trigger-pipeline-button" href='#' onclick="$('triggerPipelineForm').submit()">
+              <img src="${rootURL}/images/24x24/clock.png" alt="Trigger a Pipeline" class="icon-with-caption"/>
+            </a>
    		  </j:if>
             <div>Run</div>
           </div>

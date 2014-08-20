@@ -136,7 +136,7 @@ public class BuildPipelineDashboard extends DashboardPortlet {
 
     public BuildPipelineView getBuildPipelineView() {
         return new ReadOnlyBuildPipelineView(getDisplayName(), getDescription(), getGridBuilder(),
-                getNoOfDisplayedBuilds(), false, getCssUrl(), false);
+                getNoOfDisplayedBuilds(), false, getCssUrl());
     }
 
     /**

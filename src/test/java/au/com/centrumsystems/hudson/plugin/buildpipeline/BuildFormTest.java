@@ -1,6 +1,7 @@
 package au.com.centrumsystems.hudson.plugin.buildpipeline;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
@@ -66,5 +67,20 @@ public class BuildFormTest extends HudsonTestCase {
         final BuildForm bf = new BuildForm(jenkins, pb);
 
         assertEquals(paramList, bf.getParameterList());
+    }
+
+    @Test
+    public void testNoInfiniteRecursion() throws Exception {
+        final String proj1 = "Project1";
+        final String proj2 = "Project2";
+        final FreeStyleProject project1 = createFreeStyleProject(proj1);
+        final FreeStyleProject project2 = createFreeStyleProject(proj2);
+        project1.getPublishersList().add(new BuildTrigger(proj2, false));
+        project2.getPublishersList().add(new BuildTrigger(proj1, false));
+        hudson.rebuildDependencyGraph();
+
+        final BuildForm form1 = new BuildForm(jenkins, new PipelineBuild(null, project1, null));
+        assertThat(form1.getDependencies(), hasSize(1));
+        assertThat(form1.getDependencies().get(0).getDependencies(), hasSize(0));
     }
 }

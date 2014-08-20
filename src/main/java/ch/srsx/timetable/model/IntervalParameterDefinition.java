@@ -125,27 +125,6 @@ public class IntervalParameterDefinition extends ParameterDefinition {
 
     @Override
     public ParameterValue createValue(StaplerRequest req) {
-        // TODO Auto-generated method stub
-        // FileItem src;
-        // try {
-        // src = req.getFileItem( getName() );
-        // } catch (ServletException e) {
-        // // Not sure what to do here. We might want to raise this
-        // // but that would involve changing the throws for this call
-        // return null;
-        // } catch (IOException e) {
-        // // ditto above
-        // return null;
-        // }
-        // if ( src == null ) {
-        // // the requested file parameter wasn't uploaded
-        // return null;
-        // }
-        // FileParameterValue p = new FileParameterValue(getName(), src,
-        // getFileName(src.getName()));
-        // p.setDescription(getDescription());
-        // p.setLocation(getName());
-        // return p;
         return null;
     }
 

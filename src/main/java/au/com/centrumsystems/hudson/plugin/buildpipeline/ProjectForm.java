@@ -6,7 +6,10 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -17,9 +20,9 @@ import org.kohsuke.stapler.bind.JavaScriptMethod;
 
 /**
  * @author Centrum Systems
- *
+ * 
  *         Representation of a set of projects
- *
+ * 
  */
 public class ProjectForm {
     /**
@@ -56,6 +59,11 @@ public class ProjectForm {
      * the parameters used in the last successful build
      */
     private Map<String, String> lastSuccessfulBuildParams;
+
+    /**
+     * Whether last successful build is already handled
+     */
+    private boolean lastSuccessfulHandled;
 
     /**
      * keep reference to the project so that we can update it
@@ -99,18 +107,20 @@ public class ProjectForm {
      *            project
      */
     public ProjectForm(final AbstractProject<?, ?> project) {
-        this(project, null);
+        this(project, new LinkedHashSet<AbstractProject<?, ?>>(Arrays.asList(project)), project);
     }
 
     /**
      * @param project
      *            - the project to wrap
+     * @param parentPath
+     *            already traversed projects
      * @param firstProject
      *            - the first project associated with the grid for this
      *            projectform
      */
-    public ProjectForm(final AbstractProject<?, ?> project, final AbstractProject<?, ?> firstProject) {
-
+    public ProjectForm(final AbstractProject<?, ?> project, final Collection<AbstractProject<?, ?>> parentPath,
+            final AbstractProject<?, ?> firstProject) {
         final PipelineBuild pipelineBuild = new PipelineBuild(project.getLastBuild(), project, null);
 
         name = pipelineBuild.getProject().getFullName();
@@ -119,16 +129,23 @@ public class ProjectForm {
         url = pipelineBuild.getProjectURL();
         dependencies = new ArrayList<ProjectForm>();
         for (final AbstractProject<?, ?> dependency : project.getDownstreamProjects()) {
-            dependencies.add(new ProjectForm(dependency, firstProject));
+            final Collection<AbstractProject<?, ?>> forkedPath = new LinkedHashSet<AbstractProject<?, ?>>(parentPath);
+            if (forkedPath.add(dependency)) {
+                dependencies.add(new ProjectForm(dependency, forkedPath, firstProject));
+            }
         }
         if (Jenkins.getInstance().getPlugin("parameterized-trigger") != null) {
             for (SubProjectsAction action : Util.filter(project.getActions(), SubProjectsAction.class)) {
                 for (hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig config : action.getConfigs()) {
                     for (final AbstractProject<?, ?> dependency : config.getProjectList(project.getParent(), null)) {
-                        final ProjectForm candidate = new ProjectForm(dependency, firstProject);
-                        // if subprojects come back as downstreams someday, no duplicates wanted
-                        if (!dependencies.contains(candidate)) {
-                            dependencies.add(candidate);
+                        final Collection<AbstractProject<?, ?>> forkedPath = new LinkedHashSet<AbstractProject<?, ?>>(parentPath);
+                        if (forkedPath.add(dependency)) {
+                            final ProjectForm candidate = new ProjectForm(dependency, forkedPath, firstProject);
+                            // if subprojects come back as downstreams someday,
+                            // no duplicates wanted
+                            if (!dependencies.contains(candidate)) {
+                                dependencies.add(candidate);
+                            }
                         }
                     }
                 }
@@ -151,12 +168,12 @@ public class ProjectForm {
      * therefore save it as such.
      * 
      * @param p
-     *      project to be wrapped.
+     *            project to be wrapped.
      * @return
-     *      possibly null.
+     *         possibly null.
      */
     public static ProjectForm as(AbstractProject<?, ?> p) {
-        return p != null ? new ProjectForm(p, p) : null;
+        return p != null ? new ProjectForm(p) : null;
     }
 
     public String getName() {
@@ -204,18 +221,30 @@ public class ProjectForm {
         return lastSuccessfulBuildParams;
     }
 
+    public boolean isLastSuccessfulHandled() {
+        return lastSuccessfulHandled;
+    }
+
+    public void setLastSuccessfulHandled(boolean lastSuccessfulHandled) {
+        this.lastSuccessfulHandled = lastSuccessfulHandled;
+    }
+
     public List<ProjectForm> getDependencies() {
         return dependencies;
     }
 
     /**
-     * Gets a display value to determine whether a manual jobs 'trigger' button will be shown. This is used along with
-     * isTriggerOnlyLatestJob property allow only the latest version of a job to run.
-     *
-     * Works by: Initially always defaulted to true. If isTriggerOnlyLatestJob is set to true then as the html code is rendered the first
-     * job which should show the trigger button will render and then a call will be made to 'setDisplayTrigger' to change the value to both
+     * Gets a display value to determine whether a manual jobs 'trigger' button
+     * will be shown. This is used along with
+     * isTriggerOnlyLatestJob property allow only the latest version of a job to
+     * run.
+     * 
+     * Works by: Initially always defaulted to true. If isTriggerOnlyLatestJob
+     * is set to true then as the html code is rendered the first
+     * job which should show the trigger button will render and then a call will
+     * be made to 'setDisplayTrigger' to change the value to both
      * so all future jobs will not display the trigger. see main.jelly
-     *
+     * 
      * @return boolean whether to display or not
      */
     public Boolean getDisplayTrigger() {
@@ -223,15 +252,20 @@ public class ProjectForm {
     }
 
     /**
-     * Sets a display value to determine whether a manual jobs 'trigger' button will be shown. This is used along with
-     * isTriggerOnlyLatestJob property allow only the latest version of a job to run.
-     *
-     * Works by: Initially always defaulted to true. If isTriggerOnlyLatestJob is set to true then as the html code is rendered the first
-     * job which should show the trigger button will render and then a call will be made to 'setDisplayTrigger' to change the value to both
+     * Sets a display value to determine whether a manual jobs 'trigger' button
+     * will be shown. This is used along with
+     * isTriggerOnlyLatestJob property allow only the latest version of a job to
+     * run.
+     * 
+     * Works by: Initially always defaulted to true. If isTriggerOnlyLatestJob
+     * is set to true then as the html code is rendered the first
+     * job which should show the trigger button will render and then a call will
+     * be made to 'setDisplayTrigger' to change the value to both
      * so all future jobs will not display the trigger. see main.jelly
-     *
+     * 
      * @param display
-     *            - boolean to indicate whether the trigger button should be shown
+     *            - boolean to indicate whether the trigger button should be
+     *            shown
      */
     public void setDisplayTrigger(final Boolean display) {
         displayTrigger = display;
@@ -273,12 +307,12 @@ public class ProjectForm {
 
     /**
      * Project as JSON
-     *
+     * 
      * @return JSON string
      */
     @JavaScriptMethod
     public String asJSON() {
-        return ProjectJSONBuilder.asJSON(this); 
+        return ProjectJSONBuilder.asJSON(new ProjectForm(project));
     }
 
     /**
@@ -302,21 +336,24 @@ public class ProjectForm {
      *            - the build-grids present on this view
      */
     public void correctLastSuccessfulBuilds(Iterable<BuildGrid> buildGrids) {
-        AbstractBuild<?, ?> lastSuccessfulBuild = project.getLastSuccessfulBuild();
-
-        outer: while (lastSuccessfulBuild != null) {
-            // Search the buildGrid for the lastSuccessfulBuild given above
-            BuildForm buildForm = null;
-            for (BuildGrid buildGrid : buildGrids) {
-                buildForm = buildGrid.findBuildForm(lastSuccessfulBuild);
-                if (buildForm != null) {
-                    break outer;
+        if (!isLastSuccessfulHandled()) {
+            AbstractBuild<?, ?> lastSuccessfulBuild = project.getLastSuccessfulBuild();
+            // Determine whether the lastSuccessful Build belongs to this View
+            outer: while (lastSuccessfulBuild != null) {
+                // Search the buildGrid for the lastSuccessfulBuild given above
+                BuildForm buildForm = null;
+                for (BuildGrid buildGrid : buildGrids) {
+                    buildForm = buildGrid.findBuildForm(lastSuccessfulBuild);
+                    if (buildForm != null) {
+                        break outer;
+                    }
                 }
+                lastSuccessfulBuild = lastSuccessfulBuild.getPreviousSuccessfulBuild();
             }
-            lastSuccessfulBuild = lastSuccessfulBuild.getPreviousSuccessfulBuild();
+            // Set the (may be) newly found last successful build
+            handleLastSuccessfulBuild(lastSuccessfulBuild);
+            setLastSuccessfulHandled(true);
         }
-        // Set the (may be) newly found last successful build
-        handleLastSuccessfulBuild(lastSuccessfulBuild);
     }
 
     /**

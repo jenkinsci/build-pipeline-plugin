@@ -11,7 +11,7 @@ public class DownstreamProjectGridBuilderTest extends HudsonTestCase {
      */
     public void testConfigRoundtrip() throws Exception {
         DownstreamProjectGridBuilder gridBuilder = new DownstreamProjectGridBuilder("something");
-        BuildPipelineView v = new BuildPipelineView("foo","Title", gridBuilder, "5", true, null, false);
+        BuildPipelineView v = new BuildPipelineView("foo","Title", gridBuilder, "5", true, null);
         jenkins.addView(v);
         configRoundtrip(v);
         BuildPipelineView av = (BuildPipelineView)jenkins.getView(v.getViewName());

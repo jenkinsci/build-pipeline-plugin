@@ -30,6 +30,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.FreeStyleProject;
 import hudson.model.Queue.WaitingItem;
+import hudson.model.Result;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -260,7 +261,11 @@ public class PipelineBuild {
             if (build.isBuilding()) {
                 buildResult = HudsonResult.BUILDING.toString();
             } else {
-                buildResult = HudsonResult.values()[build.getResult().ordinal].toString();
+                final Result result = build.getResult();
+                if (result == null) {
+                    throw new IllegalStateException("Build with a null result after build has finished");
+                }
+                buildResult = HudsonResult.values()[result.ordinal].toString();
             }
         } else {
             // Otherwise determine its pending status
@@ -441,7 +446,7 @@ public class PipelineBuild {
             final String displayName = currentBuild.getDisplayName();
             if (displayName == null || displayName.trim().length() == 0) {
                 version = currentBuild.getNumber() > 0 ? String.valueOf(currentBuild.getNumber()) : Strings
-                        .getString("PipelineBuild.RevisionNotAvailable");
+                    .getString("PipelineBuild.RevisionNotAvailable");
             } else {
                 version = displayName;
             }
@@ -475,13 +480,15 @@ public class PipelineBuild {
      * @return is ready to be manually built.
      */
     public boolean isReadyToBeManuallyBuilt() {
-        return isManualTrigger() && this.currentBuild == null && (upstreamBuildSucceeded() || upstreamBuildUnstable())
+        return this.currentBuild == null && (upstreamBuildSucceeded() || upstreamBuildUnstable())
                 && hasBuildPermission() && (!"QUEUED".equals(getCurrentBuildResult()));
     }
 
     public boolean isRerunnable() {
         return !isReadyToBeManuallyBuilt() && !"PENDING".equals(getCurrentBuildResult()) && !"BUILDING".equals(getCurrentBuildResult())
-                && !"QUEUED".equals(getCurrentBuildResult()) && hasBuildPermission();
+                && !"QUEUED".equals(getCurrentBuildResult()) 
+                && hasBuildPermission() && getUpstreamPipelineBuild().getCurrentBuild() != null 
+                && QueueUtil.getQueueEntry(currentBuild) == null;
     }
 
     /**
@@ -503,12 +510,13 @@ public class PipelineBuild {
      * @return whether this is the latest build of this pipeline view
      */
     public boolean isLatestBuild() {
-        if (currentBuild == null || project.getLastBuild() == null) {
+        final AbstractBuild<?, ?> lastBuild = project.getLastBuild();
+        if (currentBuild == null || lastBuild == null) {
             return false;
         }
         // now check for last build on this pipeline view
         // how do we find out, if the last build is run on this view?
-        return currentBuild.getNumber() == project.getLastBuild().getNumber();
+        return currentBuild.getNumber() == lastBuild.getNumber();
     }
 
     /**
@@ -516,11 +524,18 @@ public class PipelineBuild {
      * @return whether the upstream build is the latest for this pipeline view
      */
     public boolean isUpstreamBuildLatest() {
-        if (upstreamBuild == null || getUpstreamPipelineBuild() == null || getUpstreamPipelineBuild().getProject() == null
-                || getUpstreamPipelineBuild().getProject().getLastBuild() == null) {
+        if (upstreamBuild == null || getUpstreamPipelineBuild() == null) {
             return false;
         }
-        return upstreamBuild.getNumber() == getUpstreamPipelineBuild().getProject().getLastBuild().getNumber();
+        final AbstractProject<?, ?> upstreamPBProject = getUpstreamPipelineBuild().getProject();
+        if (upstreamPBProject == null || upstreamPBProject.getLastBuild() == null) {
+            return false;
+        }
+        final AbstractBuild<?, ?> lastBuild = upstreamPBProject.getLastBuild();
+        if (lastBuild == null) {
+            return false;
+        }
+        return upstreamBuild.getNumber() == lastBuild.getNumber();
     }
 
     /**

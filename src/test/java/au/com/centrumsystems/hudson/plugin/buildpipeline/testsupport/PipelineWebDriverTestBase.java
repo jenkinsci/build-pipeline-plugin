@@ -31,7 +31,7 @@ public class PipelineWebDriverTestBase {
     public void initSharedComponents() throws Exception {
         realm = jr.createDummySecurityRealm();
         jr.jenkins.setSecurityRealm(realm);
-        pipelineView = new BuildPipelineView("pipeline", "Pipeline", new DownstreamProjectGridBuilder(INITIAL_JOB), "5", false, true, false, false, false, 1, null, null, false);
+        pipelineView = new BuildPipelineView("pipeline", "Pipeline", new DownstreamProjectGridBuilder(INITIAL_JOB), "5", false, true, false, false, false, 1, null, null);
         jr.jenkins.addView(pipelineView);
 
         initialJob = jr.createFreeStyleProject(INITIAL_JOB);

@@ -36,12 +36,10 @@ public class ReadOnlyBuildPipelineView extends BuildPipelineView {
      *            is trigger only latest job?
      * @param cssUrl
      *            URL for the custom CSS file.
-     * @param startsWithParameters
-     *            indicates if the first job in the view takes parameters
      */
     public ReadOnlyBuildPipelineView(final String displayName, final String description, final ProjectGridBuilder gridBuilder,
-            final String noOfDisplayedBuilds, final boolean triggerOnlyLatestJob, final String cssUrl, final boolean startsWithParameters) {
-        super(displayName, displayName, gridBuilder, noOfDisplayedBuilds, triggerOnlyLatestJob, cssUrl, startsWithParameters);
+            final String noOfDisplayedBuilds, final boolean triggerOnlyLatestJob, final String cssUrl) {
+        super(displayName, displayName, gridBuilder, noOfDisplayedBuilds, triggerOnlyLatestJob, cssUrl);
         // this is ugly, but there is no other way to set the description of the view
         super.description = description;
     }

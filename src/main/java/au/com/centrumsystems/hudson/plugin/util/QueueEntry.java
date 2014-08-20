@@ -1,6 +1,7 @@
 package au.com.centrumsystems.hudson.plugin.util;
 
 import hudson.model.AbstractBuild;
+
 /**
  * Utility Class to capture a link from a build form to a queue item.
  * @author rhirt
@@ -36,6 +37,14 @@ public class QueueEntry {
      */
     public QueueEntry(String upstreamProjectName, String upstreamExtId) {
         this(upstreamProjectName, upstreamExtId, 0);
+    }
+    /**
+     * Construct from projectName and externalizable id of upstreamBuild
+     * @param upstreamProjectName - the project name of the build upstream
+     * @param upstreamBuildId - the build number of the build upstream
+     */
+    public QueueEntry(String upstreamProjectName, int upstreamBuildId) {
+        this(upstreamProjectName, upstreamProjectName + "#" + upstreamBuildId, 0);
     }
     /**
      * Construct from projectName and externalizable id of upstreamBuild, add a queueId

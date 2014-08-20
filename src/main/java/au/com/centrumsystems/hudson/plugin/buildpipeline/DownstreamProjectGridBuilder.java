@@ -10,12 +10,6 @@ import hudson.util.AdaptedIterator;
 import hudson.util.HttpResponses;
 import hudson.util.ListBoxModel;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Iterator;
-
-import javax.servlet.ServletException;
-
 import jenkins.model.Jenkins;
 import jenkins.util.TimeDuration;
 
@@ -25,6 +19,14 @@ import org.kohsuke.stapler.HttpResponse;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.interceptor.RequirePOST;
+
+import javax.servlet.ServletException;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Iterator;
+
+import org.acegisecurity.AccessDeniedException;
 
 /**
  * {@link ProjectGridBuilder} based on the upstream/downstream relationship.
@@ -62,7 +64,7 @@ public class DownstreamProjectGridBuilder extends ProjectGridBuilder {
         /**
          * @param context
          *            item group pipeline view belongs to, used to compute relative item names
-         * @param start The first project to lead the pipeline.        
+         * @param start The first project to lead the pipeline.
          */
         private GridImpl(ItemGroup context, AbstractProject<?, ?> start) {
             this.context = context;
@@ -161,7 +163,11 @@ public class DownstreamProjectGridBuilder extends ProjectGridBuilder {
      * @return possibly null
      */
     public AbstractProject<?, ?> getFirstJob(BuildPipelineView owner) {
-        return Jenkins.getInstance().getItem(firstJob, owner.getOwnerItemGroup(), AbstractProject.class);
+        try {
+            return Jenkins.getInstance().getItem(firstJob, owner.getOwnerItemGroup(), AbstractProject.class);
+        } catch (final AccessDeniedException ex) {
+            return null;
+        }
     }
 
     @Override
@@ -169,7 +175,7 @@ public class DownstreamProjectGridBuilder extends ProjectGridBuilder {
         final AbstractProject<?, ?> job = getFirstJob(owner);
         return job != null && job.hasPermission(Item.BUILD);
     }
-    
+
     @Override
     public boolean startsWithParameters(BuildPipelineView owner) {
         final AbstractProject<?, ?> firstJob = this.getFirstJob(owner);

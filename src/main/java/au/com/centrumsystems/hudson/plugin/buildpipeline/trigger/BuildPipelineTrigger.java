@@ -26,12 +26,12 @@ package au.com.centrumsystems.hudson.plugin.buildpipeline.trigger;
 
 import hudson.Extension;
 import hudson.Launcher;
-import hudson.Util;
 import hudson.PluginWrapper;
+import hudson.Util;
 import hudson.model.BuildListener;
+import hudson.model.DependecyDeclarer;
 import hudson.model.DependencyGraph;
 import hudson.model.Item;
-import hudson.model.ItemGroup;
 import hudson.model.Items;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
@@ -53,14 +53,12 @@ import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import jenkins.model.DependencyDeclarer;
-import jenkins.model.Jenkins;
-
-import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
 import au.com.centrumsystems.hudson.plugin.buildpipeline.Strings;
+import jenkins.model.Jenkins;
+import org.kohsuke.stapler.AncestorInPath;
 
 /**
  * The build pipeline trigger allows the creation of downstream jobs which aren't triggered automatically. This allows us to have manual
@@ -293,10 +291,10 @@ public class BuildPipelineTrigger extends Notifier implements DependecyDeclarer 
          * Validates that the downstream project names entered are valid projects.
          *
          * @param value   - The entered project names
-         * @param context - the context
+         * @param project - the containing project
          * @return hudson.util.FormValidation
          */
-        public FormValidation doCheckDownstreamProjectNames(@AncestorInPath ItemGroup<?> context,
+        public FormValidation doCheckDownstreamProjectNames(@AncestorInPath AbstractProject project,
                                                             @QueryParameter("downstreamProjectNames") final String value) {
             final StringTokenizer tokens = new StringTokenizer(Util.fixNull(value), ","); //$NON-NLS-1$
             boolean some = false;
@@ -306,10 +304,10 @@ public class BuildPipelineTrigger extends Notifier implements DependecyDeclarer 
                     continue;
                 }
                 some = true;
-                final Item item = Jenkins.getInstance().getItem(projectName, context, Item.class);
+                final Item item = Jenkins.getInstance().getItem(projectName, project, Item.class);
                 if (item == null) {
                     return FormValidation.error(Messages.BuildTrigger_NoSuchProject(projectName,
-                            AbstractProject.findNearest(projectName, context).getRelativeNameFrom(context)));
+                            AbstractProject.findNearest(projectName, project.getParent()).getRelativeNameFrom(project)));
                 }
                 if (!(item instanceof AbstractProject)) {
                     return FormValidation.error(Messages.BuildTrigger_NotBuildable(projectName));

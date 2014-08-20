@@ -91,7 +91,7 @@
 /*************************** build card *******************************/
 .rounded {
     height: 70px;
-	width: 141px !important;
+	width: 141px;
     -webkit-opacity: 0.9;
     opacity: 0.9;
 
@@ -155,6 +155,11 @@
 	background: url("../images/user-small.png") no-repeat left center;
 	padding-left: 14px;
 	width: 102px;
+}
+
+.build-card {
+    float: left;
+    width: 100%;
 }
 
 .build-card .build-body {
@@ -333,7 +338,6 @@ tr.spacerRow td {
 }
 
 .PROJECT .header-name div.header-wrapper {
-	width: 141px;
 	text-align: left;
 }
 
