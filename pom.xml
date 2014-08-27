@@ -95,7 +95,7 @@
 			<!-- only necessary if Hamcrest matchers are used -->
 			<groupId>org.hamcrest</groupId>
 			<artifactId>hamcrest-core</artifactId>
-			<version>1.3</version>
+			<version>1.2</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -231,7 +231,6 @@
 				<version>2.7.1</version>
 				<!--$NO-MVN-MAN-VER$ -->
 				<configuration>
-					<targetJdk>1.6</targetJdk>
 					<rulesets>
 						<ruleset>${pmd.config.file}</ruleset>
 					</rulesets>
@@ -258,7 +257,6 @@
 					<threshold>Medium</threshold>
 					<xmlOutput>true</xmlOutput>
 					<excludeFilterFile>findbugs-exclude.xml</excludeFilterFile>
-					<skip>false</skip>
 				</configuration>
 				<executions>
 					<execution>
