@@ -81,7 +81,6 @@ BuildPipeline.prototype = {
 		buildPipeline.viewProxy.triggerManualBuild(upstreamBuildNumber, triggerProjectName, upstreamProjectName, function(data){
 			buildPipeline.updateNextBuildAndShowProgress(id, data.responseObject(), dependencyIds);
 		});
-		buildPipeline.showProgress(id, {});
 	},
 	cancelQueued : function(id, queueId) {
 		var buildPipeline = this;
@@ -106,7 +105,6 @@ BuildPipeline.prototype = {
 		buildPipeline.viewProxy.rerunBuild(buildNumber, upstreamBuildNumber, triggerProjectName, upstreamProjectName, function(data){
 			buildPipeline.updateNextBuildAndShowProgress(id, data.responseObject(), dependencyIds);
 		});
-		buildPipeline.showProgress(id, {});
 	},
 	showSpinner : function(id){
 		jQuery("#status-bar-" + id).html('<table class="progress-bar" align="center"><tbody><tr class="unknown"><td></td></tr></tbody></table>');
