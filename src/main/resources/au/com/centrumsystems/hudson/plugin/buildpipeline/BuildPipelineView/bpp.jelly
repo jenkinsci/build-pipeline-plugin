@@ -248,17 +248,17 @@
 				<!-- If the user has the Build Project permission include a hyperlink to build the base project.-->
         <j:set var="hasBuildPermission" type="boolean" value="${from.hasBuildPermission()}" />
         <j:if test="${hasBuildPermission}">
-			<div class="icon-container">
-			<j:if test="${from.isProjectParameterized()}">
-				<span class="pointer" onclick="buildPipeline.fillDialog('${rootURL}/job/${from.gridBuilder.firstJob}/build?delay=0sec', 'Starts the pipeline with parameters')">
-					<img src="${rootURL}/images/24x24/clock.png" alt="Trigger a Pipeline" class="icon-with-caption"/>
-				</span>
-			</j:if>
-			<j:if test="${!from.isProjectParameterized()}">
-			  <a id="trigger-pipeline-button" href='#' onclick="$('triggerPipelineForm').submit()">
-				<img src="${rootURL}/images/24x24/clock.png" alt="Trigger a Pipeline" class="icon-with-caption"/>
-			  </a>
-			</j:if>
+          <div class="icon-container">
+		  <j:if test="${from.isProjectParameterized()}">
+			<span class="pointer" onclick="buildPipeline.fillDialog('${rootURL}/job/${from.gridBuilder.firstJob}/build?delay=0sec', 'Starts the pipeline with parameters')">
+                <img src="${rootURL}/images/24x24/clock.png" alt="Trigger a Pipeline" class="icon-with-caption"/>
+            </span>
+		  </j:if>
+		  <j:if test="${!from.isProjectParameterized()}">
+            <a id="trigger-pipeline-button" href='#' onclick="$('triggerPipelineForm').submit()">
+              <img src="${rootURL}/images/24x24/clock.png" alt="Trigger a Pipeline" class="icon-with-caption"/>
+            </a>
+   		  </j:if>
             <div>Run</div>
           </div>
           <j:if test="${from.m2Release}">

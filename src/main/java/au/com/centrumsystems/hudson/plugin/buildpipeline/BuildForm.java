@@ -205,14 +205,20 @@ public class BuildForm {
         return pipelineBuild.isManualTrigger();
     }
 
+
+    /**
+     * @return Map<String, String> the map with the parameters, enriched with a version parameter.
+     */
     public Map<String, String> getParameters() {
-        return pipelineBuild.getBuildParameters();
+        final Map<String, String> params = new HashMap<String, String>();
+        params.putAll(pipelineBuild.getBuildParameters());
+        return params;
     }
 
     public Map<String, String> getFilteredParameters() {
         return filterSensitiveBuildVariables(pipelineBuild.getCurrentBuild());
     }
-    
+
     public ArrayList<String> getParameterList() {
         return parameters;
     }

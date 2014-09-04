@@ -4,7 +4,6 @@ import au.com.centrumsystems.hudson.plugin.util.BuildUtil;
 import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import jenkins.model.Jenkins;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,7 +13,9 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
+import jenkins.model.Jenkins;
 import hudson.plugins.parameterizedtrigger.SubProjectsAction;
+
 import org.kohsuke.stapler.bind.JavaScriptMethod;
 
 /**
@@ -140,7 +141,8 @@ public class ProjectForm {
                         final Collection<AbstractProject<?, ?>> forkedPath = new LinkedHashSet<AbstractProject<?, ?>>(parentPath);
                         if (forkedPath.add(dependency)) {
                             final ProjectForm candidate = new ProjectForm(dependency, forkedPath, firstProject);
-                            // if subprojects come back as downstreams someday, no duplicates wanted
+                            // if subprojects come back as downstreams someday,
+                            // no duplicates wanted
                             if (!dependencies.contains(candidate)) {
                                 dependencies.add(candidate);
                             }
@@ -166,9 +168,9 @@ public class ProjectForm {
      * therefore save it as such.
      * 
      * @param p
-     *      project to be wrapped.
+     *            project to be wrapped.
      * @return
-     *      possibly null.
+     *         possibly null.
      */
     public static ProjectForm as(AbstractProject<?, ?> p) {
         return p != null ? new ProjectForm(p) : null;
@@ -242,7 +244,7 @@ public class ProjectForm {
      * job which should show the trigger button will render and then a call will
      * be made to 'setDisplayTrigger' to change the value to both
      * so all future jobs will not display the trigger. see main.jelly
-     *
+     * 
      * @return boolean whether to display or not
      */
     public Boolean getDisplayTrigger() {
@@ -260,9 +262,10 @@ public class ProjectForm {
      * job which should show the trigger button will render and then a call will
      * be made to 'setDisplayTrigger' to change the value to both
      * so all future jobs will not display the trigger. see main.jelly
-     *
+     * 
      * @param display
-     *            - boolean to indicate whether the trigger button should be shown
+     *            - boolean to indicate whether the trigger button should be
+     *            shown
      */
     public void setDisplayTrigger(final Boolean display) {
         displayTrigger = display;
@@ -304,7 +307,7 @@ public class ProjectForm {
 
     /**
      * Project as JSON
-     *
+     * 
      * @return JSON string
      */
     @JavaScriptMethod
