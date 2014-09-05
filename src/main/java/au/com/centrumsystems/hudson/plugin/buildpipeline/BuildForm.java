@@ -8,12 +8,18 @@ import hudson.model.ParametersDefinitionProperty;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 import org.kohsuke.stapler.bind.JavaScriptMethod;
+
+import au.com.centrumsystems.hudson.plugin.util.QueueEntry;
+import au.com.centrumsystems.hudson.plugin.util.QueueUtil;
 
 /**
  * @author Centrum Systems
@@ -150,6 +156,34 @@ public class BuildForm {
         if (newBuild != null) {
             updated = true;
             pipelineBuild = new PipelineBuild(newBuild, newBuild.getProject(), pipelineBuild.getUpstreamBuild());
+        } else {
+            // try to see if the build went into queueing by searching for the queue-item from the upstream-build
+            final AbstractBuild<?, ?> upstreamBuild = pipelineBuild.getUpstreamBuild();
+            if (upstreamBuild != null) {
+                final QueueEntry qentry = QueueUtil.getQueueEntry(upstreamBuild);
+                if (QueueUtil.getQueuedItem(pipelineBuild.getProject(), qentry) != null) {
+                    updated = true;
+                }
+            }
+        }
+        return updated;
+    }
+
+    /**
+     * 
+     * @param queueId the id of the queue-item that was cancelled
+     * 
+     * @return is the queued item cancelled.
+     */
+    @JavaScriptMethod
+    public boolean cancelQueued(final int queueId) {
+        boolean updated = false;
+        final AbstractBuild<?, ?> upstreamBuild = pipelineBuild.getUpstreamBuild();
+        if (upstreamBuild != null) {
+            final QueueEntry qentry = QueueUtil.getQueueEntry(upstreamBuild);
+            if (qentry.getQueueId() == queueId) {
+                updated = true;
+            }
         }
         return updated;
     }
@@ -162,6 +196,10 @@ public class BuildForm {
         return pipelineBuild.getPipelineVersion();
     }
 
+    public String getFullBuildName() {
+        return pipelineBuild.getProject().getDisplayName() + " #" + pipelineBuild.getCurrentBuildNumber();
+    }
+    
     @JavaScriptMethod
     public boolean isManualTrigger() {
         return pipelineBuild.isManualTrigger();
@@ -175,8 +213,33 @@ public class BuildForm {
         return parameters;
     }
 
+    public Map<String, String> getFilteredParameters() {
+        return filterSensitiveBuildVariables(pipelineBuild.getCurrentBuild());
+    }
+
     public Integer getProjectId() {
         return projectId;
     }
 
+    /**
+     * Filter last successful build variables with sensitive information.
+     * 
+     * @param build
+     *            the Build object to get the Variables from
+     * 
+     * @return Map<String, String> the vars, pixeled out sensitive information
+     */
+    private Map<String, String> filterSensitiveBuildVariables(AbstractBuild<?, ?> build) {
+        final Map<String, String> allVars = build.getBuildVariables();
+        final Set<String> sensitives = build.getSensitiveBuildVariables();
+        final HashMap<String, String> resultVars = new HashMap<String, String>();
+        for (Entry<String, String> item : allVars.entrySet()) {
+            if (sensitives.contains(item.getKey())) {
+                resultVars.put(item.getKey(), "******");
+            } else {
+                resultVars.put(item.getKey(), item.getValue());
+            }
+        }
+        return resultVars;
+    }
 }
