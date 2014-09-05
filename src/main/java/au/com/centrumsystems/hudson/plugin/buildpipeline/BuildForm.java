@@ -1,15 +1,10 @@
 package au.com.centrumsystems.hudson.plugin.buildpipeline;
 
 import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.ParametersDefinitionProperty;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 import org.kohsuke.stapler.bind.JavaScriptMethod;
@@ -55,12 +50,6 @@ public class BuildForm {
      */
     private List<BuildForm> dependencies = new ArrayList<BuildForm>();
 
-    
-    /**
-     * project stringfied list of parameters for the project
-     * */
-    private final ArrayList<String> parameters;
-    
     /**
      * @param pipelineBuild
      *            pipeline build domain used to see the form
@@ -73,16 +62,7 @@ public class BuildForm {
             dependencies.add(new BuildForm(downstream));
         }
         id = hashCode();
-        final AbstractProject<?, ?> project = pipelineBuild.getProject();
-        projectId = project.getFullName().hashCode();
-        final ParametersDefinitionProperty params = project.getProperty(ParametersDefinitionProperty.class);
-        final ArrayList<String> paramList = new ArrayList<String>();
-        if (params != null) {
-            for (String p : params.getParameterDefinitionNames()) {
-                paramList.add(p);
-            }
-        }
-        parameters = paramList;
+        projectId = pipelineBuild.getProject().getFullName().hashCode();
     }
 
     public String getStatus() {
@@ -109,7 +89,7 @@ public class BuildForm {
      */
     @JavaScriptMethod
     public String asJSON() {
-        return BuildJSONBuilder.asJSON(pipelineBuild, id, projectId, getDependencyIds(), getParameterList());
+        return BuildJSONBuilder.asJSON(pipelineBuild, id, projectId, getDependencyIds());
     }
 
     public int getId() {
@@ -189,7 +169,7 @@ public class BuildForm {
     public ArrayList<String> getParameterList() {
         return parameters;
     }
-
+    
     public Integer getProjectId() {
         return projectId;
     }
