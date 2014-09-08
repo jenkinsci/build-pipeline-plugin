@@ -26,6 +26,7 @@ package au.com.centrumsystems.hudson.plugin.buildpipeline;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
+
 import com.google.common.collect.Sets;
 import hudson.Extension;
 import hudson.model.Action;
@@ -56,6 +57,7 @@ import hudson.util.DescribableList;
 import hudson.util.LogTaskListener;
 import hudson.util.ListBoxModel;
 import jenkins.model.Jenkins;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -63,18 +65,21 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.servlet.ServletException;
+
+import org.jvnet.hudson.plugins.m2release.M2ReleaseAction;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
+
 import au.com.centrumsystems.hudson.plugin.buildpipeline.trigger.BuildPipelineTrigger;
 import au.com.centrumsystems.hudson.plugin.util.BuildUtil;
 import au.com.centrumsystems.hudson.plugin.util.ProjectUtil;
+import au.com.centrumsystems.hudson.plugin.util.ScheduleUtil;
 
 /**
  * This view displays the set of jobs that are related
@@ -85,58 +90,70 @@ import au.com.centrumsystems.hudson.plugin.util.ProjectUtil;
  *
  */
 public class BuildPipelineView extends View {
+
     /**
      * @deprecated
-     *             For backward compatibility. Back when we didn't have
-     *             {@link #gridBuilder},
-     *             this field stored the first job to display.
+     *      For backward compatibility. Back when we didn't have {@link #gridBuilder},
+     *      this field stored the first job to display.
      */
     @Deprecated
     private volatile String selectedJob;
+
     /** Builds {@link ProjectGrid} */
     private ProjectGridBuilder gridBuilder;
+
     /** noOfDisplayedBuilds. */
     private String noOfDisplayedBuilds;
+
     /** buildViewTitle. */
     private String buildViewTitle = ""; //$NON-NLS-1$
+
     /** consoleOutputLinkStyle. */
     private String consoleOutputLinkStyle = LinkStyle.LIGHTBOX;
+
     /** URL for custom CSS file */
     private String cssUrl = "";
+
     /** Indicates whether only the latest job will be triggered. **/
     private boolean triggerOnlyLatestJob;
+
     /** alwaysAllowManualTrigger. */
     private boolean alwaysAllowManualTrigger = true;
+
     /** showPipelineParameters. */
     private boolean showPipelineParameters = true;
+
     /** showPipelineParametersInHeaders */
     private boolean showPipelineParametersInHeaders;
+
     /**
      * @deprecated
      *
-     *             Don't need an input from UI store this
+     * Don't need an input from UI store this
      */
-    @Deprecated
+    @Deprecated    
     private boolean startsWithParameters;
+
     /**
-     * Frequency at which the Build Pipeline Plugin updates the build cards in
-     * seconds
+     * Frequency at which the Build Pipeline Plugin updates the build cards in seconds
      */
     private int refreshFrequency = 3;
+
     /** showPipelineDefinitionHeader. */
     private boolean showPipelineDefinitionHeader;
+
     /*
-     * Keep feature flag properties in one place so that it is easy to refactor
-     * them out later.
+     * Keep feature flag properties in one place so that it is easy to refactor them out later.
      */
     /* Feature flags - START */
+
     /* Feature flags - END */
+
     /** A Logger object is used to log messages */
     private static final Logger LOGGER = Logger.getLogger(BuildPipelineView.class.getName());
 
     /**
-     * An instance of {@link Cause.UserIdCause} related to the current user.
-     * Must be transient, or xstream will include it in the
+     * An instance of {@link Cause.UserIdCause} related to the current user. Must be transient, or xstream will include it in the
      * serialization
      */
     private class MyUserIdCause extends Cause.UserIdCause {
@@ -146,12 +163,11 @@ public class BuildPipelineView extends View {
         private User user;
 
         /**
-*
-*/
+         *
+         */
         public MyUserIdCause() {
             try {
-                // this block can generate a
-                // CyclicGraphDetector.CycleDetectedException
+                // this block can generate a CyclicGraphDetector.CycleDetectedException
                 // in cases that I haven't quite figured out yet
                 // also an org.acegisecurity.AccessDeniedException when the user
                 // is not logged in
@@ -194,6 +210,7 @@ public class BuildPipelineView extends View {
             if (!(o instanceof Cause.UserIdCause)) {
                 return false;
             }
+
             return hashCode() == o.hashCode();
         }
 
@@ -218,8 +235,9 @@ public class BuildPipelineView extends View {
      * @param cssUrl
      *            URL for the custom CSS file.
      */
-    public BuildPipelineView(final String name, final String buildViewTitle, final ProjectGridBuilder gridBuilder,
-            final String noOfDisplayedBuilds, final boolean triggerOnlyLatestJob, final String cssUrl) {
+    public BuildPipelineView(final String name, final String buildViewTitle,
+             final ProjectGridBuilder gridBuilder, final String noOfDisplayedBuilds,
+             final boolean triggerOnlyLatestJob, final String cssUrl) {
         super(name, Hudson.getInstance());
         this.buildViewTitle = buildViewTitle;
         this.gridBuilder = gridBuilder;
@@ -250,40 +268,39 @@ public class BuildPipelineView extends View {
      * @param showPipelineDefinitionHeader
      *            Indicates whether the pipeline headers should be shown.
      * @param refreshFrequency
-     *            Frequency at which the build pipeline plugin refreshes build
-     *            cards
+     *            Frequency at which the build pipeline plugin refreshes build cards
      * @param cssUrl
      *            URL for the custom CSS file.
      * @param selectedJob
-     *            the first job name in the pipeline. it can be set to null when
-     *            gridBuilder is passed.
+     *            the first job name in the pipeline. it can be set to null when gridBuilder is passed.
      */
     @DataBoundConstructor
     public BuildPipelineView(final String name, final String buildViewTitle, final ProjectGridBuilder gridBuilder,
-            final String noOfDisplayedBuilds, final boolean triggerOnlyLatestJob, final boolean alwaysAllowManualTrigger,
-            final boolean showPipelineParameters, final boolean showPipelineParametersInHeaders,
-            final boolean showPipelineDefinitionHeader, final int refreshFrequency, final String cssUrl, final String selectedJob) {
+            final String noOfDisplayedBuilds,
+            final boolean triggerOnlyLatestJob, final boolean alwaysAllowManualTrigger, final boolean showPipelineParameters,
+            final boolean showPipelineParametersInHeaders, final boolean showPipelineDefinitionHeader,
+            final int refreshFrequency, final String cssUrl, final String selectedJob) {
         this(name, buildViewTitle, gridBuilder, noOfDisplayedBuilds, triggerOnlyLatestJob, cssUrl);
         this.alwaysAllowManualTrigger = alwaysAllowManualTrigger;
         this.showPipelineParameters = showPipelineParameters;
         this.showPipelineParametersInHeaders = showPipelineParametersInHeaders;
         this.showPipelineDefinitionHeader = showPipelineDefinitionHeader;
         this.selectedJob = selectedJob;
-        // not exactly understanding the lifecycle here, but I want a default of
-        // 3
-        // (this is what the class variable is set to 3, if it's 0, set it to
-        // default, refresh of 0 does not make sense anyway)
+        //not exactly understanding the lifecycle here, but I want a default of 3
+        //(this is what the class variable is set to 3, if it's 0, set it to default, refresh of 0 does not make sense anyway)
         if (refreshFrequency < 1) {
             this.refreshFrequency = 3;
         } else {
             this.refreshFrequency = refreshFrequency;
         }
-        // for remote api support
+        
+        //for remote api support
         if (this.gridBuilder == null) {
             if (this.selectedJob != null) {
                 this.gridBuilder = new DownstreamProjectGridBuilder(this.selectedJob);
             }
         }
+        
         if (this.selectedJob == null) {
             if (this.gridBuilder != null && this.gridBuilder instanceof DownstreamProjectGridBuilder) {
                 this.selectedJob = ((DownstreamProjectGridBuilder) this.gridBuilder).getFirstJob();
@@ -293,7 +310,7 @@ public class BuildPipelineView extends View {
 
     /**
      * @return
-     *         must be always 'this'
+     *      must be always 'this'
      */
     protected Object readResolve() {
         if (gridBuilder == null) {
@@ -322,11 +339,9 @@ public class BuildPipelineView extends View {
     }
 
     /**
-     * Checks whether the user has a permission to start a new instance of the
-     * pipeline.
+     * Checks whether the user has a permission to start a new instance of the pipeline.
      *
-     * @return - true: Has Build permission; false: Does not have Build
-     *         permission
+     * @return - true: Has Build permission; false: Does not have Build permission
      * @see hudson.model.Item
      */
     public boolean hasBuildPermission() {
@@ -336,8 +351,7 @@ public class BuildPipelineView extends View {
     /**
      * Checks whether the user has Configure permission for the current project.
      *
-     * @return - true: Has Configure permission; false: Does not have Configure
-     *         permission
+     * @return - true: Has Configure permission; false: Does not have Configure permission
      */
     public boolean hasConfigurePermission() {
         return this.hasPermission(CONFIGURE);
@@ -367,26 +381,25 @@ public class BuildPipelineView extends View {
      *
      * @param currentProject
      *            - The project from which we are testing.
-     * @return - true; has downstream projects; false: does not have downstream
-     *         projects
+     * @return - true; has downstream projects; false: does not have downstream projects
      */
     public boolean hasDownstreamProjects(final AbstractProject<?, ?> currentProject) {
         return (getDownstreamProjects(currentProject).size() > 0);
     }
-
+    
     /**
      * Returns BuildPipelineForm containing the build pipeline to display.
      *
-     * @return - Representation of the projects and their related builds making
-     *         up the build pipeline view
+     * @return - Representation of the projects and their related builds making up the build pipeline view
      */
     public BuildPipelineForm getBuildPipelineForm() {
         final int maxNoOfDisplayBuilds = Integer.valueOf(noOfDisplayedBuilds);
-        final ProjectGrid project = gridBuilder.build(this);
-        if (project.isEmpty()) {
+
+        final ProjectGrid projectGrid = gridBuilder.build(this);
+        if (projectGrid.isEmpty()) {
             return null;
         }
-        return new BuildPipelineForm(project, Iterables.limit(project.builds(), maxNoOfDisplayBuilds));
+        return new BuildPipelineForm(projectGrid, Iterables.limit(projectGrid.builds(), maxNoOfDisplayBuilds));
     }
 
     /**
@@ -416,19 +429,21 @@ public class BuildPipelineView extends View {
      */
     @JavaScriptMethod
     public int triggerManualBuild(final Integer upstreamBuildNumber, final String triggerProjectName, final String upstreamProjectName) {
-        final ItemGroup context = getOwnerItemGroup();
+        final ItemGroup<?> context = getOwnerItemGroup();
         final AbstractProject<?, ?> triggerProject = (AbstractProject<?, ?>) Jenkins.getInstance().getItem(triggerProjectName, context);
         final AbstractProject<?, ?> upstreamProject = (AbstractProject<?, ?>) Jenkins.getInstance().getItem(upstreamProjectName, context);
+
         final AbstractBuild<?, ?> upstreamBuild = retrieveBuild(upstreamBuildNumber, upstreamProject);
+
         // Get parameters from upstream build
-        if (upstreamBuild != null) {
+        if (upstreamBuild == null) {
+            return triggerFirstBuild(triggerProject, ScheduleUtil.calcDelay(ProjectUtil.getProjectParametersAction(triggerProject)));
+        } else {
             LOGGER.fine("Getting parameters from upstream build " + upstreamBuild.getExternalizableId()); //$NON-NLS-1$
+            final Action buildParametersAction = BuildUtil.getAllBuildParametersAction(upstreamBuild, triggerProject);
+            return triggerBuild(triggerProject, upstreamBuild, buildParametersAction,
+                    ScheduleUtil.calcDelay(ProjectUtil.getProjectParametersAction(triggerProject)));
         }
-        Action buildParametersAction = null;
-        if (upstreamBuild != null) {
-            buildParametersAction = BuildUtil.getAllBuildParametersAction(upstreamBuild, triggerProject);
-        }
-        return triggerBuild(triggerProject, upstreamBuild, buildParametersAction);
     }
 
     /**
@@ -441,46 +456,55 @@ public class BuildPipelineView extends View {
         LOGGER.fine("Retrying build again: " + triggerProjectName); //$NON-NLS-1$
         final AbstractProject<?, ?> triggerProject = (AbstractProject<?, ?>) super.getJob(triggerProjectName);
         triggerProject.scheduleBuild(new MyUserIdCause());
+
         return triggerProject.getNextBuildNumber();
     }
 
     /**
-     * @param externalizableId
-     *            the externalizableId
-     * @return the number of re-run build
+     * Trigger a manual build
+     *
+     * @param buildNumber 
+     *            the number of the build of the current project
+     * @param upstreamBuildNumber
+     *            upstream build number
+     * @param triggerProjectName
+     *            project that is triggered
+     * @param upstreamProjectName
+     *            upstream project
+     * @return next build number that has been scheduled
      */
     @JavaScriptMethod
-    public int rerunBuild(final String externalizableId) {
-        LOGGER.fine("Running build again: " + externalizableId); //$NON-NLS-1$
-        final AbstractBuild<?, ?> triggerBuild = (AbstractBuild<?, ?>) Run.fromExternalizableId(externalizableId);
-        final AbstractProject<?, ?> triggerProject = triggerBuild.getProject();
-        final Future<?> future = triggerProject.scheduleBuild2(triggerProject.getQuietPeriod(), new MyUserIdCause(),
-                removeUserIdCauseActions(triggerBuild.getActions()));
-        AbstractBuild<?, ?> result = triggerBuild;
-        try {
-            result = (AbstractBuild<?, ?>) future.get();
-        } catch (final InterruptedException e) {
-            e.printStackTrace();
-        } catch (final ExecutionException e) {
-            e.printStackTrace();
-        }
-        return result.getNumber();
+    public int rerunBuild(final Integer buildNumber, final Integer upstreamBuildNumber, final String triggerProjectName, 
+                          final String upstreamProjectName) {
+        LOGGER.fine("Running build again: " + triggerProjectName); //$NON-NLS-1$
+        final ItemGroup<?> context = getOwnerItemGroup();
+        final AbstractProject<?, ?> triggerProject = (AbstractProject<?, ?>) Jenkins.getInstance().getItem(triggerProjectName, context);
+        final AbstractProject<?, ?> upstreamProject = (AbstractProject<?, ?>) Jenkins.getInstance().getItem(upstreamProjectName, context);
+        
+        // Retrieve the current build and then clear the upstream cause for the current link
+        final AbstractBuild<?, ?> upstreamBuild = retrieveBuild(upstreamBuildNumber, upstreamProject);
+        
+        LOGGER.fine("Getting parameters from upstream build " + upstreamBuild.getExternalizableId()); //$NON-NLS-1$
+        final Action buildParametersAction = BuildUtil.getAllBuildParametersAction(upstreamBuild, triggerProject);
+        final int nextBuildNumber = triggerBuild(triggerProject, upstreamBuild, buildParametersAction,
+                ScheduleUtil.calcDelay(ProjectUtil.getProjectParametersAction(triggerProject)));
+            
+        return nextBuildNumber;
     }
 
     /**
-     * Given an AbstractProject and a build number the associated AbstractBuild
-     * will be retrieved.
+     * Given an AbstractProject and a build number the associated AbstractBuild will be retrieved.
      *
      * @param buildNo
      *            - Build number
      * @param project
      *            - AbstractProject
-     * @return The AbstractBuild associated with the AbstractProject and build
-     *         number.
+     * @return The AbstractBuild associated with the AbstractProject and build number.
      */
     @SuppressWarnings("unchecked")
     private AbstractBuild<?, ?> retrieveBuild(final int buildNo, final AbstractProject<?, ?> project) {
         AbstractBuild<?, ?> build = null;
+
         if (project != null) {
             for (final AbstractBuild<?, ?> tmpUpBuild : (List<AbstractBuild<?, ?>>) project.getBuilds()) {
                 if (tmpUpBuild.getNumber() == buildNo) {
@@ -489,88 +513,117 @@ public class BuildPipelineView extends View {
                 }
             }
         }
+
         return build;
     }
 
     /**
-     * Schedules a build to start.
-     *
-     * The build will take an upstream build as its Cause and a set of
-     * ParametersAction from the upstream build.
-     *
+     * Schedules a build to start (no upstream build).
+     * 
      * @param triggerProject
      *            - Schedule a build to start on this AbstractProject
-     * @param upstreamBuild
-     *            - The upstream AbstractBuild that will be used as a Cause for
-     *            the triggerProject's build.
-     * @param buildParametersAction
-     *            - The upstream ParametersAction that will be used as an Action
-     *            for the triggerProject's build.
+     * @param delay
+     *            - The delay for triggering the build (handle queueing)
      * @return next build number
      */
-    private int triggerBuild(final AbstractProject<?, ?> triggerProject, final AbstractBuild<?, ?> upstreamBuild,
-            final Action buildParametersAction) {
+    private int triggerFirstBuild(final AbstractProject<?, ?> triggerProject, final int delay) {
         LOGGER.fine("Triggering build for project: " + triggerProject.getFullDisplayName()); //$NON-NLS-1$
-        final Cause.UpstreamCause upstreamCause = (null == upstreamBuild) ? null : new Cause.UpstreamCause((Run<?, ?>) upstreamBuild);
+        final Cause.UpstreamCause upstreamCause = null;
         final List<Action> buildActions = new ArrayList<Action>();
         final CauseAction causeAction = new CauseAction(new MyUserIdCause());
         // TODO hack obsolete as of 1.531 when CauseAction.<init>(Cause...)
         // available:
         causeAction.getCauses().add(upstreamCause);
         buildActions.add(causeAction);
-        ParametersAction parametersAction = buildParametersAction instanceof ParametersAction ? (ParametersAction) buildParametersAction
-                : new ParametersAction();
-        if (upstreamBuild != null) {
-            final List<AbstractBuildParameters> configs = retrieveUpstreamProjectTriggerConfig(triggerProject, upstreamBuild);
-            if (configs == null) {
-                LOGGER.log(Level.SEVERE, "No upstream trigger found for this project" + triggerProject.getFullDisplayName());
-                throw new IllegalStateException("No upstream trigger found for this project" + triggerProject.getFullDisplayName());
-            }
-            for (final AbstractBuildParameters config : configs) {
-                try {
-                    final Action action = config.getAction(upstreamBuild, new LogTaskListener(LOGGER, Level.INFO));
-                    if (action instanceof ParametersAction) {
-                        parametersAction = mergeParameters(parametersAction, (ParametersAction) action);
-                    } else {
-                        buildActions.add(action);
-                    }
-                } catch (final IOException e) {
-                    LOGGER.log(Level.SEVERE, "I/O exception while adding build parameter", e); //$NON-NLS-1$
-                } catch (final InterruptedException e) {
-                    LOGGER.log(Level.SEVERE, "Adding build parameter was interrupted", e); //$NON-NLS-1$
-                } catch (final AbstractBuildParameters.DontTriggerException e) {
-                    LOGGER.log(Level.FINE, "Not triggering : " + config); //$NON-NLS-1$
-                }
-            }
-        }
+
+        final ParametersAction parametersAction = new ParametersAction();
         buildActions.add(parametersAction);
-        triggerProject.scheduleBuild(triggerProject.getQuietPeriod(), null, buildActions.toArray(new Action[buildActions.size()]));
+
+        triggerProject.scheduleBuild(triggerProject.getQuietPeriod() + delay, null, buildActions.toArray(new Action[buildActions.size()]));
+
         return triggerProject.getNextBuildNumber();
     }
 
     /**
-     * Used to retrieve the parameters from the upstream project build trigger
-     * relative to the given downstream project
-     * 
-     * @param project
-     *            the downstream project
+     * Schedules a build to start.
+     *
+     * The build will take an upstream build as its Cause and a set of ParametersAction from the upstream build.
+     *
+     * @param triggerProject
+     *            - Schedule a build to start on this AbstractProject
      * @param upstreamBuild
-     *            the upstream project build
+     *            - The upstream AbstractBuild that will be used as a Cause for the triggerProject's build.
+     * @param buildParametersAction
+     *            - The upstream ParametersAction that will be used as an Action for the triggerProject's build.
+     * @param delay
+     *            - The delay for triggering the build (handle queueing)
+     * @return next build number
+     */
+    private int triggerBuild(final AbstractProject<?, ?> triggerProject, final AbstractBuild<?, ?> upstreamBuild,
+            final Action buildParametersAction, final int delay) {
+        LOGGER.fine("Triggering build for project: " + triggerProject.getFullDisplayName()); //$NON-NLS-1$
+        final Cause.UpstreamCause upstreamCause = new Cause.UpstreamCause((Run<?, ?>) upstreamBuild);
+        final List<Action> buildActions = new ArrayList<Action>();
+        final CauseAction causeAction = new CauseAction(new MyUserIdCause());
+        // TODO hack obsolete as of 1.531 when CauseAction.<init>(Cause...) available:
+        causeAction.getCauses().add(upstreamCause);
+        buildActions.add(causeAction);
+        ParametersAction parametersAction = buildParametersAction instanceof ParametersAction ? (ParametersAction) buildParametersAction
+                : new ParametersAction();
+
+        final List<AbstractBuildParameters> configs = retrieveUpstreamProjectTriggerConfig(triggerProject, upstreamBuild);
+
+        if (configs == null) {
+            LOGGER.log(Level.SEVERE, "No upstream trigger found for this project" + triggerProject.getFullDisplayName());
+            throw new IllegalStateException("No upstream trigger found for this project" + triggerProject.getFullDisplayName());
+        }
+
+        for (final AbstractBuildParameters config : configs) {
+            try {
+                final Action action = config.getAction(upstreamBuild, new LogTaskListener(LOGGER, Level.INFO));
+                if (action instanceof ParametersAction) {
+                    // Exchange base and overlay (last param wins) !
+                    parametersAction = mergeParameters((ParametersAction) action, parametersAction);
+                } else {
+                    buildActions.add(action);
+                }
+            } catch (final IOException e) {
+                LOGGER.log(Level.SEVERE, "I/O exception while adding build parameter", e); //$NON-NLS-1$
+            } catch (final InterruptedException e) {
+                LOGGER.log(Level.SEVERE, "Adding build parameter was interrupted", e); //$NON-NLS-1$
+            } catch (final AbstractBuildParameters.DontTriggerException e) {
+                LOGGER.log(Level.FINE, "Not triggering : " + config); //$NON-NLS-1$
+            }
+        }
+
+        buildActions.add(parametersAction);
+
+        triggerProject.scheduleBuild(triggerProject.getQuietPeriod() + delay, null, buildActions.toArray(new Action[buildActions.size()]));
+        return triggerProject.getNextBuildNumber();
+    }
+
+    /**
+     * Used to retrieve the parameters from the upstream project build trigger relative to the given downstream project
+     * @param project the downstream project
+     * @param upstreamBuild the upstream project build
      * @return the trigger config relative to the given downstream project
      */
     private List<AbstractBuildParameters> retrieveUpstreamProjectTriggerConfig(final AbstractProject<?, ?> project,
-            final AbstractBuild<?, ?> upstreamBuild) {
-        final DescribableList<Publisher, Descriptor<Publisher>> upstreamProjectPublishersList = upstreamBuild.getProject()
-                .getPublishersList();
+                                                                               final AbstractBuild<?, ?> upstreamBuild) {
+        final DescribableList<Publisher, Descriptor<Publisher>> upstreamProjectPublishersList =
+                upstreamBuild.getProject().getPublishersList();
+
         List<AbstractBuildParameters> configs = null;
+
         final BuildPipelineTrigger manualTrigger = upstreamProjectPublishersList.get(BuildPipelineTrigger.class);
         if (manualTrigger != null) {
-            final Set<String> downstreamProjectsNames = Sets.newHashSet(Splitter.on(",").trimResults()
-                    .split(manualTrigger.getDownstreamProjectNames()));
+            final Set<String> downstreamProjectsNames =
+                    Sets.newHashSet(Splitter.on(",").trimResults().split(manualTrigger.getDownstreamProjectNames()));
             if (downstreamProjectsNames.contains(project.getName())) {
                 configs = manualTrigger.getConfigs();
             }
         }
+
         final BuildTrigger autoTrigger = upstreamProjectPublishersList.get(BuildTrigger.class);
         if (autoTrigger != null) {
             for (BuildTriggerConfig config : autoTrigger.getConfigs()) {
@@ -580,19 +633,19 @@ public class BuildPipelineView extends View {
                 }
             }
         }
+
         return configs;
     }
 
     /**
-     * From parameterized trigger plugin
-     * src/main/java/hudson/plugins/parameterizedtrigger/BuildTriggerConfig.java
+     * From parameterized trigger plugin src/main/java/hudson/plugins/parameterizedtrigger/BuildTriggerConfig.java
      *
      * @param base
-     *            One of the two parameters to merge.
+     *      One of the two parameters to merge.
      * @param overlay
-     *            The other parameters to merge
+     *      The other parameters to merge
      * @return
-     *         Result of the merge.
+     *      Result of the merge.
      */
     private static ParametersAction mergeParameters(final ParametersAction base, final ParametersAction overlay) {
         final LinkedHashMap<String, ParameterValue> params = new LinkedHashMap<String, ParameterValue>();
@@ -606,13 +659,11 @@ public class BuildPipelineView extends View {
     }
 
     /**
-     * Checks whether the given {@link Action} contains a reference to a
-     * {@link UserIdCause} object.
+     * Checks whether the given {@link Action} contains a reference to a {@link UserIdCause} object.
      *
      * @param buildAction
      *            the action to check.
-     * @return <code>true</code> if the action has a reference to a userId
-     *         cause.
+     * @return <code>true</code> if the action has a reference to a userId cause.
      */
     private boolean isUserIdCauseAction(final Action buildAction) {
         boolean retval = false;
@@ -628,12 +679,9 @@ public class BuildPipelineView extends View {
     }
 
     /**
-     * Removes any UserId cause action from the given actions collection. This
-     * is used by downstream builds that inherit upstream actions.
-     * The downstream build can be initiated by another user that is different
-     * from the user who initiated the upstream build, so the
-     * downstream build needs to remove the old user action inherited from
-     * upstream, and add its own.
+     * Removes any UserId cause action from the given actions collection. This is used by downstream builds that inherit upstream actions.
+     * The downstream build can be initiated by another user that is different from the user who initiated the upstream build, so the
+     * downstream build needs to remove the old user action inherited from upstream, and add its own.
      *
      * @param actions
      *            a collection of build actions.
@@ -655,9 +703,9 @@ public class BuildPipelineView extends View {
      */
     @Extension
     public static final class DescriptorImpl extends ViewDescriptor {
+
         /**
-         * descriptor impl constructor This empty constructor is required for
-         * stapler. If you remove this constructor, text name of
+         * descriptor impl constructor This empty constructor is required for stapler. If you remove this constructor, text name of
          * "Build Pipeline View" will be not displayed in the "NewView" page
          */
         public DescriptorImpl() {
@@ -692,6 +740,7 @@ public class BuildPipelineView extends View {
             noOfBuilds.add("100"); //$NON-NLS-1$
             noOfBuilds.add("200"); //$NON-NLS-1$
             noOfBuilds.add("500"); //$NON-NLS-1$
+
             for (final String noOfBuild : noOfBuilds) {
                 options.add(noOfBuild);
             }
@@ -834,9 +883,9 @@ public class BuildPipelineView extends View {
                 for (int col = 0; col < grid.getColumns(); col++) {
                     final ProjectForm form = grid.get(row, col);
                     if (form != null) {
-                        final Item item = Jenkins.getInstance().getItem(form.getName(), getOwnerItemGroup());
-                        if (item != null && item instanceof TopLevelItem) {
-                            items.add((TopLevelItem) item);
+                        final TopLevelItem item = Jenkins.getInstance().getItem(form.getName());
+                        if (item != null) {
+                            items.add(item);
                         }
                     }
                 }
@@ -851,8 +900,7 @@ public class BuildPipelineView extends View {
     }
 
     /**
-     * If a project name is changed we check if the selected job for this view
-     * also needs to be changed.
+     * If a project name is changed we check if the selected job for this view also needs to be changed.
      *
      * @param item
      *            - The Item that has been renamed
@@ -866,7 +914,9 @@ public class BuildPipelineView extends View {
     public void onJobRenamed(final Item item, final String oldName, final String newName) {
         LOGGER.fine(String.format("Renaming job: %s -> %s", oldName, newName));
         try {
-            gridBuilder.onJobRenamed(this, item, oldName, newName);
+            if (gridBuilder != null) {
+                gridBuilder.onJobRenamed(this, item, oldName, newName);
+            }
         } catch (IOException e) {
             LOGGER.log(Level.WARNING, "Failed to handle onJobRenamed", e);
         }
@@ -888,7 +938,7 @@ public class BuildPipelineView extends View {
         /** this window link style option */
         static final String THIS_WINDOW = "This Window"; //$NON-NLS-1$
     }
-
+    
     @Override
     public boolean hasPermission(final Permission p) {
         boolean display = true;
@@ -901,6 +951,30 @@ public class BuildPipelineView extends View {
             // Pas en lecture => permission standard
             display = super.hasPermission(p);
         }
+
         return display;
     }
+
+    /**
+     * Check for M2ReleaseAction, if present, then provide an icon on top
+     * 
+     * @return boolean - whether the first job is a m2release job
+     */
+    public boolean isM2Release() {
+        if (Jenkins.getInstance().getPlugin("m2release") == null) {
+            return false;
+        }
+        final String firstJobName = ((DownstreamProjectGridBuilder) gridBuilder).getFirstJob();
+        final AbstractProject<?, ?> project = Jenkins.getInstance().getItem(firstJobName, this.getOwnerItemGroup(),
+                AbstractProject.class);
+        if (project != null) {
+            // If a M2ReleaseAction is found
+            final List<M2ReleaseAction> actions = project.getActions(M2ReleaseAction.class);
+            if (actions != null && !actions.isEmpty()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }
