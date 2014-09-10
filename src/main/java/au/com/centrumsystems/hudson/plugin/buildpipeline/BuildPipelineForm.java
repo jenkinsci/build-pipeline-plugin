@@ -4,6 +4,7 @@ import com.google.common.collect.Iterables;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * @author Centrum Systems
@@ -12,6 +13,11 @@ import java.util.List;
  * 
  */
 public class BuildPipelineForm {
+    /**
+     * logger
+     */
+    private static final Logger LOGGER = Logger.getLogger(BuildPipelineForm.class.getName());
+
     /**
      * projects laid out in a grid using maps to ease accessing (or maybe I made it way too complicated by not using a 2-dimensional array)
      * Outside map holds rows and inner map has ProjectForm at a particular position (defined with key)
@@ -32,8 +38,6 @@ public class BuildPipelineForm {
     public BuildPipelineForm(final ProjectGrid grid, final Iterable<BuildGrid> builds) {
         projectGrid = grid;
         buildGrids = Arrays.asList(Iterables.toArray(builds, BuildGrid.class));
-        // Handle lastSuccessful Builds correctly, when some jobs are used in multiple Views
-        grid.correctProjectForms(builds);
     }
 
     public ProjectGrid getProjectGrid() {

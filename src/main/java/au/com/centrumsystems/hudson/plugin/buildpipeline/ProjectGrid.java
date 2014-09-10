@@ -19,14 +19,4 @@ public abstract class ProjectGrid extends Grid<ProjectForm> {
      * @return never null.
      */
     public abstract Iterable<BuildGrid> builds();
-
-    /**
-     * Correct things in project forms due to usage of jobs in multiple
-     * pipelines
-     * 
-     * @param buildGrids
-     *            - the buildGrids available to search for each
-     *            lastSuccessfulBuild of a projectform
-     */
-    public abstract void correctProjectForms(Iterable<BuildGrid> buildGrids);    
 }

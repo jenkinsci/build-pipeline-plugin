@@ -36,6 +36,7 @@ import hudson.model.Items;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Descriptor;
+import hudson.model.Hudson;
 import hudson.model.Project;
 import hudson.model.listeners.ItemListener;
 import hudson.plugins.parameterizedtrigger.AbstractBuildParameters;
@@ -256,7 +257,7 @@ public class BuildPipelineTrigger extends Notifier implements DependecyDeclarer 
          * @return true if it is possible to add parameters to the trigger
          */
         public boolean canAddParameters() {
-            final PluginWrapper plugin = Jenkins.getInstance().getPluginManager().getPlugin("parameterized-trigger"); //$NON-NLS-1$
+            final PluginWrapper plugin = Hudson.getInstance().getPluginManager().getPlugin("parameterized-trigger"); //$NON-NLS-1$
             return plugin != null && plugin.isActive();
         }
 
@@ -304,7 +305,7 @@ public class BuildPipelineTrigger extends Notifier implements DependecyDeclarer 
                     continue;
                 }
                 some = true;
-                final Item item = Jenkins.getInstance().getItem(projectName, project, Item.class);
+                final Item item = Jenkins.getInstance().getItemByFullName(projectName);
                 if (item == null) {
                     return FormValidation.error(Messages.BuildTrigger_NoSuchProject(projectName,
                             AbstractProject.findNearest(projectName, project.getParent()).getRelativeNameFrom(project)));
@@ -320,7 +321,7 @@ public class BuildPipelineTrigger extends Notifier implements DependecyDeclarer 
         }
 
         public List<Descriptor<AbstractBuildParameters>> getBuilderConfigDescriptors() {
-            return Jenkins.getInstance().<AbstractBuildParameters,
+            return Hudson.getInstance().<AbstractBuildParameters,
                     Descriptor<AbstractBuildParameters>>getDescriptorList(AbstractBuildParameters.class);
         }
 

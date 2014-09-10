@@ -89,8 +89,8 @@ public class DownstreamProjectGridBuilder extends ProjectGridBuilder {
             set(row, startingColumn, projectForm);
 
             final int childrensColumn = startingColumn + 1;
-            for (final ProjectForm downstreamForm : projectForm.getDependencies()) {
-                placeProjectInGrid(row, childrensColumn, downstreamForm);
+            for (final ProjectForm downstreamProject : projectForm.getDependencies()) {
+                placeProjectInGrid(row, childrensColumn, downstreamProject);
                 row++;
             }
         }

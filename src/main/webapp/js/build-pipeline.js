@@ -60,9 +60,8 @@ BuildPipeline.prototype = {
 	},
 	updateProjectCardFromJSON : function(projectAsJSON, fadeIn) {
 		var buildPipeline = this;
-		var projectId = "#project-" + projectAsJSON.id + "-" + projectAsJSON.row + "-" + projectAsJSON.col; 
-		jQuery(projectId).empty();
-		jQuery(buildPipeline.projectCardTemplate(projectAsJSON)).hide().appendTo(projectId).fadeIn(fadeIn ? 1000 : 0);
+		jQuery("#project-" + projectAsJSON.id).empty();
+		jQuery(buildPipeline.projectCardTemplate(projectAsJSON)).hide().appendTo("#project-" + projectAsJSON.id).fadeIn(fadeIn ? 1000 : 0);
 	},
 	updateNextBuildAndShowProgress : function(id, nextBuildNumber, dependencies) {
 		var buildPipeline = this;
@@ -81,19 +80,6 @@ BuildPipeline.prototype = {
 		buildPipeline.viewProxy.triggerManualBuild(upstreamBuildNumber, triggerProjectName, upstreamProjectName, function(data){
 			buildPipeline.updateNextBuildAndShowProgress(id, data.responseObject(), dependencyIds);
 		});
-		buildPipeline.showProgress(id, {});
-	},
-	cancelQueued : function(id, queueId) {
-		var buildPipeline = this;
-		var intervalId = setInterval(function(){
-			buildPipeline.buildProxies[id].cancelQueued(queueId, function(updated){
-				if (updated.responseObject()) {
-					buildPipeline.updateBuildCard(id);
-					clearInterval(intervalId);
-				}
-			});
-		}, buildPipeline.refreshFrequency);
-		buildPipeline.showProgress(id, {});
 	},
 	retryBuild : function(id, triggerProjectName, dependencyIds) {
 		var buildPipeline = this;
@@ -101,12 +87,11 @@ BuildPipeline.prototype = {
 			buildPipeline.updateNextBuildAndShowProgress(id, data.responseObject(), dependencyIds);
 		});
 	},
-	rerunBuild : function(id, buildNumber, upstreamProjectName, upstreamBuildNumber, triggerProjectName, dependencyIds) {
+	rerunBuild : function(id, buildExternalizableId, dependencyIds) {
 		var buildPipeline = this;
-		buildPipeline.viewProxy.rerunBuild(buildNumber, upstreamBuildNumber, triggerProjectName, upstreamProjectName, function(data){
+		buildPipeline.viewProxy.rerunBuild(buildExternalizableId, function(data){
 			buildPipeline.updateNextBuildAndShowProgress(id, data.responseObject(), dependencyIds);
 		});
-		buildPipeline.showProgress(id, {});
 	},
 	showSpinner : function(id){
 		jQuery("#status-bar-" + id).html('<table class="progress-bar" align="center"><tbody><tr class="unknown"><td></td></tr></tbody></table>');

@@ -61,11 +61,6 @@ public final class BuildUtil {
     public static AbstractBuild<?, ?> getDownstreamBuild(final AbstractProject<?, ?> downstreamProject,
             final AbstractBuild<?, ?> upstreamBuild) {
         if ((downstreamProject != null) && (upstreamBuild != null)) {
-            // First, test the queue for any builds under way
-            final QueueEntry qentry = QueueUtil.getQueueEntry(upstreamBuild);
-            if (qentry != null) {
-                return null;
-            }
             @SuppressWarnings("unchecked")
             final List<AbstractBuild<?, ?>> downstreamBuilds = (List<AbstractBuild<?, ?>>) downstreamProject.getBuilds();
             for (final AbstractBuild<?, ?> innerBuild : downstreamBuilds) {
