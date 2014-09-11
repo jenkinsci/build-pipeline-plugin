@@ -72,6 +72,7 @@ import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 
+import org.jvnet.hudson.plugins.m2release.M2ReleaseAction;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
@@ -931,5 +932,28 @@ public class BuildPipelineView extends View {
         }
 
         return display;
-    } 
+    }
+
+    /**
+     * Check for M2ReleaseAction, if present, then provide an icon on top
+     * 
+     * @return boolean - whether the first job is a m2release job
+     */
+    public boolean isM2Release() {
+        if (Jenkins.getInstance().getPlugin("m2release") == null) {
+            return false;
+        }
+        final String firstJobName = ((DownstreamProjectGridBuilder) gridBuilder).getFirstJob();
+        final AbstractProject<?, ?> project = Jenkins.getInstance().getItem(firstJobName, this.getOwnerItemGroup(),
+                AbstractProject.class);
+        if (project != null) {
+            // If a M2ReleaseAction is found
+            final List<M2ReleaseAction> actions = project.getActions(M2ReleaseAction.class);
+            if (actions != null && !actions.isEmpty()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }
