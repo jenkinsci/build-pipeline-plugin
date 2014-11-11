@@ -102,7 +102,7 @@ BuildPipeline.prototype = {
 			type: 'iframe',
 			title: title,
 			titlePosition: 'outside',
-			href: '/' + href,
+			href: href.startsWith('/') ? href : '/' + href,
 			transitionIn : 'elastic',
 			transitionOut : 'elastic',
 			width: '90%',
