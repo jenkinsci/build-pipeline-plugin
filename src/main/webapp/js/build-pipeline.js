@@ -98,16 +98,22 @@ BuildPipeline.prototype = {
 		jQuery("#icons-" + id).empty();
 	},
 	fillDialog : function(href, title) {
-		jQuery.fancybox({
-			type: 'iframe',
-			title: title,
-			titlePosition: 'outside',
-			href: '/' + href,
-			transitionIn : 'elastic',
-			transitionOut : 'elastic',
-			width: '90%',
-			height: '80%'
-		});
+        // ensure an absolute path, without risking a double-slash, which
+        // causes browsers to interpret the first path component as a
+        // domain name.
+        if(href.charAt(0) != '/') {
+            href = '/' + href;
+        }
+        jQuery.fancybox({
+            type: 'iframe',
+            title: title,
+            titlePosition: 'outside',
+            href: href,
+            transitionIn : 'elastic',
+            transitionOut : 'elastic',
+            width: '90%',
+            height: '80%'
+        });
 	},
 	closeDialog : function() {
 		jQuery.fancybox.close();
