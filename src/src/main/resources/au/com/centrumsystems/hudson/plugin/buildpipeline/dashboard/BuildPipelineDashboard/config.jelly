@@ -1,0 +1,33 @@
+<!--
+////////////////////////////////////////////////////////////////////////////////
+//
+//  ADOBE SYSTEMS INCORPORATED
+//  Copyright 2012 Adobe Systems Incorporated
+//  All Rights Reserved.
+//
+//  NOTICE: Adobe permits you to use, modify, and distribute this file
+//  in accordance with the terms of the license agreement accompanying it.
+//
+////////////////////////////////////////////////////////////////////////////////
+-->
+
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+    <!-- st:include page="au/com/centrumsystems/hudson/plugin/buildpipeline/BuildPipelineView/configure-entries.jelly" / -->
+    <!-- TODO: this is code duplication from configure-entries.jelly -->
+<!--    <f:entry title="Build Pipeline View Title" field="buildViewTitle">
+        <f:textbox name="buildViewTitle"/>
+    </f:entry>-->
+    <f:entry title="Display name">
+        <f:textbox field="name" default="${descriptor.getDisplayName()}" />
+    </f:entry>
+
+    <f:entry title="Description" field="description">
+        <f:textbox />
+    </f:entry>
+
+    <f:dropdownDescriptorSelector field="gridBuilder" title="${%Layout}" />
+
+    <f:entry title="No Of Displayed Builds" field="noOfDisplayedBuilds">
+        <f:select />
+    </f:entry>
+</j:jelly>

@@ -1,0 +1,24 @@
+<!--
+////////////////////////////////////////////////////////////////////////////////
+//
+//  ADOBE SYSTEMS INCORPORATED
+//  Copyright 2012 Adobe Systems Incorporated
+//  All Rights Reserved.
+//
+//  NOTICE: Adobe permits you to use, modify, and distribute this file
+//  in accordance with the terms of the license agreement accompanying it.
+//
+////////////////////////////////////////////////////////////////////////////////
+-->
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:dp="/hudson/plugins/view/dashboard" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+    <dp:decorate portlet="${it}">
+        <tr>
+            <td>
+                <div align="center">
+                    <st:include page="main_dashboard.jelly" from="${it.getBuildPipelineView()}"/>
+                </div>
+            </td>
+        </tr>
+    </dp:decorate>
+</j:jelly>
+

@@ -1,0 +1,47 @@
+<!--
+  Edit View Page
+-->
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt">
+	<f:entry title="Build Pipeline View Title" field="buildViewTitle">
+		<f:textbox name="buildViewTitle"/>
+	</f:entry>
+
+  <f:dropdownDescriptorSelector field="gridBuilder" title="${%Layout}" />
+
+	<f:entry title="No Of Displayed Builds" field="noOfDisplayedBuilds">
+		<f:select />
+	</f:entry>
+
+	<f:entry title="Restrict triggers to most recent successful builds" field="triggerOnlyLatestJob">
+		<f:booleanRadio default="true"/>
+	</f:entry>
+
+	<f:entry title="Always allow manual trigger on pipeline steps" field="alwaysAllowManualTrigger">
+		<f:booleanRadio default="false"/>
+	</f:entry>
+
+	<f:entry title="Show pipeline project headers" field="showPipelineDefinitionHeader">
+		<f:booleanRadio true="Yes" false="No" default="false"/>
+	</f:entry>
+
+    <f:entry title="Show pipeline parameters in project headers" field="showPipelineParametersInHeaders">
+        <f:booleanRadio default="false"/>
+    </f:entry>
+
+	<f:entry title="Show pipeline parameters in revision box" field="showPipelineParameters">
+		<f:booleanRadio default="false"/>
+	</f:entry>
+
+	<f:entry title="Refresh frequency (in seconds)" field="refreshFrequency">
+		<f:textbox clazz="number"/>
+	</f:entry>
+
+	<f:entry title="URL for custom CSS files" field="cssUrl">
+		<f:textbox />
+	</f:entry>
+
+	<f:entry title="Console Output Link Style" field="consoleOutputLinkStyle">
+		<f:select />
+	</f:entry>
+
+</j:jelly>

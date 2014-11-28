@@ -1,0 +1,17 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt">
+	<st:include page="bpp.jelly" from="${it.getBuildPipelineView()}" />
+	<link href="${rootURL}/plugin/build-pipeline-plugin/css/main_dashboard.css" type="text/css" rel="stylesheet" />
+	<script type="text/javascript">	
+	    // show/hide build details
+	    $(function() {
+	        $(".header").click(function()
+	        {
+	            var parent = $(this).parent();
+	            var ba = parent.find(".build-actions");
+	            var bb = parent.find(".build-body");
+	            
+	            ba.add(bb).toggle('slow');
+	        });
+	    });		
+	</script>
+</j:jelly>

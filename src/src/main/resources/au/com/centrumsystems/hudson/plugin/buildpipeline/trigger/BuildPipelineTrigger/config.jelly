@@ -1,0 +1,23 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+  <!--
+    This jelly script is used for per-project configuration.
+
+    See global.jelly for a general discussion about jelly script.
+  -->
+
+  <f:entry title="Downstream Project Names" field="downstreamProjectNames">
+  	<f:textbox name="downstreamProjectNames"/> 
+  </f:entry>
+
+  <j:if test="${descriptor.canAddParameters()}">
+      <f:block>
+        <f:hetero-list name="configs" hasHeader="true"
+                       descriptors="${descriptor.getBuilderConfigDescriptors()}"
+                       oneEach="true"
+                       items="${instance.configs}"
+                       addCaption="${%Add Parameters}"
+        />
+      </f:block>
+  </j:if>
+
+</j:jelly>

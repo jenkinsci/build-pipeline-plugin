@@ -1,0 +1,3 @@
+<div>  
+  This plugin renders upstream and downstream connected jobs that typically form a build pipeline.  In addition, it offers the ability to define manual triggers for jobs that require intervention prior to execution, e.g. an approval process outside of Jenkins. 
+</div>
