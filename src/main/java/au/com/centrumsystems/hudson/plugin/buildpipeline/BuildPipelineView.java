@@ -60,11 +60,7 @@ import jenkins.model.Jenkins;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
@@ -606,8 +602,15 @@ public class BuildPipelineView extends View {
         if (manualTrigger != null) {
             final Set<String> downstreamProjectsNames =
                     Sets.newHashSet(Splitter.on(",").trimResults().split(manualTrigger.getDownstreamProjectNames()));
-            if (downstreamProjectsNames.contains(project.getFullName())) {
-                configs = manualTrigger.getConfigs();
+
+            Iterator<String> downstreamProjectsNamesIter = downstreamProjectsNames.iterator();
+            while (downstreamProjectsNamesIter.hasNext()) {
+                String downstreamProjectsName = downstreamProjectsNamesIter.next();
+                Item item = Jenkins.getInstance().getItem(downstreamProjectsName,project,Item.class);
+                if (item.getFullName().equals(project.getFullName())) {
+                    configs = manualTrigger.getConfigs();
+                    break;
+                }
             }
         }
 
