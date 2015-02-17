@@ -220,7 +220,7 @@ public class DownstreamProjectGridBuilder extends ProjectGridBuilder {
         final AbstractProject<?, ?> project = Jenkins.getInstance().getItem(firstJob, 
             owner.getOwnerItemGroup(), AbstractProject.class);            
         if (project != null) {
-            this.firstJobLink = project.getUrl();
+            this.firstJobLink = project.getParent().getUrl() + project.getShortUrl();
         } else {
             this.firstJobLink = "";
         }
