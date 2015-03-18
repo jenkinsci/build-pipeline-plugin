@@ -57,11 +57,16 @@ import hudson.util.ListBoxModel;
 import jenkins.model.Jenkins;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -70,6 +75,21 @@ import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 
+import jenkins.model.Jenkins;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
@@ -78,6 +98,10 @@ import org.kohsuke.stapler.bind.JavaScriptMethod;
 import au.com.centrumsystems.hudson.plugin.buildpipeline.trigger.BuildPipelineTrigger;
 import au.com.centrumsystems.hudson.plugin.util.BuildUtil;
 import au.com.centrumsystems.hudson.plugin.util.ProjectUtil;
+
+import com.google.common.base.Splitter;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 
 /**
  * This view displays the set of jobs that are related
@@ -403,7 +427,400 @@ public class BuildPipelineView extends View {
 
         return triggerBuild(triggerProject, upstreamBuild, buildParametersAction);
     }
+    
+    /**
+     * Commit the job config to jenkins server.
+     * @param jobName
+     *                  Which job to commit
+     * @param configURL
+     *                 The job url to jenkins server
+     * @param jobConfigXml
+     *                  The job config xml to commit
+     */
+    private void updateJobWithConfig(String jobName, String configURL, String jobConfigXml) {
+        DefaultHttpClient httpClient = new DefaultHttpClient();
+        HttpPost post = new HttpPost(generateJobConfigURL(jobName, configURL));
+        try {
+            StringEntity entity = new StringEntity(jobConfigXml, "UTF-8");
+            post.setEntity(entity);
+            httpClient.execute(post);
+        } catch (UnsupportedEncodingException e) {
+            LOGGER.log(Level.SEVERE, "Unsupported Encoding exception while committing job config.", e);
+            e.printStackTrace();
+        } catch (ClientProtocolException e) {
+            LOGGER.log(Level.SEVERE, "Http protocol exception while committing job config.", e);
+            e.printStackTrace();
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "I/O exception while committing job config.", e);
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     * 
+     * @param viewName
+     * @param configURL
+     * @param viewConfigXml
+     */
+    private void updateViewWithConfig(String viewName, String configURL, String viewConfigXml) {
+        DefaultHttpClient httpClient = new DefaultHttpClient();
+        
+        HttpPost post = new HttpPost(configURL+"config.xml");
+        try {
+            StringEntity entity = new StringEntity(viewConfigXml, "UTF-8");
+            post.setEntity(entity);
+            httpClient.execute(post);
+        } catch (UnsupportedEncodingException e) {
+            LOGGER.log(Level.SEVERE, "Unsupported Encoding exception while committing job config.", e);
+            e.printStackTrace();
+        } catch (ClientProtocolException e) {
+            LOGGER.log(Level.SEVERE, "Http protocol exception while committing job config.", e);
+            e.printStackTrace();
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "I/O exception while committing job config.", e);
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    private String fetchViewConfig(String url) {
+        
+        try {
+            DefaultHttpClient httpClient = new DefaultHttpClient();
+            HttpGet get = new HttpGet(url+"config.xml");
+            
+            HttpResponse response = httpClient.execute(get);
+            
+            if (response == null) {
+                LOGGER.log(Level.FINE, "The view doesn't exist.");
+                return "";
+            }
+            
+            HttpEntity httpEntity = response.getEntity();
+            
+            String viewConfigXml = EntityUtils.toString(httpEntity);
+            return viewConfigXml;
+        } catch (ClientProtocolException e) {
+            LOGGER.log(Level.SEVERE, "Http protocol exception while removing the relationship.", e);
+            e.printStackTrace();
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "I/O exception while removing the relationship.", e);
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+    
+    
+    private String fetchJobConfig(String jobName, String url) {
+        
+        try {
+            DefaultHttpClient httpClient = new DefaultHttpClient();
+            HttpGet get = new HttpGet(generateJobConfigURL(jobName, url));
+            HttpResponse response = httpClient.execute(get);
+            
+            
+            if (response == null) {
+                LOGGER.log(Level.FINE, "One of the jobName doesn't exist.");
+                return "";
+            }
+            
+            HttpEntity httpEntity = response.getEntity();
+            String jobConfigXml = EntityUtils.toString(httpEntity);
+            
+            return jobConfigXml;
+            
+        } catch (ClientProtocolException e) {
+            LOGGER.log(Level.SEVERE, "Http protocol exception while removing the relationship.", e);
+            e.printStackTrace();
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "I/O exception while removing the relationship.", e);
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+    
+    
+    private String generateJobConfigURL(String jobName, String url) {
+        url = url.replace("#", "");
+        StringBuilder jobURLBuilder = new StringBuilder();
+        String jobURL = url.substring(0, url.indexOf("view"));
+        jobURLBuilder.append(jobURL).append("job/").append(jobName).append("/config.xml");
+        return jobURLBuilder.toString();
+    }
+    
+    
+    private String getViewNameFromURL(String url) {
+        url = url.replace("#", "");
+        String viewName = url.substring(url.indexOf("view/")+"view".length()).replace("/", "");
+        return viewName;
+    }
+    
+    private static String getRandomString(int length) {
+        String base = "abcdefghijklmnopqrstuvwxyz0123456789";   
+        Random random = new Random();   
+        StringBuffer sb = new StringBuffer();   
+        for (int i = 0; i < length; i++) {   
+            int number = random.nextInt(base.length());   
+            sb.append(base.charAt(number));   
+        }
+        return sb.toString();   
+     }  
+    
+    private String getViewShortUrlFromURL(String url) {
+    	url = url.replace("#", "");
+    	String uri = url.substring(0, url.indexOf("/view/")+"/view/".length());
+    	return uri;
+    }
+    
+    @JavaScriptMethod
+    public Set<String> getAllFirstJobsName(String url) {
+    	Jenkins jk = Jenkins.getInstance();
+    	Collection<View> views = jk.getViews();
+    	Set<String> firstJobNameSet = new HashSet<String>();
+    	String shortUrl = getViewShortUrlFromURL(url);
+    	StringBuilder sb = null;
+    	Document configXmlDoc = null;
+    	String viewName = null;
+    	for (View view : views) {
+    		sb = new StringBuilder(shortUrl);
+    		viewName = view.getViewName();
+    		if ("ALL".equals(viewName)) {
+    			continue;
+    		}
+    		sb.append(viewName).append("/");
+    		String viewConfigXml = fetchViewConfig(sb.toString());
+    		try {
+				configXmlDoc = DocumentHelper.parseText(viewConfigXml);
+			} catch (DocumentException e) {
+				e.printStackTrace();
+			}
+    		
+    		Iterator iter = configXmlDoc.getRootElement().elementIterator("gridBuilder");
+    		while (iter.hasNext()) {
+    			Element elt = (Element) iter.next();
+    			firstJobNameSet.add(elt.elementTextTrim("firstJob"));
+    		}
+    	}
+    	
+    	return firstJobNameSet;
+    }
+    
+    /**
+     * 
+     * @param viewName
+     * @param url
+     */
+    @JavaScriptMethod
+    public void triggerAddFirstJob(String jobName, String url) {
+        String viewName = getViewNameFromURL(url);
+        
+        /* Modify xml START */
+        String gridBuilderStartTag = "<gridBuilder class=\""+DownstreamProjectGridBuilder.class.getName()+"\"><firstJob>";
+        String gridBuilderEndTag = "</firstJob></gridBuilder>";
+        String gridBuilder = "<gridBuilder class=\""+DownstreamProjectGridBuilder.class.getName()+"\"/>";
+        try {
+            String viewConfigXml = fetchViewConfig(url);
+            String firstJob = "";
+            // If it contains firstJob tag
+            if (viewConfigXml.contains("<firstJob>")) {
+                firstJob = viewConfigXml.substring(
+                        viewConfigXml.indexOf("<firstJob>")+"<firstJob>".length(),
+                        viewConfigXml.indexOf("</firstJob>"));
+                
+                // firstJob is empty
+                if (firstJob != null && firstJob.trim().isEmpty()) {
+                    viewConfigXml = viewConfigXml.replace("<firstJob></firstJob>", "<firstJob>"+jobName+"</firstJob>");
+                } else {
+                	// first job is not empty
+                    viewConfigXml = viewConfigXml.replace(firstJob, jobName);
+                }
+            } 
+            // xml doesn't contain <firstJob>
+            else if (!viewConfigXml.contains("<firstJob>") 
+                    && viewConfigXml.contains(gridBuilder)) {
+                viewConfigXml = viewConfigXml.replace(gridBuilder, gridBuilderStartTag+jobName+gridBuilderEndTag);
+            } 
+            // xml even donesn't contain <gridBuilder>
+            else if (!viewConfigXml.contains(gridBuilder)) {
+                String buildPipelineViewEndTag = "</"+BuildPipelineView.class.getName()+">";
+                String replacement = new StringBuilder()
+                                    .append(gridBuilderStartTag)
+                                    .append(jobName)
+                                    .append(gridBuilderEndTag)
+                                    .append(buildPipelineViewEndTag).toString();
+                //gridBuilderStartTag+jobName+gridBuilderEndTag+buildPipelineViewEndTag;
+                viewConfigXml = viewConfigXml.replace(buildPipelineViewEndTag, replacement);
+            }
+            /* Modify xml END */ 
+            
+            
+            updateViewWithConfig(viewName, url, viewConfigXml);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+         
+    }
+    
+    /**
+     * 
+     * @param jobName
+     * @param url
+     */
+/*    @JavaScriptMethod
+    public void triggerRemoveFirstJob(String jobName, String url) {
+        String viewName = getViewNameFromURL(url);
+        String viewConfigXml = fetchViewConfig(viewName, url);
+        
+    }*/
+    
+    /**
+     * Add the relationship of two jobs
+     * @param previousJobName
+     *              the previous job
+     * @param nextJobName
+     *              the next job which would be removed
+     * @param url
+     *              url in the current pipeline page
+     * @return
+     */
+    @JavaScriptMethod
+    public void triggerAppendJobRelationship(final String previousJobName,
+            final String nextJobName, final String url) {
+        String jobConfigXml = fetchJobConfig(previousJobName, url);
+        
+        String jobNames = null;
+        try {
+            StringBuilder jobNameSB = new StringBuilder();
+            if (jobConfigXml.contains("<publishers/>")) {
+                jobNames = "<publishers/>";
+                jobNameSB.append("<publishers>\n");
+                jobNameSB.append("    <hudson.tasks.BuildTrigger>\n");
+                jobNameSB.append("      <childProjects>").append(nextJobName).append("</childProjects>\n");
+                jobNameSB.append("      <threshold>\n");
+                jobNameSB.append("        <name>SUCCESS</name>\n");
+                jobNameSB.append("        <ordinal>0</ordinal>\n");
+                jobNameSB.append("        <color>BLUE</color>\n");
+                jobNameSB.append("        <completeBuild>true</completeBuild>\n");
+                jobNameSB.append("      </threshold>\n");
+                jobNameSB.append("    </hudson.tasks.BuildTrigger>\n");
+                jobNameSB.append("  </publishers>");
+            } else if (jobConfigXml.contains("<childProjects/>")) {
+                jobNames = "<childProjects/>";
+                jobNameSB.append("<childProjects>");
+                jobNameSB.append(nextJobName);
+                jobNameSB.append("</childProjects>");
+            } else if (!jobConfigXml.isEmpty()) {
+                jobNames = jobConfigXml.substring(
+                        jobConfigXml.indexOf("<childProjects>")+"<childProjects>".length(),
+                        jobConfigXml.indexOf("</childProjects>"));
+                
+                jobNameSB.append("<childProjects>");
+                if (jobNames.trim().length() != 0) {
+                    jobNameSB.append(jobNames);
+                    if(!jobNames.contains(nextJobName)) {
+                        jobNameSB.append(",").append(nextJobName);
+                    }
+                } else {
+                    jobNameSB.append(nextJobName);
+                }
+                jobNameSB.append("</childProjects>");
+                
+                jobNames = "<childProjects>" + jobNames + "</childProjects>";
+            } else {
+                throw new Exception("job config xml is empty.");
+            }
+            jobConfigXml = jobConfigXml.replace(jobNames, jobNameSB.toString());
+            updateJobWithConfig(previousJobName, url, jobConfigXml);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    
+    /**
+     * Copy the job wiping the relationship
+     * @param jobName
+     * @param url
+     */
+    @JavaScriptMethod
+    public void triggerCopyJob(final String jobName, final String url) {
+        
+        try {
+            String jobConfigXml = fetchJobConfig(jobName, url);
+            if (jobConfigXml.contains("<childProjects>")) {
+                String jobNames = jobConfigXml.substring(
+                                jobConfigXml.indexOf("<childProjects>"),
+                                jobConfigXml.indexOf("</childProjects>") + "</childProjects>".length());
+                jobConfigXml = jobConfigXml.replace(jobNames, "<childProjects/>");
+            }
 
+            StringBuilder sb = new StringBuilder();
+            sb.append(jobName).append("_").append(getRandomString(5));
+            
+            String copyJobName = sb.toString();
+            Jenkins jk = Jenkins.getInstance();
+            
+            if (jk != null) { 
+                jk.createProjectFromXML(copyJobName, IOUtils.toInputStream(jobConfigXml));
+            } else {
+                throw new Exception("Jenkins instance not found.");
+            }
+            triggerAppendJobRelationship(jobName, copyJobName, url);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     * Remove the relationship of two jobs
+     * @param previousJobName
+     *              the previous job
+     * @param nextJobName
+     *              the next job which would be removed
+     * @param url
+     *              url in the current pipeline page
+     * @return
+     */
+    @JavaScriptMethod
+    public void triggerRemoveRelationship(final String previousJobName, final String nextJobName, final String url) {
+            
+        String jobConfigXml = fetchJobConfig(previousJobName, url);
+        String jobNames = jobConfigXml.substring(
+                jobConfigXml.indexOf("<childProjects>")+"<childProjects>".length(),
+                jobConfigXml.indexOf("</childProjects>"));
+        String[] jobNameArray = jobNames.split(",");
+        
+        
+        StringBuilder sb = new StringBuilder();
+        for (String jobName : jobNameArray) {
+            if (jobName.trim().equals(nextJobName.trim())) {
+                continue;
+            } else {
+                sb.append(jobName.trim()).append(",");
+            }
+        }
+        
+        if(sb.length() != 0) {
+            String newJobName = sb.toString().substring(0, sb.toString().length()-1);
+            jobConfigXml = jobConfigXml.replace(jobNames, newJobName);
+            
+        } else {
+            jobConfigXml = jobConfigXml.replace(jobNames, "");
+        }
+        updateJobWithConfig(previousJobName, url, jobConfigXml);
+    }
+
+    
     /**
      * @param triggerProjectName
      *            the triggerProjectName
