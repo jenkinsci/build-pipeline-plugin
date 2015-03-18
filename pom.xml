@@ -96,19 +96,45 @@
 			<!-- only necessary if Hamcrest matchers are used -->
 			<groupId>org.hamcrest</groupId>
 			<artifactId>hamcrest-core</artifactId>
-			<version>1.2</version>
+			<version>1.3</version>
 			<scope>test</scope>
 		</dependency>
+		<!-- Need to update this version due to conflicts on maven* versions -->
 		<dependency>
 			<groupId>org.jenkins-ci.plugins</groupId>
 			<artifactId>dashboard-view</artifactId>
-			<version>2.2</version>
+			<version>2.9.4</version>
 			<optional>true</optional>
 		</dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>parameterized-trigger</artifactId>
             <version>2.17</version>
+        </dependency>
+        <!-- Additional dependencies to enable detection of maven builds, resp. maven release builds
+             The test-scoped dependencies are needed due to mismatches with the versions. -->
+        <dependency>
+        	<groupId>org.jenkins-ci.plugins.m2release</groupId>
+        	<artifactId>m2release</artifactId>
+        	<version>0.14.0</version>
+        </dependency>
+        <dependency>
+        	<groupId>org.apache.maven</groupId>
+        	<artifactId>maven-artifact</artifactId>
+        	<version>3.0.3</version>
+        	<scope>test</scope>
+        </dependency>
+        <dependency>
+        	<groupId>org.apache.maven</groupId>
+        	<artifactId>maven-model</artifactId>
+        	<version>3.0.3</version>
+        	<scope>test</scope>
+        </dependency>
+        <dependency>
+        	<groupId>org.apache.maven</groupId>
+        	<artifactId>maven-settings</artifactId>
+        	<version>3.0.3</version>
+        	<scope>test</scope>
         </dependency>
 
         <dependency>

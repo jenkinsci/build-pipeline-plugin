@@ -246,6 +246,14 @@
 			</j:if>
             <div>Run</div>
           </div>
+          <j:if test="${from.m2Release}">
+          <div class="icon-container">
+		    <div onclick="buildPipeline.fillDialog('${rootURL}/job/${from.gridBuilder.firstJob}/m2release', 'Starts the pipeline with a maven release build')" class="pointer">
+                <img src="${rootURL}/images/24x24/installer.gif" alt="M2Release in a Pipeline" class="icon-with-caption"/>
+            </div>
+            <div>Release</div>
+          </div>
+          </j:if>          
         </j:if>
 
 				<div class="icon-container">
