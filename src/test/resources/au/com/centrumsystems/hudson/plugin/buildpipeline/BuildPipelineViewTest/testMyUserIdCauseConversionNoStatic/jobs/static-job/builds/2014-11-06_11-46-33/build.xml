@@ -190,8 +190,8 @@
             <comparator class="hudson.util.CaseInsensitiveComparator" reference="../../../../../org.jenkinsci.plugins.envinject.EnvInjectPluginAction/build/actions/hudson.plugins.parameterizedtrigger.CapturedEnvironmentAction/env/tree-map/default/comparator"/>
           </default>
           <!--Can't cast Integer to Action-->
-          <!--<int>3</int>-->
-          <!--<string>/usr/dt/app-defaults/%L/Dt</string>-->
+          <int>3</int>
+          <string>/usr/dt/app-defaults/%L/Dt</string>
         </tree-map>
       </env>
     </hudson.plugins.parameterizedtrigger.CapturedEnvironmentAction>
