@@ -156,7 +156,7 @@ public class BuildPipelineView extends View {
      * @deprecated Use Cause.UserIdCause instead
      */
     @Deprecated
-    private static class MyUserIdCause extends Cause.UserIdCause {
+    private class MyUserIdCause extends Cause.UserIdCause {
     }
 
     /**
