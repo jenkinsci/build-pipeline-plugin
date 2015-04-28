@@ -356,6 +356,15 @@ public class BuildPipelineViewTest {
         assertEquals("bill", cause.getUserId());
     }
 
+    @Test
+    @LocalData
+    @Bug(19755)
+    public void testMyUserIdCauseConversionNoStatic() throws Exception {
+        final FreeStyleProject staticJob = (FreeStyleProject) jenkins.getInstance().getItem("static-job");
+        final FreeStyleBuild staticBuild = staticJob.getBuildByNumber(138);
+        assertNotNull(staticBuild);
+    }
+
     /**
      * This is a factory to create an instance of the class under test. This
      * helps to avoid a NPE in View.java when calling getOwnerItemGroup and it's
