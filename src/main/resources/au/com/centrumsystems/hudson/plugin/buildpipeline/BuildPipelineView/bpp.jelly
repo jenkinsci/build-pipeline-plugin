@@ -63,7 +63,7 @@
 				{{#unless project.disabled}}
 				<div class="status-bar" id="status-bar-{{id}}">
 					{{#if build.isBuilding}}
-						<div class="pointer" onclick="buildPipeline.fillDialog('${app.rootUrl}{{build.url}}console', 'Console output for {{project.name}} #{{build.number}}')">
+						<div class="pointer" onclick="buildPipeline.fillDialog('${rootUrl}{{build.url}}console', 'Console output for {{project.name}} #{{build.number}}')">
 							<table class="progress-bar" align="center">
 								<tbody>
 									<tr title="Estimated remaining time: {{build.estimatedRemainingTime}}">
