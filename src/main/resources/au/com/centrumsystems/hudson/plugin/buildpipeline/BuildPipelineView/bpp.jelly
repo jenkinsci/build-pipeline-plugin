@@ -412,7 +412,7 @@
 														</j:when>
 														<j:otherwise>
 															<td>
-																<div class="build-number-pipeline" id="buildNumber${buildGrid.get(x,0).getId()}"><span>${buildGrid.get(x,0).getRevision()}</span></div>
+																<div class="build-number-pipeline" id="buildNumber${buildGrid.get(x,0).getId()}"><a name="${buildGrid.get(x,0).getRevision().replace('#', '')}" href="${buildGrid.get(x,0).getRevision()}">${buildGrid.get(x,0).getRevision()}</a></div>
 															</td>
 														</j:otherwise>
 													</j:choose>
