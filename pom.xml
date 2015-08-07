@@ -154,6 +154,12 @@
             <version>18.0</version>
             <scope>provided</scope>
         </dependency>
+        
+        <dependency>
+            <groupId>com.cloudbees.plugins</groupId>
+            <artifactId>build-flow-plugin</artifactId>
+            <version>0.18</version>
+        </dependency>
 
 	</dependencies>
 
