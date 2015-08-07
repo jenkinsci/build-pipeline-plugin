@@ -114,7 +114,7 @@ public class BuildForm {
         }
         parameters = paramList;
 
-        if(pipelineBuild.getCurrentBuild() instanceof FlowRun) {
+        if (pipelineBuild.getCurrentBuild() instanceof FlowRun) {
             final FlowRun flowRun = (FlowRun) pipelineBuild.getCurrentBuild();
             traverseBuildFlowRunDownstreams(context, dependencies, flowRun.getJobsGraph(), flowRun.getStartJob(), parentPath);
         }
@@ -122,6 +122,16 @@ public class BuildForm {
 
     /**
      * trasverse all of downstreams of the build flow run
+     * @param context
+     *          item group pipeline view belongs to, used to compute relative item names
+     * @param dependencies
+     *          the current dependencies for holding downstreams
+     * @param allJobsGraphs
+     *          build flow run jobs graph (jobs relationship)
+     * @param jobInvocation
+     *          build flow run
+     * @param parentPath
+     *          already traversed projects
      */
     private void traverseBuildFlowRunDownstreams(ItemGroup context, List<BuildForm> dependencies,
         final DirectedGraph<JobInvocation, FlowRun.JobEdge> allJobsGraphs, final JobInvocation jobInvocation,
@@ -149,16 +159,20 @@ public class BuildForm {
 
     /**
      * continue trasversing or not
+     * @param jobsGraph
+     *          build flow run jobs graph (jobs relationship)
+     * @param edge
+     *          a outgoing edge in jobs graph
      * @return true - continuing trasversing, false - not
      */
     private boolean needTrasverse(DirectedGraph<JobInvocation, FlowRun.JobEdge> jobsGraph, FlowRun.JobEdge edge) {
-        Map<JobInvocation, Integer> vLd = getJobGraphVertexsLongestDistance(jobsGraph);
-        int sDistance = vLd.get(edge.getSource());
-        int tDistance = vLd.get(edge.getTarget());
+        final Map<JobInvocation, Integer> vLd = getJobGraphVertexsLongestDistance(jobsGraph);
+        final int sDistance = vLd.get(edge.getSource());
+        final int tDistance = vLd.get(edge.getTarget());
         //first element: distance, the rest: all of staring sources jobs with the same longest distance
-        List<JobInvocation> firstSources = new ArrayList<JobInvocation>();
+        final List<JobInvocation> firstSources = new ArrayList<JobInvocation>();
         for (FlowRun.JobEdge incomingEdeg : jobsGraph.incomingEdgesOf(edge.getTarget())) {
-            int inSourceDistance = vLd.get(incomingEdeg.getSource());
+            final int inSourceDistance = vLd.get(incomingEdeg.getSource());
             if ((inSourceDistance + 1) == tDistance) {
                 firstSources.add(incomingEdeg.getSource());
             }
@@ -172,18 +186,20 @@ public class BuildForm {
     }
 
     /**
+     * @param jobsGraph build flow run jobs graph (jobs relationship)
+     *
      * @return get the longest distance (from the builf flow run vertex) for each vertex in the jobgraphs
      */
     private Map<JobInvocation, Integer> getJobGraphVertexsLongestDistance(DirectedGraph<JobInvocation, FlowRun.JobEdge> jobsGraph) {
-        DepthFirstIterator<JobInvocation, FlowRun.JobEdge> iter =
+        final DepthFirstIterator<JobInvocation, FlowRun.JobEdge> iter =
                 new DepthFirstIterator<JobInvocation, FlowRun.JobEdge>(jobsGraph);
 
-        Map<JobInvocation, Integer> vLd = new HashMap<JobInvocation, Integer>();
+        final Map<JobInvocation, Integer> vLd = new HashMap<JobInvocation, Integer>();
 
         while (iter.hasNext()) {
             int distance = 0;
-            JobInvocation vertex = iter.next();
-            List<Integer> ivds = new ArrayList<Integer>(); // for calculate maximum distance
+            final JobInvocation vertex = iter.next();
+            final List<Integer> ivds = new ArrayList<Integer>(); // for calculate maximum distance
             for (FlowRun.JobEdge incommingEdge : jobsGraph.incomingEdgesOf(vertex)) {
                 if (vLd.containsKey(incommingEdge.getSource())) {
                     ivds.add(vLd.get(incommingEdge.getSource()));

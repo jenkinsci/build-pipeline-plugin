@@ -63,9 +63,13 @@ public class BuildPipelineForm {
         return buildGrids;
     }
 
-    private Integer getMaxColloumsOfBuildGrids(){
-        List<Integer> li = new ArrayList<Integer>();
-        for(BuildGrid bg: buildGrids){
+    /**
+     *
+     * @return the maximum number of build grid collumns
+     */
+    private Integer getMaxColloumsOfBuildGrids() {
+        final List<Integer> li = new ArrayList<Integer>();
+        for (BuildGrid bg : buildGrids) {
             li.add(bg.getColumns());
         }
         return Ints.max(Ints.toArray(li));
