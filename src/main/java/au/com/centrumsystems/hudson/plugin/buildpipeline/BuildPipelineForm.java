@@ -1,7 +1,9 @@
 package au.com.centrumsystems.hudson.plugin.buildpipeline;
 
 import com.google.common.collect.Iterables;
+import com.google.common.primitives.Ints;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
@@ -50,7 +52,7 @@ public class BuildPipelineForm {
      * @return width
      */
     public Integer getGridWidth() {
-        return projectGrid.getColumns();
+        return Ints.max(projectGrid.getColumns(), getMaxColloumsOfBuildGrids());
     }
 
     public Integer getGridHeight() {
@@ -61,4 +63,11 @@ public class BuildPipelineForm {
         return buildGrids;
     }
 
+    private Integer getMaxColloumsOfBuildGrids(){
+        List<Integer> li = new ArrayList<Integer>();
+        for(BuildGrid bg: buildGrids){
+            li.add(bg.getColumns());
+        }
+        return Ints.max(Ints.toArray(li));
+    }
 }
