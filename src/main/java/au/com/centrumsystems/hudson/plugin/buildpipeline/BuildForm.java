@@ -137,14 +137,14 @@ public class BuildForm {
         final DirectedGraph<JobInvocation, FlowRun.JobEdge> allJobsGraphs, final JobInvocation jobInvocation,
         final Collection<AbstractProject<?, ?>> parentPath) {
         final Collection<AbstractProject<?, ?>> forkedPath = new LinkedHashSet<AbstractProject<?, ?>>(parentPath);
-        Set<FlowRun.JobEdge> edges = allJobsGraphs.outgoingEdgesOf(jobInvocation);
+        final Set<FlowRun.JobEdge> edges = allJobsGraphs.outgoingEdgesOf(jobInvocation);
         for (FlowRun.JobEdge edge : edges) {
             if (needTrasverse(allJobsGraphs, edge)) {
                 try {
-                    PipelineBuild downstream = new PipelineBuild((AbstractBuild<?, ?>) edge.getTarget().getBuild(),
+                    final PipelineBuild downstream = new PipelineBuild((AbstractBuild<?, ?>) edge.getTarget().getBuild(),
                             edge.getTarget().getProject(), (AbstractBuild<?, ?>) jobInvocation.getBuild());
                     if (forkedPath.add(downstream.getProject())) {
-                        BuildForm bf = new BuildForm(context, downstream, forkedPath);
+                        final BuildForm bf = new BuildForm(context, downstream, forkedPath);
                         traverseBuildFlowRunDownstreams(context, bf.dependencies, allJobsGraphs, edge.getTarget(), parentPath);
                         dependencies.add(bf);
                     }
@@ -180,9 +180,8 @@ public class BuildForm {
         //only add this downstream only, even when multiple starting source with the same longest distance
         if ((sDistance + 1) == tDistance && (firstSources.size() == 0 || firstSources.get(0).equals(edge.getSource()))) {
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**
