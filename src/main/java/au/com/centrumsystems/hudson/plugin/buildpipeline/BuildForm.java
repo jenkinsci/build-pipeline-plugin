@@ -8,9 +8,17 @@ import hudson.model.AbstractProject;
 import hudson.model.ItemGroup;
 import hudson.model.ParametersDefinitionProperty;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.concurrent.ExecutionException;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.logging.Logger;
+import java.util.Map;
+import java.util.Set;
+
 
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.traverse.DepthFirstIterator;
@@ -106,20 +114,25 @@ public class BuildForm {
         }
         parameters = paramList;
 
-        if(pipelineBuild.getCurrentBuild() instanceof FlowRun){
-            FlowRun flowRun = (FlowRun) pipelineBuild.getCurrentBuild();
+        if(pipelineBuild.getCurrentBuild() instanceof FlowRun) {
+            final FlowRun flowRun = (FlowRun) pipelineBuild.getCurrentBuild();
             traverseBuildFlowRunDownstreams(context, dependencies, flowRun.getJobsGraph(), flowRun.getStartJob(), parentPath);
         }
     }
 
-    //trasverse all of downstreams of the build flow run
-    private void traverseBuildFlowRunDownstreams(ItemGroup context, List<BuildForm> dependencies, final DirectedGraph<JobInvocation, FlowRun.JobEdge> allJobsGraphs, final JobInvocation jobInvocation, final Collection<AbstractProject<?, ?>> parentPath)  {
+    /**
+     * trasverse all of downstreams of the build flow run
+     */
+    private void traverseBuildFlowRunDownstreams(ItemGroup context, List<BuildForm> dependencies,
+        final DirectedGraph<JobInvocation, FlowRun.JobEdge> allJobsGraphs, final JobInvocation jobInvocation,
+        final Collection<AbstractProject<?, ?>> parentPath) {
         final Collection<AbstractProject<?, ?>> forkedPath = new LinkedHashSet<AbstractProject<?, ?>>(parentPath);
         Set<FlowRun.JobEdge> edges = allJobsGraphs.outgoingEdgesOf(jobInvocation);
         for (FlowRun.JobEdge edge : edges) {
-            if(needTrasverse(allJobsGraphs, edge)){
+            if (needTrasverse(allJobsGraphs, edge)) {
                 try {
-                    PipelineBuild downstream = new PipelineBuild((AbstractBuild<?, ?>)edge.getTarget().getBuild(), edge.getTarget().getProject(), (AbstractBuild<?, ?>)jobInvocation.getBuild());
+                    PipelineBuild downstream = new PipelineBuild((AbstractBuild<?, ?>) edge.getTarget().getBuild(),
+                            edge.getTarget().getProject(), (AbstractBuild<?, ?>) jobInvocation.getBuild());
                     if (forkedPath.add(downstream.getProject())) {
                         BuildForm bf = new BuildForm(context, downstream, forkedPath);
                         traverseBuildFlowRunDownstreams(context, bf.dependencies, allJobsGraphs, edge.getTarget(), parentPath);
@@ -134,26 +147,34 @@ public class BuildForm {
         }
     }
 
-    private boolean needTrasverse(DirectedGraph<JobInvocation, FlowRun.JobEdge> jobsGraph, FlowRun.JobEdge edge){
+    /**
+     * continue trasversing or not
+     * @return true - continuing trasversing, false - not
+     */
+    private boolean needTrasverse(DirectedGraph<JobInvocation, FlowRun.JobEdge> jobsGraph, FlowRun.JobEdge edge) {
         Map<JobInvocation, Integer> vLd = getJobGraphVertexsLongestDistance(jobsGraph);
         int sDistance = vLd.get(edge.getSource());
         int tDistance = vLd.get(edge.getTarget());
-        List<JobInvocation> firstSources = new ArrayList<JobInvocation>(); //first element: distance, the rest: all of staring sources jobs with the same longest distance
-        for (FlowRun.JobEdge incomingEdeg: jobsGraph.incomingEdgesOf(edge.getTarget())){
+        //first element: distance, the rest: all of staring sources jobs with the same longest distance
+        List<JobInvocation> firstSources = new ArrayList<JobInvocation>();
+        for (FlowRun.JobEdge incomingEdeg : jobsGraph.incomingEdgesOf(edge.getTarget())) {
             int inSourceDistance = vLd.get(incomingEdeg.getSource());
-            if((inSourceDistance+1) == tDistance){
+            if ((inSourceDistance + 1) == tDistance) {
                 firstSources.add(incomingEdeg.getSource());
             }
         }
-        if((sDistance + 1) == tDistance && (firstSources.size() == 0 || firstSources.get(0).equals(edge.getSource()))){ //only add this downstream only, even when multiple starting source with the same longest distance
+        //only add this downstream only, even when multiple starting source with the same longest distance
+        if ((sDistance + 1) == tDistance && (firstSources.size() == 0 || firstSources.get(0).equals(edge.getSource()))) {
             return true;
-        }
-        else {
+        } else {
             return false;
         }
     }
 
-    private Map<JobInvocation, Integer> getJobGraphVertexsLongestDistance(DirectedGraph<JobInvocation, FlowRun.JobEdge> jobsGraph){
+    /**
+     * @return get the longest distance (from the builf flow run vertex) for each vertex in the jobgraphs
+     */
+    private Map<JobInvocation, Integer> getJobGraphVertexsLongestDistance(DirectedGraph<JobInvocation, FlowRun.JobEdge> jobsGraph) {
         DepthFirstIterator<JobInvocation, FlowRun.JobEdge> iter =
                 new DepthFirstIterator<JobInvocation, FlowRun.JobEdge>(jobsGraph);
 
@@ -163,13 +184,13 @@ public class BuildForm {
             int distance = 0;
             JobInvocation vertex = iter.next();
             List<Integer> ivds = new ArrayList<Integer>(); // for calculate maximum distance
-            for (FlowRun.JobEdge incommingEdge: jobsGraph.incomingEdgesOf(vertex)){
-                if(vLd.containsKey(incommingEdge.getSource())){
+            for (FlowRun.JobEdge incommingEdge : jobsGraph.incomingEdgesOf(vertex)) {
+                if (vLd.containsKey(incommingEdge.getSource())) {
                     ivds.add(vLd.get(incommingEdge.getSource()));
                 }
             }
-            if(!ivds.isEmpty()){
-                distance = Ints.max(Ints.toArray(ivds))+1;
+            if (!ivds.isEmpty()) {
+                distance = Ints.max(Ints.toArray(ivds)) + 1;
             }
             vLd.put(vertex, distance);
         }
