@@ -96,10 +96,21 @@ public class BuildForm {
         this.pipelineBuild = pipelineBuild;
         status = pipelineBuild.getCurrentBuildResult();
         dependencies = new ArrayList<BuildForm>();
+        BuildForm flowRunFirstLongestDistanceBuildForm = null;
+        if (pipelineBuild.getCurrentBuild() instanceof FlowRun) {
+            final FlowRun flowRun = (FlowRun) pipelineBuild.getCurrentBuild();
+            flowRunFirstLongestDistanceBuildForm = traverseBuildFlowRunDownstreams(context, dependencies, flowRun.getJobsGraph(), 
+                                                             flowRun.getStartJob(), parentPath, flowRunFirstLongestDistanceBuildForm);
+        }
+
         for (final PipelineBuild downstream : pipelineBuild.getDownstreamPipeline()) {
             final Collection<AbstractProject<?, ?>> forkedPath = new LinkedHashSet<AbstractProject<?, ?>>(parentPath);
             if (forkedPath.add(downstream.getProject())) {
-                dependencies.add(new BuildForm(context, downstream, forkedPath));
+                if (flowRunFirstLongestDistanceBuildForm == null) {
+                    dependencies.add(new BuildForm(context, downstream, forkedPath));
+                } else {
+                    flowRunFirstLongestDistanceBuildForm.dependencies.add(new BuildForm(context, downstream, forkedPath));
+                }
             }
         }
         id = hashCode();
@@ -113,11 +124,6 @@ public class BuildForm {
             }
         }
         parameters = paramList;
-
-        if (pipelineBuild.getCurrentBuild() instanceof FlowRun) {
-            final FlowRun flowRun = (FlowRun) pipelineBuild.getCurrentBuild();
-            traverseBuildFlowRunDownstreams(context, dependencies, flowRun.getJobsGraph(), flowRun.getStartJob(), parentPath);
-        }
     }
 
     /**
@@ -132,10 +138,13 @@ public class BuildForm {
      *          build flow run
      * @param parentPath
      *          already traversed projects
+     * @param firstLongestDistanceBuildForm
+     *          the first longest distance build form (of build flow)
+     * @return the first longest distance build form (of build flow) or null
      */
-    private void traverseBuildFlowRunDownstreams(ItemGroup context, List<BuildForm> dependencies,
+    private BuildForm traverseBuildFlowRunDownstreams(ItemGroup context, List<BuildForm> dependencies,
         final DirectedGraph<JobInvocation, FlowRun.JobEdge> allJobsGraphs, final JobInvocation jobInvocation,
-        final Collection<AbstractProject<?, ?>> parentPath) {
+        final Collection<AbstractProject<?, ?>> parentPath, BuildForm firstLongestDistanceBuildForm) {
         final Collection<AbstractProject<?, ?>> forkedPath = new LinkedHashSet<AbstractProject<?, ?>>(parentPath);
         final Set<FlowRun.JobEdge> edges = allJobsGraphs.outgoingEdgesOf(jobInvocation);
         for (FlowRun.JobEdge edge : edges) {
@@ -145,7 +154,15 @@ public class BuildForm {
                             edge.getTarget().getProject(), (AbstractBuild<?, ?>) jobInvocation.getBuild());
                     if (forkedPath.add(downstream.getProject())) {
                         final BuildForm bf = new BuildForm(context, downstream, forkedPath);
-                        traverseBuildFlowRunDownstreams(context, bf.dependencies, allJobsGraphs, edge.getTarget(), parentPath);
+                        if (firstLongestDistanceBuildForm == null) { 
+                            final int maxLongestDistance = Ints.max(Ints.toArray(
+                                                               getJobGraphVertexsLongestDistance(allJobsGraphs).values()));
+                            if (maxLongestDistance == getJobGraphVertexsLongestDistance(allJobsGraphs).get(edge.getTarget())) {
+                               firstLongestDistanceBuildForm =  bf;
+                            }
+                        }
+                        firstLongestDistanceBuildForm = traverseBuildFlowRunDownstreams(context, bf.dependencies, allJobsGraphs, 
+                                                                  edge.getTarget(), parentPath, firstLongestDistanceBuildForm);
                         dependencies.add(bf);
                     }
                 } catch (ExecutionException e) {
@@ -155,6 +172,7 @@ public class BuildForm {
                 }
             }
         }
+        return firstLongestDistanceBuildForm;
     }
 
     /**
