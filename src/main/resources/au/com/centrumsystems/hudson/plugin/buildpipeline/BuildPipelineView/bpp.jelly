@@ -31,7 +31,11 @@
 								{{/if}}
 							{{/unless}}
 						{{/unless}}
-						{{project.name}}
+						{{#if project.displayName}}
+							{{project.displayName}}
+						{{else}}
+							{{project.name}}
+						{{/if}}
 					</a>
 				</div>
 			</td>

@@ -42,6 +42,7 @@ class BuildJSONBuilder {
 			project {
 				disabled(pipelineBuild.projectDisabled)
 				name(pipelineBuild.project.getRelativeNameFromGroup(context))
+				displayName(pipelineBuild.project.displayName)
 				url(pipelineBuild.projectURL)
 				health(pipelineBuild.projectHealth)
 				id(projectId)
