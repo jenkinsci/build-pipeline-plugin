@@ -16,6 +16,13 @@
 
 }
 
+#main-panel
+{
+	margin-left:0px;
+	display: inline-block;
+	min-width:100%;
+} 
+
 /******************** popup ***************************/
 #popup-iframe{
     width: 100%;
