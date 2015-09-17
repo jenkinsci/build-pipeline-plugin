@@ -82,7 +82,7 @@
 					{{#if project.parameters.length}}
 						<j:set var="hasParameterIconUrl" value="${rootURL}/plugin/build-pipeline-plugin/images/has-parameter.png" />
 						<img title="This job has parameters" alt="This job has parameters" src="${hasParameterIconUrl}"/>
-					{{/if}}		
+					{{/if}}
 					{{#unless build.isPending}}
 						{{#unless build.isReadyToBeManuallyBuilt}}
 							<j:set var="consoleOutputIconUrl" value="${rootURL}/images/16x16/terminal.png" />
@@ -237,9 +237,24 @@
         <j:if test="${hasBuildPermission}">
 			<div class="icon-container">
 			<j:if test="${from.isProjectParameterized()}">
-				<span class="pointer" onclick="buildPipeline.fillDialog('${app.rootUrl}${from.gridBuilder.firstJobLink}/build?delay=0sec', 'Starts the pipeline with parameters')">
-					<img src="${rootURL}/images/24x24/clock.png" alt="Trigger a Pipeline" class="icon-with-caption"/>
-				</span>
+			<j:choose>
+					<j:when test="${from.newWindowConsoleOutputLinkStyle}">
+						<a href="${app.rootUrl}${from.gridBuilder.firstJobLink}/build?delay=0sec" target="_blank">
+							<img src="${rootURL}/images/24x24/clock.png" alt="Trigger a Pipeline" class="icon-with-caption"/>
+						</a>
+					</j:when>
+					<j:when test="${from.thisWindowConsoleOutputLinkStyle}">
+						<a href="${app.rootUrl}${from.gridBuilder.firstJobLink}/build?delay=0sec">
+							<img src="${rootURL}/images/24x24/clock.png" alt="Trigger a Pipeline" class="icon-with-caption"/>
+						</a>
+					</j:when>
+					<j:otherwise>
+						<span class="pointer" onclick="buildPipeline.fillDialog('${app.rootUrl}${from.gridBuilder.firstJobLink}/build?delay=0sec', 'Starts the pipeline with parameters')">
+							<img src="${rootURL}/images/24x24/clock.png" alt="Trigger a Pipeline" class="icon-with-caption"/>
+						</span>
+					</j:otherwise>
+				</j:choose>
+
 			</j:if>
 			<j:if test="${!from.isProjectParameterized()}">
 			  <a id="trigger-pipeline-button" href='#' onclick="$('triggerPipelineForm').submit()">
