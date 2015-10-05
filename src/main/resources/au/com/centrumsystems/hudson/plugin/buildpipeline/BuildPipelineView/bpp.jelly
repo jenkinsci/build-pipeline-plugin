@@ -17,10 +17,10 @@
 	<script src="${rootURL}/plugin/build-pipeline-plugin/js/build-pipeline.js"></script>
 	<script id="build-card-template" type="text/x-handlebars-template">
 <table class="build-card rounded {{build.status}} {{#if project.disabled}}disabled{{/if}}">
-	<tbody>
-		<tr class="header">
+	<thead>
+		<tr>
 			<td>
-				<div class="overflow-hidden">
+				<div class="header">
 					<a href="${rootURL}/{{build.url}}" title="{{project.name}}">
 						{{#unless build.isPending}}
 							{{#unless build.isReadyToBeManuallyBuilt}}
@@ -36,6 +36,8 @@
 				</div>
 			</td>
 		</tr>
+	</thead>
+	<tbody>
 		<tr class="build-body">
 			<td class="secondary-info">
 				<div class="build-time">
@@ -80,7 +82,7 @@
 					{{#if project.parameters.length}}
 						<j:set var="hasParameterIconUrl" value="${rootURL}/plugin/build-pipeline-plugin/images/has-parameter.png" />
 						<img title="This job has parameters" alt="This job has parameters" src="${hasParameterIconUrl}"/>
-					{{/if}}		
+					{{/if}}
 					{{#unless build.isPending}}
 						{{#unless build.isReadyToBeManuallyBuilt}}
 							<j:set var="consoleOutputIconUrl" value="${rootURL}/images/16x16/terminal.png" />
@@ -365,19 +367,23 @@
 									<!-- Only adding the revision-cell once. -->
 									<j:if test="${x == 0}"><td class="revision-cell" rowspan="${buildGrid.rows}">
 										<table class="revision rounded build-card">
-											<tbody>
-												<tr class="header">
-													<td colspan="2">
-														<j:choose>
-															<j:when test="${from.isShowPipelineParameters()}">
-																<div>Pipeline ${buildGrid.get(x,0).getRevision()}</div>
-															</j:when>
-															<j:otherwise>
-																<div>Pipeline</div>
-															</j:otherwise>
-														</j:choose>
+											<thead>
+												<tr>
+													<td>
+														<div class="header">
+															<j:choose>
+																<j:when test="${from.isShowPipelineParameters()}">
+																	Pipeline ${buildGrid.get(x,0).getRevision()}
+																</j:when>
+																<j:otherwise>
+																	Pipeline
+																</j:otherwise>
+															</j:choose>
+														</div>
 													</td>
 												</tr>
+											</thead>
+											<tbody>
 												<tr class="build-body">
 													<j:choose>
 														<j:when test="${from.isShowPipelineParameters()}">
