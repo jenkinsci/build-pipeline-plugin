@@ -24,10 +24,6 @@
  */
 package au.com.centrumsystems.hudson.plugin.buildpipeline;
 
-import com.google.common.base.Splitter;
-import com.google.common.collect.Iterables;
-
-import com.google.common.collect.Sets;
 import hudson.Extension;
 import hudson.model.Action;
 import hudson.model.Item;
@@ -54,7 +50,6 @@ import hudson.tasks.Publisher;
 import hudson.util.DescribableList;
 import hudson.util.LogTaskListener;
 import hudson.util.ListBoxModel;
-import jenkins.model.Jenkins;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -70,6 +65,8 @@ import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 
+import jenkins.model.Jenkins;
+
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
@@ -78,6 +75,10 @@ import org.kohsuke.stapler.bind.JavaScriptMethod;
 import au.com.centrumsystems.hudson.plugin.buildpipeline.trigger.BuildPipelineTrigger;
 import au.com.centrumsystems.hudson.plugin.util.BuildUtil;
 import au.com.centrumsystems.hudson.plugin.util.ProjectUtil;
+
+import com.google.common.base.Splitter;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 
 /**
  * This view displays the set of jobs that are related
@@ -428,8 +429,8 @@ public class BuildPipelineView extends View {
         LOGGER.fine("Running build again: " + externalizableId); //$NON-NLS-1$
         final AbstractBuild<?, ?> triggerBuild = (AbstractBuild<?, ?>) Run.fromExternalizableId(externalizableId);
         final AbstractProject<?, ?> triggerProject = triggerBuild.getProject();
-        final Future<?> future = triggerProject.scheduleBuild2(triggerProject.getQuietPeriod(), new MyUserIdCause(),
-                removeUserIdCauseActions(triggerBuild.getActions()));
+        final Future<?> future = triggerProject.scheduleBuild2(triggerProject.getQuietPeriod(), null,
+                updateUserIdCauseActions(triggerBuild.getActions()));
 
         AbstractBuild<?, ?> result = triggerBuild;
         try {
@@ -613,11 +614,21 @@ public class BuildPipelineView extends View {
      *            a collection of build actions.
      * @return a collection of build actions with all UserId causes removed.
      */
-    private List<Action> removeUserIdCauseActions(final List<Action> actions) {
+    private List<Action> updateUserIdCauseActions(final List<Action> actions) {
         final List<Action> retval = new ArrayList<Action>();
         for (final Action action : actions) {
             if (!isUserIdCauseAction(action)) {
                 retval.add(action);
+            } else {
+                final List<Cause> causes = new ArrayList<Cause>();
+                for (Cause cause : ((CauseAction) action).getCauses()) {
+                    if (cause instanceof UserIdCause) {
+                        causes.add(new UserIdCause());
+                    } else {
+                        causes.add(cause);
+                    }
+                }
+                retval.add(new CauseAction(causes));
             }
         }
         return retval;
