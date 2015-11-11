@@ -428,8 +428,17 @@ public class BuildPipelineView extends View {
         LOGGER.fine("Running build again: " + externalizableId); //$NON-NLS-1$
         final AbstractBuild<?, ?> triggerBuild = (AbstractBuild<?, ?>) Run.fromExternalizableId(externalizableId);
         final AbstractProject<?, ?> triggerProject = triggerBuild.getProject();
+        
+        final List<Action> actions = removeUserIdAndUpstreamCauseActions(triggerBuild.getActions());
+        final Cause.UpstreamCause upstreamCause = triggerBuild.getCause(Cause.UpstreamCause.class);
+        
+        if (upstreamCause != null) {
+            LOGGER.fine(String.format("Adding Upstream Cause: %s", upstreamCause.getShortDescription()));
+            actions.add(new CauseAction(upstreamCause));
+        }
+        
         final Future<?> future = triggerProject.scheduleBuild2(triggerProject.getQuietPeriod(), new MyUserIdCause(),
-                removeUserIdCauseActions(triggerBuild.getActions()));
+                actions);
 
         AbstractBuild<?, ?> result = triggerBuild;
         try {
@@ -603,20 +612,42 @@ public class BuildPipelineView extends View {
         }
         return retval;
     }
+    
+   /** 
+    * Checks whether the given {@link Action} contains a reference to a {@link Cause.UpstreamCause} object.
+    *
+    * @param buildAction
+    *            the action to check.
+    * @return <code>true</code> if the action has a reference to an upstream cause.
+    */
+   private boolean isUpstreamCauseAction(final Action buildAction) {
+       boolean retval = false;
+       if (buildAction instanceof CauseAction) {
+           for (final Cause cause : ((CauseAction) buildAction).getCauses()) {
+               if (cause instanceof Cause.UpstreamCause) {
+                   retval = true;
+                   break;
+               }
+           }
+       }
+       return retval;
+   }
 
     /**
-     * Removes any UserId cause action from the given actions collection. This is used by downstream builds that inherit upstream actions.
-     * The downstream build can be initiated by another user that is different from the user who initiated the upstream build, so the
-     * downstream build needs to remove the old user action inherited from upstream, and add its own.
+     * Removes any UserId and Upstream cause action from the given actions collection. This is used by downstream 
+     * builds that inherit upstream actions.The downstream build can be initiated by another user that is different 
+     * from the user who initiated the upstream build, so the downstream build needs to remove the old user action 
+     * inherited from upstream, and add its own. Also, reseting the upstream cause will prevent multiple upstream 
+     * cause entries.
      *
      * @param actions
      *            a collection of build actions.
-     * @return a collection of build actions with all UserId causes removed.
+     * @return a collection of build actions with all UserId and Upstream causes removed.
      */
-    private List<Action> removeUserIdCauseActions(final List<Action> actions) {
+    private List<Action> removeUserIdAndUpstreamCauseActions(final List<Action> actions) {
         final List<Action> retval = new ArrayList<Action>();
         for (final Action action : actions) {
-            if (!isUserIdCauseAction(action)) {
+            if (!isUserIdCauseAction(action) && !isUpstreamCauseAction(action)) {
                 retval.add(action);
             }
         }
