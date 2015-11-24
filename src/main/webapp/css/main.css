@@ -198,6 +198,9 @@ table.build-card div.header a {
     text-align: left;
     font-weight: normal;
     font-size: .9em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 #pipelines {
