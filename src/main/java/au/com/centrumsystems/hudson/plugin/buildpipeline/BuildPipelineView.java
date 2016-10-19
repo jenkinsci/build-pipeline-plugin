@@ -537,8 +537,12 @@ public class BuildPipelineView extends View {
         if (manualTrigger != null) {
             final Set<String> downstreamProjectsNames =
                     Sets.newHashSet(Splitter.on(",").trimResults().split(manualTrigger.getDownstreamProjectNames()));
-            if (downstreamProjectsNames.contains(project.getFullName())) {
-                configs = manualTrigger.getConfigs();
+            for (String downstreamProjectsName : downstreamProjectsNames) {
+                final Item item = Jenkins.getInstance().getItem(downstreamProjectsName, project, Item.class);
+                if (item == project) {
+                    configs = manualTrigger.getConfigs();
+                    break;
+                }
             }
         }
 
