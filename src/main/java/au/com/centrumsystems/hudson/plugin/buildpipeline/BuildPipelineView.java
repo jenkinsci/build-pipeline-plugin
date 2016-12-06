@@ -533,12 +533,17 @@ public class BuildPipelineView extends View {
 
         List<AbstractBuildParameters> configs = null;
 
-        final BuildPipelineTrigger manualTrigger = upstreamProjectPublishersList.get(BuildPipelineTrigger.class);
-        if (manualTrigger != null) {
-            final Set<String> downstreamProjectsNames =
-                    Sets.newHashSet(Splitter.on(",").trimResults().split(manualTrigger.getDownstreamProjectNames()));
-            if (downstreamProjectsNames.contains(project.getFullName())) {
-                configs = manualTrigger.getConfigs();
+        final List<BuildPipelineTrigger> manualTriggers = upstreamProjectPublishersList.getAll(BuildPipelineTrigger.class);
+        for (BuildPipelineTrigger manualTrigger : manualTriggers) {
+            if (manualTrigger != null) {
+                final Set<String> downstreamProjectsNames =
+                        Sets.newHashSet(Splitter.on(",").trimResults().split(manualTrigger.getDownstreamProjectNames()));
+                if (downstreamProjectsNames.contains(project.getFullName())) {
+                    configs = manualTrigger.getConfigs();
+                    if (configs != null) {
+                        break;
+                    }
+                }
             }
         }
 
