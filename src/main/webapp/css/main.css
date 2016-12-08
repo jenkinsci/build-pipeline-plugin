@@ -124,6 +124,11 @@ div.pipeline-wrapper div.pipeline {
     color: #333;
 }
 
+.icon-container img {
+    width: 24px;
+    height: 24px;
+}
+
 /* -------------------- */
 
 /*************************** build card *******************************/
@@ -239,6 +244,11 @@ table.pipelines > tbody > tr > td {
 table.pipelines td.next {
     width: 30px;
     vertical-align: middle;
+}
+
+table.pipelines td.next img {
+    width: 24px;
+    height: 24px;
 }
 
 .revision {
