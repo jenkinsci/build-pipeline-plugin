@@ -999,8 +999,7 @@ public class BuildPipelineView extends View {
         boolean display = true;
         //tester la liste vide seulement en lecture
         if (READ.name.equals(p.name)) {
-          final Collection<TopLevelItem> items = this.getItems();
-          if (items == null || items.isEmpty()) {
+            if (isEmpty()) {
                 display = false;
             }
         } else {
@@ -1009,5 +1008,16 @@ public class BuildPipelineView extends View {
         }
 
         return display;
-    } 
+    }
+
+    /**
+     * determine if this view is empty
+     * @return true if this view contains zero items
+     */
+    private boolean isEmpty() {
+        if (noOfDisplayedBuilds == null || gridBuilder == null) {
+            return false;
+        }
+        return gridBuilder.build(this).isEmpty();
+    }
 }
