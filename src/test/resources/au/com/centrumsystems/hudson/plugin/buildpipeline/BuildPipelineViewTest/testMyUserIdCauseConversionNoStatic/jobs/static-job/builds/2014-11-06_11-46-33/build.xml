@@ -1,0 +1,200 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<build>
+  <number>138</number>
+  <startTime>1415274393267</startTime>
+  <result>SUCCESS</result>
+  <duration>10184</duration>
+  <charset>US-ASCII</charset>
+  <keepLog>false</keepLog>
+  <builtOn>slave</builtOn>
+  <workspace>/var/lib/jenkins/workspace/job-workspace</workspace>
+  <hudsonVersion>1.565.3</hudsonVersion>
+  <culprits class="com.google.common.collect.EmptyImmutableSet"/>
+
+  <actions>
+    <hudson.model.ParametersAction>
+      <parameters class="java.util.Arrays$ArrayList">
+        <a class="hudson.model.ParameterValue-array">
+          <hudson.model.StringParameterValue>
+            <name>param-name</name>
+            <description></description>
+            <value>value</value>
+          </hudson.model.StringParameterValue>
+        </a>
+      </parameters>
+    </hudson.model.ParametersAction>
+    <hudson.model.CauseAction>
+      <causes>
+        <hudson.model.Cause_-UpstreamCause>
+          <upstreamProject>upstream-project</upstreamProject>
+          <upstreamUrl>job/upstream-project/</upstreamUrl>
+          <upstreamBuild>50</upstreamBuild>
+          <upstreamCauses>
+            <hudson.model.Cause_-UserIdCause>
+              <userId>user@user.com</userId>
+            </hudson.model.Cause_-UserIdCause>
+          </upstreamCauses>
+        </hudson.model.Cause_-UpstreamCause>
+      </causes>
+    </hudson.model.CauseAction>
+    <org.jenkinsci.plugins.envinject.EnvInjectPluginAction plugin="envinject@1.91.1">
+      <build class="build">
+        <actions>
+          <hudson.model.ParametersAction reference="../../../../hudson.model.ParametersAction"/>
+          <hudson.model.CauseAction reference="../../../../hudson.model.CauseAction"/>
+          <org.jenkinsci.plugins.envinject.EnvInjectPluginAction reference="../../.."/>
+          <hudson.scm.SCMRevisionState_-None/>
+          <hudson.plugins.parameterizedtrigger.CapturedEnvironmentAction plugin="parameterized-trigger@2.17">
+            <env serialization="custom">
+              <unserializable-parents/>
+              <tree-map>
+                <default>
+                  <comparator class="hudson.util.CaseInsensitiveComparator"/>
+                </default>
+                <int>3</int>
+                <string>/usr/dt/app-defaults/%L/Dt</string>
+              </tree-map>
+            </env>
+          </hudson.plugins.parameterizedtrigger.CapturedEnvironmentAction>
+        </actions>
+        <number>136</number>
+        <startTime>1415271897952</startTime>
+        <result>SUCCESS</result>
+        <duration>10433</duration>
+        <charset>US-ASCII</charset>
+        <keepLog>false</keepLog>
+        <builtOn>slave</builtOn>
+        <workspace>/var/lib/jenkins/workspace/job</workspace>
+        <hudsonVersion>1.565.3</hudsonVersion>
+        <culprits class="com.google.common.collect.SingletonImmutableSet">
+          <string>jenkins</string>
+        </culprits>
+      </build>
+    </org.jenkinsci.plugins.envinject.EnvInjectPluginAction>
+    <hudson.scm.SCMRevisionState_-None reference="../org.jenkinsci.plugins.envinject.EnvInjectPluginAction/build/actions/hudson.scm.SCMRevisionState_-None"/>
+    <hudson.plugins.parameterizedtrigger.CapturedEnvironmentAction reference="../org.jenkinsci.plugins.envinject.EnvInjectPluginAction/build/actions/hudson.plugins.parameterizedtrigger.CapturedEnvironmentAction"/>
+    <hudson.model.CauseAction>
+      <causes>
+        <au.com.centrumsystems.hudson.plugin.buildpipeline.BuildPipelineView_-MyUserIdCause plugin="build-pipeline-plugin@1.4.8-SNAPSHOT">
+          <userId>UserId</userId>
+          <outer-class>
+            <owner class="hudson.model.Hudson">
+              <disabledAdministrativeMonitors>
+                <string>hudson.node_monitors.MonitorMarkedNodeOffline</string>
+              </disabledAdministrativeMonitors>
+              <version>1.565.3</version>
+              <numExecutors>3</numExecutors>
+              <mode>NORMAL</mode>
+              <useSecurity>true</useSecurity>
+              <authorizationStrategy class="hudson.security.GlobalMatrixAuthorizationStrategy">
+                <permission>com.cloudbees.plugins.credentials.CredentialsProvider.Create:user@user.com</permission>
+                <permission>com.cloudbees.plugins.credentials.CredentialsProvider.Delete:user@user.com</permission>
+                <permission>com.cloudbees.plugins.credentials.CredentialsProvider.View:user@user.com</permission>
+                <permission>hudson.model.Computer.Build:user@user.com</permission>
+                <permission>hudson.model.Computer.Configure:user@user.com</permission>
+                <permission>hudson.model.Computer.Connect:user@user.com</permission>
+                <permission>hudson.model.Computer.Create:user@user.com</permission>
+                <permission>hudson.model.Computer.Delete:user@user.com</permission>
+                <permission>hudson.model.Computer.Disconnect:user@user.com</permission>
+                <permission>hudson.model.Hudson.Administer:user@user.com</permission>
+                <permission>hudson.model.Hudson.ConfigureUpdateCenter:user@user.com</permission>
+                <permission>hudson.model.Hudson.Read:user@user.com</permission>
+                <permission>hudson.model.Hudson.RunScripts:user@user.com</permission>
+                <permission>hudson.model.Hudson.UploadPlugins:user@user.com</permission>
+                <permission>hudson.model.Item.Build:user@user.com</permission>
+                <permission>hudson.model.Item.Cancel:user@user.com</permission>
+                <permission>hudson.model.Item.Configure:user@user.com</permission>
+                <permission>hudson.model.Item.Create:user@user.com</permission>
+                <permission>hudson.model.Item.Create:user@user.com</permission>
+                <permission>hudson.model.Item.Delete:user@user.com</permission>
+                <permission>hudson.model.Item.Discover:user@user.com</permission>
+                <permission>hudson.model.Item.Read:user@user.com</permission>
+                <permission>hudson.model.Item.Read:user@user.com</permission>
+                <permission>hudson.model.Item.Workspace:user@user.com</permission>
+                <permission>hudson.model.Run.Delete:user@user.com</permission>
+                <permission>hudson.model.Run.Delete:user@user.com</permission>
+                <permission>hudson.model.Run.Update:user@user.com</permission>
+                <permission>hudson.model.Run.Update:user@user.com</permission>
+                <permission>hudson.model.View.Configure:user@user.com</permission>
+                <permission>hudson.model.View.Create:user@user.com</permission>
+                <permission>hudson.model.View.Delete:user@user.com</permission>
+                <permission>hudson.model.View.Read:user@user.com</permission>
+                <permission>hudson.scm.SCM.Tag:user@user.com</permission>
+                <!--<permission>org.jfrog.hudson.ArtifactoryPlugin.Promote:user@user.com</permission>-->
+                <!--<permission>org.jfrog.hudson.ArtifactoryPlugin.Release:user@user.com</permission>-->
+
+              </authorizationStrategy>
+              <securityRealm class="hudson.security.HudsonPrivateSecurityRealm">
+                <disableSignup>true</disableSignup>
+                <enableCaptcha>false</enableCaptcha>
+              </securityRealm>
+              <disableRememberMe>false</disableRememberMe>
+              <projectNamingStrategy class="jenkins.model.ProjectNamingStrategy$DefaultProjectNamingStrategy"/>
+              <workspaceDir>${ITEM_ROOTDIR}/workspace</workspaceDir>
+              <buildsDir>${ITEM_ROOTDIR}/builds</buildsDir>
+              <markupFormatter class="hudson.markup.RawHtmlMarkupFormatter" plugin="antisamy-markup-formatter@1.0">
+                <disableSyntaxHighlighting>false</disableSyntaxHighlighting>
+              </markupFormatter>
+              <jdks/>
+              <viewsTabBar class="hudson.views.DefaultViewsTabBar"/>
+              <myViewsTabBar class="hudson.views.DefaultMyViewsTabBar"/>
+              <clouds/>
+              <slaves></slaves>
+              <quietPeriod>5</quietPeriod>
+              <scmCheckoutRetryCount>0</scmCheckoutRetryCount>
+              <views>
+                <hudson.model.AllView>
+                  <owner class="hudson.model.Hudson" reference="../../.."/>
+                  <name>All</name>
+                  <description>description</description>
+                  <filterExecutors>false</filterExecutors>
+                  <filterQueue>false</filterQueue>
+                  <properties class="hudson.model.View$PropertyList"/>
+                </hudson.model.AllView>
+              </views>
+              <primaryView>All</primaryView>
+              <slaveAgentPort>15000</slaveAgentPort>
+              <label></label>
+              <nodeProperties/>
+              <globalNodeProperties></globalNodeProperties>
+              <noUsageStatistics>true</noUsageStatistics>
+            </owner>
+            <name>Pipeline (Services Blue Green Deployment)</name>
+            <description>description</description>
+            <filterExecutors>false</filterExecutors>
+            <filterQueue>false</filterQueue>
+            <properties class="hudson.model.View$PropertyList"/>
+            <gridBuilder class="au.com.centrumsystems.hudson.plugin.buildpipeline.DownstreamProjectGridBuilder">
+              <firstJob>first-job</firstJob>
+            </gridBuilder>
+            <noOfDisplayedBuilds>10</noOfDisplayedBuilds>
+            <buildViewTitle>build title</buildViewTitle>
+            <consoleOutputLinkStyle>Lightbox</consoleOutputLinkStyle>
+            <cssUrl></cssUrl>
+            <triggerOnlyLatestJob>false</triggerOnlyLatestJob>
+            <alwaysAllowManualTrigger>false</alwaysAllowManualTrigger>
+            <showPipelineParameters>true</showPipelineParameters>
+            <showPipelineParametersInHeaders>false</showPipelineParametersInHeaders>
+            <startsWithParameters>true</startsWithParameters>
+            <refreshFrequency>3</refreshFrequency>
+            <showPipelineDefinitionHeader>true</showPipelineDefinitionHeader>
+          </outer-class>
+        </au.com.centrumsystems.hudson.plugin.buildpipeline.BuildPipelineView_-MyUserIdCause>
+      </causes>
+    </hudson.model.CauseAction>
+    <hudson.plugins.parameterizedtrigger.CapturedEnvironmentAction plugin="parameterized-trigger@2.17">
+      <env serialization="custom">
+        <unserializable-parents/>
+        <tree-map>
+          <default>
+            <comparator class="hudson.util.CaseInsensitiveComparator" reference="../../../../../org.jenkinsci.plugins.envinject.EnvInjectPluginAction/build/actions/hudson.plugins.parameterizedtrigger.CapturedEnvironmentAction/env/tree-map/default/comparator"/>
+          </default>
+          <!--Can't cast Integer to Action-->
+          <int>3</int>
+          <string>/usr/dt/app-defaults/%L/Dt</string>
+        </tree-map>
+      </env>
+    </hudson.plugins.parameterizedtrigger.CapturedEnvironmentAction>
+  </actions>
+
+</build>
