@@ -37,7 +37,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Provides helper methods for #hudson.model.AbstractBuild
@@ -173,14 +172,15 @@ public final class BuildUtil {
     public static Map<String, String> getUnsensitiveParameters(final AbstractBuild<?, ?> build) {
         final Map<String, String> retval = new HashMap<String, String>();
         if (build != null) {
-            retval.putAll(build.getBuildVariables());
-            final Set<String> sensitiveBuildVariables = build.getSensitiveBuildVariables();
-            if (sensitiveBuildVariables != null) {
-                for (String paramName : sensitiveBuildVariables) {
-                    if (retval.containsKey(paramName)) {
+            final ParametersAction action = build.getAction(ParametersAction.class);
+            if (action != null) {
+                for (ParameterValue value : action.getParameters()) {
+                    
+                    if (value.isSensitive()) {
                         // We have the choice to hide the parameter or to replace it with special characters
-                        retval.put(paramName, "********");
-                        //retval.remove(paramName);
+                        retval.put(value.getName(), "********");
+                    } else {
+                        retval.put(value.getName(), value.createVariableResolver(build).resolve(value.getName()));
                     }
                 }
             }
@@ -188,5 +188,5 @@ public final class BuildUtil {
 
         return retval;
     }
-
+    
 }
