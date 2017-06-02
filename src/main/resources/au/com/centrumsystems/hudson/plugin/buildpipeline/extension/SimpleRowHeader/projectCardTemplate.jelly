@@ -1,0 +1,28 @@
+<j:jelly xmlns:j="jelly:core"
+         xmlns:st="jelly:stapler"
+         xmlns:d="jelly:define"
+         xmlns:l="/lib/layout"
+         xmlns:t="/lib/hudson"
+         xmlns:f="/lib/form">
+
+    <div class="build-card rounded">
+        <div class="header">
+            <a href="${rootURL}/{{url}}" title="{{name}}">{{name}}</a>
+        </div>
+        <div class="build-info">
+            {{#if lastSuccessfulBuildNumber}}
+            <ul>
+                <li>Health: <img src="${rootURL}/images/16x16/{{health}}" /></li>
+                <li>Build <abbr title="Number">No.</abbr>: <a href="${rootURL}/{{url}}{{lastSuccessfulBuildNumber}}">#{{lastSuccessfulBuildNumber}}</a></li>
+                {{#each lastSuccessfulBuildParams}}
+                <li>{{paramName}}: {{paramValue}}</li>
+                {{/each}}
+
+            </ul>
+            {{else}}
+            Awaiting Execution
+            {{/if}}
+        </div>
+    </div>
+
+</j:jelly>
