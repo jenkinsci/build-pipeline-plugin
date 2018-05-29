@@ -766,18 +766,7 @@ public class BuildPipelineView extends View {
     @Override
     public boolean hasPermission(final Permission p) {
         try {
-            boolean display = true;
-            //tester la liste vide seulement en lecture
-            if (READ.name.equals(p.name)) {
-                if (isEmpty()) {
-                    display = false;
-                }
-            } else {
-                //Pas en lecture => permission standard
-                display = super.hasPermission(p);
-            }
-
-            return display;
+            return isEmpty() ? this.getACL().hasPermission(View.CONFIGURE) : super.hasPermission(p);
         } catch (Throwable t) {
             // JENKINS-44324This can be called from jenkins just determinig if it needs to show the
             // pipeline tab, so if there are any errors don't blow up
