@@ -26,36 +26,29 @@ package au.com.centrumsystems.hudson.plugin.buildpipeline;
 
 import au.com.centrumsystems.hudson.plugin.buildpipeline.extension.BuildVariablesHeader;
 import au.com.centrumsystems.hudson.plugin.buildpipeline.extension.NullColumnHeader;
-import au.com.centrumsystems.hudson.plugin.buildpipeline.extension.PipelineHeaderExtension;
 import au.com.centrumsystems.hudson.plugin.buildpipeline.extension.SimpleColumnHeader;
 import au.com.centrumsystems.hudson.plugin.buildpipeline.extension.SimpleRowHeader;
 import au.com.centrumsystems.hudson.plugin.buildpipeline.extension.StandardBuildCard;
-import hudson.Launcher;
 import hudson.model.*;
 import hudson.model.Cause.UpstreamCause;
-import hudson.security.Permission;
+import hudson.security.ACL;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import hudson.triggers.SCMTrigger;
 import jenkins.model.Jenkins;
 
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.Bug;
-
-import au.com.centrumsystems.hudson.plugin.buildpipeline.trigger.BuildPipelineTrigger;
-import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
-import org.jvnet.hudson.test.TestBuilder;
+import org.jvnet.hudson.test.MockAuthorizationStrategy;
 import org.jvnet.hudson.test.recipes.LocalData;
 
+import au.com.centrumsystems.hudson.plugin.buildpipeline.trigger.BuildPipelineTrigger;
+
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
 
 /**
  * Test Build Pipeline View
@@ -393,12 +386,68 @@ public class BuildPipelineViewTest {
         final String bpViewTitle = "MyTestViewTitle";
         final String proj1 = "Proj1";
         final String noOfBuilds = "5";
-
+        
+        jenkins.jenkins.setSecurityRealm(jenkins.createDummySecurityRealm());
+        MockAuthorizationStrategy auth = new MockAuthorizationStrategy()
+                .grant(Jenkins.READ).everywhere().to("alice", "bob", "charlie")
+                .grant(Item.READ).everywhere().to("alice", "bob", "charlie")
+                .grant(View.READ).everywhere().to("alice", "bob")
+                .grant(View.CONFIGURE).everywhere().to("alice");
+        jenkins.jenkins.setAuthorizationStrategy(auth);
+        
         final BuildPipelineView testView = new BuildPipelineView(bpViewName,
                 bpViewTitle, new DownstreamProjectGridBuilder(proj1),
                 noOfBuilds, false, null);
 
-        assertTrue(testView.hasPermission(Permission.READ));
+        final FreeStyleProject downstream = jenkins.createFreeStyleProject(proj1);
+        auth.grant(Item.READ).onItems(downstream).to("alice", "bob");
+        
+        /* Add Tests */
+        ACL.impersonate(User.get("alice").impersonate(), new Runnable() {
+            @Override
+            public void run() {
+                assertTrue(testView.hasPermission(View.READ));
+                assertTrue(testView.hasPermission(View.CONFIGURE));
+            }
+        });
+        ACL.impersonate(User.get("bob").impersonate(), new Runnable() {
+            @Override
+            public void run() {
+                assertTrue(testView.hasPermission(View.READ));
+                assertTrue(!testView.hasPermission(View.CONFIGURE));
+            }
+        });
+        ACL.impersonate(User.get("charlie").impersonate(), new Runnable() {
+            @Override
+            public void run() {
+                assertTrue(testView.hasPermission(View.READ));
+                assertTrue(!testView.hasPermission(View.CONFIGURE));
+            }
+        });
+
+        // Test Empty view
+        final BuildPipelineView emptyView = new BuildPipelineView(bpViewName, bpViewTitle, null, noOfBuilds, false, null);
+        ACL.impersonate(User.get("alice").impersonate(), new Runnable() {
+            @Override
+            public void run() {
+                assertTrue(emptyView.hasPermission(View.READ));
+                assertTrue(emptyView.hasPermission(View.CONFIGURE));
+            }
+        });
+        ACL.impersonate(User.get("bob").impersonate(), new Runnable() {
+            @Override
+            public void run() {
+                assertTrue(!emptyView.hasPermission(View.READ));
+                assertTrue(!emptyView.hasPermission(View.CONFIGURE));
+            }
+        });
+        ACL.impersonate(User.get("charlie").impersonate(), new Runnable() {
+            @Override
+            public void run() {
+                assertTrue(!emptyView.hasPermission(View.READ));
+                assertTrue(!emptyView.hasPermission(View.CONFIGURE));
+            }
+        });
     }
 
     @Test
