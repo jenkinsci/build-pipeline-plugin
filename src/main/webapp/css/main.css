@@ -23,10 +23,20 @@ div.pipeline-wrapper.header {
     background-color: transparent;
 }
 
-div.pipeline-wrapper div.pipeline-info {
+div.pipeline-wrapper {
+    position: relative;
+    min-width: 100px;
+}
+
+div.pipeline-info {
     position: relative;
     float: left;
     min-width: 100px;
+    width: 20em;
+    height: 8.5em;
+    overflow-y: scroll;
+    margin-right: 20px;
+    box-shadow: 4px 4px 6px #555;
 }
 
 div.pipeline-wrapper div.pipeline {
@@ -245,7 +255,7 @@ table.pipelines td.next {
     background-color: #8b8989;
     text-align: center;
     padding: 4px;
-    min-height: 100px;
+    min-height: 8.5em;
 }
 
 .revision .title {

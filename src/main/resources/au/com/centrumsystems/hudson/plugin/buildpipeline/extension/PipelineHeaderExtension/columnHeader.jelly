@@ -7,7 +7,7 @@
     <!-- projects header -->
 
     <div class="pipeline-wrapper header">
-        <div class="pipeline-info"></div>
+        <div class="pipeline-info-header"></div>
         <div class="pipeline">
             <table class="pipelines">
                 <tbody>
