@@ -414,7 +414,7 @@ public class BuildPipelineViewTest {
             @Override
             public void run() {
                 assertTrue(testView.hasPermission(View.READ));
-                assertTrue(!testView.hasPermission(View.CONFIGURE));
+                assertFalse(testView.hasPermission(View.CONFIGURE));
             }
         });
         ACL.impersonate(User.get("charlie").impersonate(), new Runnable() {
@@ -437,15 +437,15 @@ public class BuildPipelineViewTest {
         ACL.impersonate(User.get("bob").impersonate(), new Runnable() {
             @Override
             public void run() {
-                assertTrue(!emptyView.hasPermission(View.READ));
-                assertTrue(!emptyView.hasPermission(View.CONFIGURE));
+                assertTrue(emptyView.hasPermission(View.READ));
+                assertFalse(emptyView.hasPermission(View.CONFIGURE));
             }
         });
         ACL.impersonate(User.get("charlie").impersonate(), new Runnable() {
             @Override
             public void run() {
-                assertTrue(!emptyView.hasPermission(View.READ));
-                assertTrue(!emptyView.hasPermission(View.CONFIGURE));
+                assertFalse(emptyView.hasPermission(View.READ));
+                assertFalse(emptyView.hasPermission(View.CONFIGURE));
             }
         });
     }

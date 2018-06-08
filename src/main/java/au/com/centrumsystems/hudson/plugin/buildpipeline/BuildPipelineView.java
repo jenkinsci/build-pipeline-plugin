@@ -766,15 +766,7 @@ public class BuildPipelineView extends View {
     @Override
     public boolean hasPermission(final Permission p) {
         try {
-            boolean display = true;
-            if (READ.equals(p)) {
-                if (isEmpty()) {
-                    display = super.hasPermission(View.CONFIGURE);
-                }
-            } else {
-                display = super.hasPermission(p);
-            }
-            return display;
+            return super.hasPermission(p);
         } catch (Throwable t) {
             // JENKINS-44324This can be called from jenkins just determinig if it needs to show the
             // pipeline tab, so if there are any errors don't blow up
