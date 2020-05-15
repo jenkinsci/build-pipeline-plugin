@@ -421,7 +421,7 @@ public class BuildPipelineViewTest {
             @Override
             public void run() {
                 assertTrue(testView.hasPermission(View.READ));
-                assertTrue(!testView.hasPermission(View.CONFIGURE));
+                assertFalse(testView.hasPermission(View.CONFIGURE));
             }
         });
 
