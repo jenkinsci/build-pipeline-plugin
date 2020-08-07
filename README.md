@@ -39,7 +39,7 @@ in the chain based on it revision number in VCS.
 
 #### The Pipeline View
 
-![](https://wiki.jenkins.io/download/attachments/54723106/bpp1.png?version=2&modificationDate=1340695983000&api=v2){width="900"}
+![](https://wiki.jenkins.io/download/attachments/54723106/bpp1.png?version=2&modificationDate=1340695983000&api=v2)
 
 ## Configuration
 
