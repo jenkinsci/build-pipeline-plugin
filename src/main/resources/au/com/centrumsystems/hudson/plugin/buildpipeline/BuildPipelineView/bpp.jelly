@@ -61,14 +61,14 @@
             <div class="icon-container">
             <j:if test="${from.isProjectParameterized()}">
                 <span class="pointer" onclick="buildPipeline.fillDialog('${app.rootUrl}${from.gridBuilder.firstJobLink}/build?delay=0sec', 'Starts the pipeline with parameters')">
-                    <img src="${rootURL}/images/24x24/clock.png" alt="Trigger a Pipeline" class="icon-with-caption"/>
-                                <span>Run</span>
+                    <l:icon src="icon-clock icon-md" alt="Trigger a Pipeline" />
+                    <span>Run</span>
                 </span>
             </j:if>
             <j:if test="${!from.isProjectParameterized()}">
               <a id="trigger-pipeline-button" href='#' onclick="$('triggerPipelineForm').submit()">
-                <img src="${rootURL}/images/24x24/clock.png" alt="Trigger a Pipeline" class="icon-with-caption"/>
-                                <span>Run</span>
+                <l:icon src="icon-clock icon-md" alt="Trigger a Pipeline" />
+                <span>Run</span>
               </a>
             </j:if>
           </div>
@@ -76,36 +76,36 @@
 
                 <div class="icon-container">
                     <a href="builds">
-                        <img src="${rootURL}/images/24x24/notepad.png" alt="Pipeline History" />
+                        <l:icon src="icon-notepad icon-md" alt="Pipeline History"/>
                         <span>History</span>
-                        </a>
-                    </div>
+                    </a>
+                </div>
 
                 <j:if test="${from.hasConfigurePermission()}">
                     <div class="icon-container">
                         <a href="configure">
-                            <img src="${rootURL}/images/24x24/setting.png" alt="Configure" />
+                            <l:icon src="icon-setting icon-md" alt="Configure" />
                             <span>Configure</span>
-                            </a>
-                        </div>
+                        </a>
+                    </div>
                     <div class="icon-container">
                         <a href="newJob">
-                            <img src="${rootURL}/images/24x24/new-package.png" alt="Add Step" />
+                            <l:icon src="icon-new-package icon-md" alt="Add Step" />
                             <span>Add Step</span>
-                            </a>
-                        </div>
+                        </a>
+                    </div>
                     <div class="icon-container">
                         <a href="delete">
-                            <img src="${rootURL}/images/24x24/edit-delete.png" />
+                            <l:icon src="icon-edit-delete icon-md" />
                             <span>Delete</span>
-                            </a>
-                        </div>
+                        </a>
+                    </div>
                     <div class="icon-container">
                         <a href="${rootURL}/manage">
-                            <img src="${rootURL}/images/24x24/setting.png" />
+                            <l:icon src="icon-setting icon-md" />
                             <span>Manage</span>
-                            </a>
-                        </div>
+                        </a>
+                    </div>
                 </j:if>
             </div>
 
