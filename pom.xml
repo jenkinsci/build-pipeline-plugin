@@ -3,7 +3,8 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>1.619</version>
+        <version>4.40</version>
+        <relativePath/>
     </parent>
     <artifactId>build-pipeline-plugin</artifactId>
     <version>1.5.9-SNAPSHOT</version>
@@ -29,8 +30,9 @@
         <pmd.config.file>pmd_rules.xml</pmd.config.file>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <groovy.version>1.8.6</groovy.version>
-        <selenium.version>2.48.0</selenium.version>
+        <selenium.version>4.1.4</selenium.version>
         <exclude.tests>**/functionaltest/*.java</exclude.tests>
+        <jenkins.version>2.337</jenkins.version>
     </properties>
     <developers>
         <developer>
@@ -45,17 +47,26 @@
             <email>alvizu@gmail.com</email>
         </developer>
     </developers>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.jenkins.tools.bom</groupId>
+                <artifactId>bom-2.332.x</artifactId>
+                <version>1370.vfa_e23fe119c3</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.9</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <version>1.9.0</version>
+            <artifactId>mockito-core</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -73,7 +84,6 @@
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy-all</artifactId>
-            <version>${groovy.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -93,20 +103,17 @@
             <!-- enables mocking of classes without default constructor (together with CGLIB) -->
             <groupId>org.objenesis</groupId>
             <artifactId>objenesis</artifactId>
-            <version>1.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <!-- only necessary if Hamcrest matchers are used -->
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-core</artifactId>
-            <version>1.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>dashboard-view</artifactId>
-            <version>2.2</version>
             <optional>true</optional>
         </dependency>
         <dependency>
@@ -125,6 +132,18 @@
                     <artifactId>commons-io</artifactId>
                     <groupId>commons-io</groupId>
                 </exclusion>
+                <exclusion>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>guava</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>net.bytebuddy</groupId>
+                    <artifactId>byte-buddy</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.google.errorprone</groupId>
+                    <artifactId>error_prone_annotations</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -132,6 +151,12 @@
             <artifactId>selenium-chrome-driver</artifactId>
             <version>${selenium.version}</version>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.errorprone</groupId>
+                    <artifactId>error_prone_annotations</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
@@ -144,24 +169,22 @@
             <artifactId>selenium-support</artifactId>
             <version>${selenium.version}</version>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>net.bytebuddy</groupId>
+                    <artifactId>byte-buddy</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
             <groupId>commons-beanutils</groupId>
             <artifactId>commons-beanutils</artifactId>
-            <version>1.8.3</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>18.0</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci</groupId>
             <artifactId>test-annotations</artifactId>
-            <version>1.1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -169,37 +192,6 @@
 
     <build>
         <plugins>
-            <!-- work-around for INFRA-588 -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <version>2.6</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.apache.maven.wagon</groupId>
-                        <artifactId>wagon-http</artifactId>
-                        <version>2.10</version>
-                        <type>jar</type>
-                    </dependency>
-                </dependencies>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.4</version>
-                <!--$NO-MVN-MAN-VER$ -->
-                <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.10.3</version>
-                <configuration>
-                    <additionalparam>-Xdoclint:none</additionalparam>
-                </configuration>
-            </plugin>
             <plugin>
                 <groupId>org.codehaus.gmaven</groupId>
                 <artifactId>gmaven-plugin</artifactId>
@@ -307,13 +299,6 @@
                     <releaseProfiles>web-tests</releaseProfiles>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-enforcer-plugin</artifactId>
-                <version>1.0</version>
-                <!--$NO-MVN-MAN-VER$ -->
-            </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
