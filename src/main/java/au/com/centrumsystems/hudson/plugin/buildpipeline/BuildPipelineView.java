@@ -433,9 +433,7 @@ public class BuildPipelineView extends View {
      * @param project
      *            - The project
      * @return URL - of the project
-     * @throws URISyntaxException
-     * @throws URISyntaxException
-     *             {@link URISyntaxException}
+     * @throws URISyntaxException on error
      */
     public String getProjectURL(final AbstractProject<?, ?> project) throws URISyntaxException {
         return project.getUrl();

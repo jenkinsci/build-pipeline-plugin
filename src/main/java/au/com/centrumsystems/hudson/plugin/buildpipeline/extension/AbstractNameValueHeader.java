@@ -29,8 +29,8 @@ package au.com.centrumsystems.hudson.plugin.buildpipeline.extension;
  * .jelly files to inherit for children. See resource files:
  *
  * <ul>
- *   <li><tt>src/main/resources/au/com/centrumsystems/hudson/plugin/buildpipeline/extension/AbstractNameValueHeader/projectCardTemplate.jelly</tt></li>
- *   <li><tt>src/main/resources/au/com/centrumsystems/hudson/plugin/buildpipeline/extension/AbstractNameValueHeader/rowHeader.jelly</tt></li>
+*   <li><code>src/main/resources/au/com/centrumsystems/hudson/plugin/buildpipeline/extension/AbstractNameValueHeader/projectCardTemplate.jelly</code></li>
+ *   <li><code>src/main/resources/au/com/centrumsystems/hudson/plugin/buildpipeline/extension/AbstractNameValueHeader/rowHeader.jelly</code></li>
  * </ul>
  *
  * @author dalvizu

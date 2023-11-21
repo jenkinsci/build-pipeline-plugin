@@ -277,7 +277,7 @@ public class BuildPipelineTrigger extends Notifier implements DependecyDeclarer 
         }
 
         /**
-         * Set help text to "Build Pipeline Plugin -> Manually Execute Downstream Project" Post Build action in JOB configuration page
+         * Set help text to "Build Pipeline Plugin -&gt; Manually Execute Downstream Project" Post Build action in JOB configuration page
          *
          * @return location of the help file
          */

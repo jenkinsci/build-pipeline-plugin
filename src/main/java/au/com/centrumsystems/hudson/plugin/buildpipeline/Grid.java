@@ -47,7 +47,7 @@ public abstract class Grid<T> {
     /**
      * Determines the next row of the grid that should be populated.
      *
-     * Given (currentRow,currentColumn), find a row R>=currentRow such that
+     * Given (currentRow,currentColumn), find a row R&gt;=currentRow such that
      * the row R contains no project to any column to the right of current column.
      * That is, find the row in which we can place a sibling of the project
      * placed in (currentRow,currentColumn).
