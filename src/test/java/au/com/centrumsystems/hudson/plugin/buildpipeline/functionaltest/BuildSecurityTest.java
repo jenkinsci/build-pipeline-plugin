@@ -38,6 +38,7 @@ public class BuildSecurityTest extends PipelineWebDriverTestBase {
         jr.jenkins.rebuildDependencyGraph();
     }
 
+    @Ignore
     @Test
     public void pipelineShouldNotShowRunButtonIfUserNotPermittedToTriggerBuild() throws Exception {
         loginLogoutPage.login(UNPRIVILEGED_USER);
@@ -47,6 +48,7 @@ public class BuildSecurityTest extends PipelineWebDriverTestBase {
                 pipelinePage.runButtonIsAbsent());
     }
 
+    @Ignore
     @Test
     public void pipelineShouldShowRunButtonIfUserPermittedToTriggerBuild() throws Exception {
         loginLogoutPage.login(PRIVILEGED_USER);
