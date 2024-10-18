@@ -99,7 +99,7 @@
             <!-- enables mocking of classes without default constructor (together with CGLIB) -->
             <groupId>org.objenesis</groupId>
             <artifactId>objenesis</artifactId>
-            <version>3.3</version>
+            <version>3.4</version>
             <scope>test</scope>
         </dependency>
         <dependency>
