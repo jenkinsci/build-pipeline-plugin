@@ -24,7 +24,7 @@ public class LoginLogoutPage implements Page {
 
         usernameField().sendKeys(username);
         passwordField().sendKeys(username);
-        passwordField().submit();
+        submitButton().click();
     }
 
     private WebElement usernameField() {
@@ -33,6 +33,10 @@ public class LoginLogoutPage implements Page {
 
     private WebElement passwordField() {
         return waitForElement(By.name("j_password"), driver);
+    }
+
+    private WebElement submitButton() {
+        return waitForElement(By.name("Submit"), driver);
     }
 
     public void logout() {
