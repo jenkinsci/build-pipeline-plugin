@@ -1,20 +1,15 @@
-.classpath
-.project
-.settings
-
-*.iml
-
-**/*.iml
-
 target
+
+# mvn hpi:run
 work
 
-.checkstyle
-checkstyle-cachefile
-
-# IntelliJ
-.idea/
+# IntelliJ IDEA project files
 *.iml
-*.ipr
 *.iws
+*.ipr
+.idea
 
+# Eclipse project files
+.settings
+.classpath
+.project
