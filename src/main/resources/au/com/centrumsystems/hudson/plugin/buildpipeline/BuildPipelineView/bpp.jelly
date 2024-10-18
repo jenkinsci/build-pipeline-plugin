@@ -67,7 +67,7 @@
                 </span>
             </j:if>
             <j:if test="${!from.isProjectParameterized()}">
-              <a id="trigger-pipeline-button" href='#' onclick="$('triggerPipelineForm').submit()">
+              <a id="trigger-pipeline-button" href='#' onclick="document.getElementById('triggerPipelineForm').submit()">
                 <l:icon src="icon-clock icon-md" alt="Trigger a Pipeline" />
                                 <span>Run</span>
               </a>
