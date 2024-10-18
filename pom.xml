@@ -83,9 +83,8 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>jquery</artifactId>
-            <version>1.12.4-1</version>
+            <groupId>io.jenkins.plugins</groupId>
+            <artifactId>jquery3-api</artifactId>
         </dependency>
         <!-- Optional dependencies for using Spock -->
         <dependency>
