@@ -61,7 +61,8 @@
         {{#unless project.disabled}}
         <div class="status-bar" id="status-bar-{{id}}">
             {{#if build.isBuilding}}
-                <div onclick="buildPipeline.fillDialog('${app.rootUrl}{{build.url}}console', 'Console output for {{project.name}} #{{build.number}}')">
+                <span class="fill-dialog-params-statusbar" data-fill-dialog-href="${app.rootUrl}{{build.url}}console" data-fill-dialog-title="Console output for {{project.name}} #{{build.number}}" style="display:none"/>
+                <div class="progress-console-onclick">
                     <table class="progress-bar" align="center">
                         <tbody>
                             <tr title="Estimated remaining time: {{build.estimatedRemainingTime}}">
@@ -94,7 +95,8 @@
                             </a>
                         </j:when>
                         <j:otherwise>
-                            <span onclick="buildPipeline.fillDialog('${app.rootUrl}{{build.url}}console', 'Console output for {{project.name}} #{{build.number}}')">
+                            <span class="fill-dialog-params-console-output-icon" data-fill-dialog-href="${app.rootUrl}{{build.url}}console" data-fill-dialog-title="Console output for {{project.name}} #{{build.number}}" style="display:none"/>
+                            <span class="console-icon-onlick" >
                                 <l:icon src="${consoleOutputIconUrl} icon-sm" alt="console" />
                             </span>
                         </j:otherwise>
