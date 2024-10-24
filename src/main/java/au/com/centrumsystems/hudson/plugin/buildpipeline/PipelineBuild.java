@@ -36,6 +36,8 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.logging.Logger;
 
 import au.com.centrumsystems.hudson.plugin.util.BuildUtil;
@@ -170,6 +172,8 @@ public class PipelineBuild {
         final AbstractProject<?, ?> currentProject;
         currentProject = getProject();
 
+        Set seen = new HashSet<String>();
+
         final List<AbstractProject<?, ?>> downstreamProjects = ProjectUtil.getDownstreamProjects(currentProject);
         for (final AbstractProject<?, ?> proj : downstreamProjects) {
             AbstractBuild<?, ?> returnedBuild = null;
@@ -178,6 +182,7 @@ public class PipelineBuild {
             }
             final PipelineBuild newPB = new PipelineBuild(returnedBuild, proj, this.currentBuild);
             pbList.add(newPB);
+            seen.add(newPB.getProject().getName());
         }
         if (Hudson.getInstance().getPlugin("parameterized-trigger") != null) {
             for (SubProjectsAction action : Util.filter(currentProject.getActions(), SubProjectsAction.class)) {
@@ -188,6 +193,9 @@ public class PipelineBuild {
                             returnedBuild = BuildUtil.getDownstreamBuild(dependency, currentBuild);
                         }
                         final PipelineBuild candidate = new PipelineBuild(returnedBuild, dependency, this.currentBuild);
+                        final String candidateProjectName = candidate.getProject().getName();
+                        if (seen.contains(candidateProjectName)) continue;
+                        seen.add(candidateProjectName);
                         // if subprojects come back as downstreams someday, no duplicates wanted
                         if (!pbList.contains(candidate)) {
                             pbList.add(candidate);
