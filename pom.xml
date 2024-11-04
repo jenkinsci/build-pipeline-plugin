@@ -31,7 +31,7 @@
         <jenkins.version>2.414.3</jenkins.version>
         <gitHubRepo>jenkinsci/${project.artifactId}</gitHubRepo>
         <code.coverage.percentage>50</code.coverage.percentage>
-        <selenium.version>4.25.0</selenium.version>
+        <selenium.version>4.26.0</selenium.version>
         <!-- TODO fix existing violations -->
         <spotbugs.threshold>High</spotbugs.threshold>
     </properties>
