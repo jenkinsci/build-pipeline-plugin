@@ -8,9 +8,4 @@
         By default we just include helpers to append script tags to your build card
     -->
     <st:adjunct includes="au.com.centrumsystems.hudson.plugin.buildpipeline.extension.BuildCardExtension.build-card-script-helpers"/>
-    <![CDATA[
-
-
-
-    ]]>
 </j:jelly>

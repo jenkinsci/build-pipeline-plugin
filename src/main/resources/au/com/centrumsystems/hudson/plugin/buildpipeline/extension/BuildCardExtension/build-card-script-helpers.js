@@ -1,7 +1,7 @@
 Handlebars.registerHelper('startScript', function() {
-    return new Handlebars.SafeString("<scr" + "ipt>");
+    return new Handlebars.SafeString("<script>");
 });
 
 Handlebars.registerHelper('endScript', function() {
-    return new Handlebars.SafeString("</scr" + "ipt>");
+    return new Handlebars.SafeString("</script>");
 });
