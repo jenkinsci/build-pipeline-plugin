@@ -56,11 +56,5 @@
         </f:entry>
     </f:section>
 
-    <script type="text/javascript">
-        // dropdownDescriptorSelectors will fill items up but don't update the layout, so need
-        // to do that explicitly
-        setTimeout(function(){
-            layoutUpdateCallback.call();
-        }, 500);
-    </script>
+    <st:adjunct includes="au.com.centrumsystems.hudson.plugin.buildpipeline.BuildPipelineView.layoutUpdateCallback-call"/>
 </j:jelly>
