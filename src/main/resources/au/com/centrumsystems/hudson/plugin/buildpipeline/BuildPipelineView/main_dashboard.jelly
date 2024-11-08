@@ -4,9 +4,9 @@
     <link href="${rootURL}/plugin/build-pipeline-plugin/css/main_dashboard.css" type="text/css" rel="stylesheet" />
     <script type="text/javascript">
         // show/hide build details
-        $(function() {
-            $(".header").click(function() {
-                var parent = $(this).parent();
+        jQuery(document).ready(function() {
+            jQuery(".header").click(function() {
+                var parent = jQuery(this).parent();
                 var ba = parent.find(".build-actions");
                 var bb = parent.find(".build-body");
 
