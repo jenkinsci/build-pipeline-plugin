@@ -55,5 +55,6 @@
             <f:select />
         </f:entry>
     </f:section>
+
     <st:adjunct includes="au.com.centrumsystems.hudson.plugin.buildpipeline.BuildPipelineView.layoutUpdateCallback-call"/>
 </j:jelly>
