@@ -202,7 +202,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>3.3.1</version>
+                <version>3.6.0</version>
                 <configuration>
                     <configLocation>${project.basedir}/checkstyle_rules.xml</configLocation>
                     <suppressionsLocation>${project.basedir}/checkstyle_suppressions.xml</suppressionsLocation>
