@@ -219,7 +219,7 @@ public class BuildPipelineTriggerTest {
     }
 
     @Test
-    @Bug(22665)
+    @Issue("JENKINS-22665")
     public void testManualTriggerCause() throws Exception
     {
         FreeStyleProject projectA = jenkins.createFreeStyleProject("A");
