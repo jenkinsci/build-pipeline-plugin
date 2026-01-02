@@ -28,7 +28,8 @@
     <properties>
         <revision>2.0.3</revision>
         <changelist>-SNAPSHOT</changelist>
-        <jenkins.version>2.452.3</jenkins.version>
+        <jenkins.baseline>2.504</jenkins.baseline>
+        <jenkins.version>${jenkins.baseline}.3</jenkins.version>
         <gitHubRepo>jenkinsci/${project.artifactId}</gitHubRepo>
         <code.coverage.percentage>50</code.coverage.percentage>
         <selenium.version>4.26.0</selenium.version>
@@ -40,8 +41,8 @@
         <dependencies>
             <dependency>
                 <groupId>io.jenkins.tools.bom</groupId>
-                <artifactId>bom-2.452.x</artifactId>
-                <version>3010.vec758b_8e7da_3</version>
+                <artifactId>bom-${jenkins.baseline}.x</artifactId>
+                <version>5804.v80587a_38d937</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
