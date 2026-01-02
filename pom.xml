@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>4.88</version>
+        <version>5.2102.v5f5fe09fccf1</version>
         <relativePath />
     </parent>
     <artifactId>build-pipeline-plugin</artifactId>
@@ -28,32 +28,21 @@
     <properties>
         <revision>2.0.3</revision>
         <changelist>-SNAPSHOT</changelist>
-        <jenkins.version>2.452.3</jenkins.version>
+        <jenkins.baseline>2.504</jenkins.baseline>
+        <jenkins.version>${jenkins.baseline}.3</jenkins.version>
         <gitHubRepo>jenkinsci/${project.artifactId}</gitHubRepo>
         <code.coverage.percentage>50</code.coverage.percentage>
         <selenium.version>4.26.0</selenium.version>
         <!-- TODO fix existing violations -->
         <spotbugs.threshold>High</spotbugs.threshold>
     </properties>
-    <developers>
-        <developer>
-            <id>centrum</id>
-            <name>Centrum Systems</name>
-            <email>plugins@centrumsystems.com.au</email>
-            <url>http://www.centrumsystems.com.au</url>
-        </developer>
-        <developer>
-            <id>dalvizu</id>
-            <name>Dan Alvizu</name>
-            <email>alvizu@gmail.com</email>
-        </developer>
-    </developers>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>io.jenkins.tools.bom</groupId>
-                <artifactId>bom-2.452.x</artifactId>
-                <version>3010.vec758b_8e7da_3</version>
+                <artifactId>bom-${jenkins.baseline}.x</artifactId>
+                <version>5804.v80587a_38d937</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -221,55 +210,6 @@
                 </executions>
             </plugin>
         </plugins>
-
-
-        <pluginManagement>
-            <plugins>
-                <!--This plugin's configuration is used to store Eclipse m2e settings
-                    only. It has no influence on the Maven build itself. -->
-                <plugin>
-                    <groupId>org.eclipse.m2e</groupId>
-                    <artifactId>lifecycle-mapping</artifactId>
-                    <version>1.0.0</version>
-                    <configuration>
-                        <lifecycleMappingMetadata>
-                            <pluginExecutions>
-                                <!--<pluginExecution>
-                                    <pluginExecutionFilter>
-                                        <groupId>org.jenkins-ci.tools</groupId>
-                                        <artifactId>maven-hpi-plugin</artifactId>
-                                        <versionRange>[1.7,)</versionRange>
-                                        <goals>
-                                            <goal>insert-test</goal>
-                                            <goal>resolve-test-dependencies</goal>
-                                            <goal>test-hpl</goal>
-                                            <goal>validate</goal>
-                                        </goals>
-                                    </pluginExecutionFilter>
-                                    <action>
-                                        <execute />
-                                    </action>
-                                </pluginExecution>-->
-                                <pluginExecution>
-                                    <pluginExecutionFilter>
-                                        <groupId>org.apache.maven.plugins</groupId>
-                                        <artifactId>maven-resources-plugin</artifactId>
-                                        <versionRange>[2.0,)</versionRange>
-                                        <goals>
-                                            <goal>default-resources</goal>
-                                            <goal>default-test-resources</goal>
-                                        </goals>
-                                    </pluginExecutionFilter>
-                                    <action>
-                                        <execute />
-                                    </action>
-                                </pluginExecution>
-                            </pluginExecutions>
-                        </lifecycleMappingMetadata>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
     </build>
 
     <repositories>
@@ -284,17 +224,6 @@
             <url>https://repo.jenkins-ci.org/public/</url>
         </pluginRepository>
     </pluginRepositories>
-
-    <distributionManagement>
-        <repository>
-            <id>repo.jenkins-ci.org</id>
-            <url>https://repo.jenkins-ci.org/releases</url>
-        </repository>
-        <snapshotRepository>
-             <id>maven.jenkins-ci.org</id>
-	     <url>https://repo.jenkins-ci.org/snapshots</url>
-        </snapshotRepository>
-    </distributionManagement>
 
     <profiles>
         <profile>
