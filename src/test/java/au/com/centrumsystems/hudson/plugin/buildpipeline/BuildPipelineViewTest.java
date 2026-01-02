@@ -41,7 +41,7 @@ import jenkins.model.Jenkins;
 
 import org.junit.Rule;
 import org.junit.Test;
-import org.jvnet.hudson.test.Bug;
+import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.MockAuthorizationStrategy;
 import org.jvnet.hudson.test.recipes.LocalData;
@@ -452,7 +452,7 @@ public class BuildPipelineViewTest {
 
     @Test
     @LocalData
-    @Bug(19755)
+    @Issue("JENKINS-19755")
     public void testMyUserIdCauseConversion() throws Exception {
         FreeStyleProject projectB = (FreeStyleProject) jenkins.getInstance().getItem("B");
         FreeStyleBuild buildB = projectB.getBuildByNumber(1);
