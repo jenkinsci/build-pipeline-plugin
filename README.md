@@ -10,6 +10,8 @@ Use the [Pipeline Graph View plugin](https://plugins.jenkins.io/pipeline-graph-v
 The plugin has known issues with Jenkins [Content Security Policy](https://www.jenkins.io/doc/book/security/csp/#notable-plugins-with-known-incompatibilities).
 Installations requiring this plugin cannot enforce CSP protection without breaking its functionality.
 
+The plugin is up for [adoption](https://www.jenkins.io/doc/developer/plugin-governance/adopt-a-plugin/) and is seeking new maintainers.
+
 ## Overview
 
 Continuous Integration has become a widely adopted practice in modern software development.  Jenkins
