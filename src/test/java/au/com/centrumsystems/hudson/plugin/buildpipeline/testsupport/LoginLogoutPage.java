@@ -19,11 +19,27 @@ public class LoginLogoutPage implements Page {
         this.baseUrl = baseUrl;
     }
 
+    private void sleep() {
+        // Selenium web driver 4.39.0 with Google Chrome 143.0.7499.169
+        // fails to login to Jenkins unless it is allowed some time to
+        // render the page.  The half second sleep was enough on my
+        // Red Hat Enterprise Linux 8.10 computer with 32 GB of memory
+        // and an AMD Ryzen 5 5600X 6-Core Processor
+        try {
+            Thread.sleep(537);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public <T extends Page> void login(String username) {
         driver.get(baseUrl + "login");
+        sleep();
 
         usernameField().sendKeys(username);
+        sleep();
         passwordField().sendKeys(username);
+        sleep();
         submitButton().click();
     }
 
