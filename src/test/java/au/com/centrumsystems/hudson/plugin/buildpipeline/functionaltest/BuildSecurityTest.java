@@ -27,11 +27,11 @@ public class BuildSecurityTest extends PipelineWebDriverTestBase {
     @Before
     public void init() throws Exception {
         GlobalMatrixAuthorizationStrategy authorizationStrategy = new GlobalMatrixAuthorizationStrategy();
-        jr.jenkins.setAuthorizationStrategy(authorizationStrategy);
         authorizationStrategy.add(Permission.READ, UNPRIVILEGED_USER);
         authorizationStrategy.add(Permission.READ, PRIVILEGED_USER);
         authorizationStrategy.add(Item.BUILD, PRIVILEGED_USER);
         authorizationStrategy.add(Item.CONFIGURE, PRIVILEGED_USER);
+        jr.jenkins.setAuthorizationStrategy(authorizationStrategy);
 
         secondJob = createFailingJob(SECOND_JOB);
         initialJob.getPublishersList().add(new BuildPipelineTrigger(secondJob.getName(), Collections.<AbstractBuildParameters>emptyList()));
