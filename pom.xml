@@ -35,19 +35,7 @@
         <!-- TODO fix existing violations -->
         <spotbugs.threshold>High</spotbugs.threshold>
     </properties>
-    <developers>
-        <developer>
-            <id>centrum</id>
-            <name>Centrum Systems</name>
-            <email>plugins@centrumsystems.com.au</email>
-            <url>http://www.centrumsystems.com.au</url>
-        </developer>
-        <developer>
-            <id>dalvizu</id>
-            <name>Dan Alvizu</name>
-            <email>alvizu@gmail.com</email>
-        </developer>
-    </developers>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
