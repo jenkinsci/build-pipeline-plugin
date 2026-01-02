@@ -89,3 +89,8 @@ au.com.centrumsystems.hudson.plugin.buildpipeline.trigger.BuildPipelineTrigger.d
 This is because the configuration files refer to old fields that may no longer exist.  In order to
 correct these issues, go to the Job Configuration page, confirm that all of the details are correct,
 and click on the *Save* button.
+
+## Changelog in [GitHub Releases](https://github.com/jenkinsci/build-pipeline-plugin/releases)
+
+Release notes have been recorded in [GitHub Releases](https://github.com/jenkinsci/build-pipeline-plugin/releases) since Build Pipeline plugin 2.0.0.
+Prior release notes are recorded in the archived [changelog](https://github.com/jenkinsci/build-pipeline-plugin/blob/build-pipeline-plugin-2.0.0/CHANGELOG.md)
