@@ -1,8 +1,14 @@
 # Build Pipeline Plugin
 
-This plugin provides a *Build Pipeline View* of upstream and downstream connected jobs that typically
-form a build pipeline.  In addition, it offers the ability to define manual triggers for jobs that
-require intervention prior to execution (e.g., an approval process outside of Jenkins).
+This plugin provides a visualization of the upstream and downstream relationships between freestyle and multi-configuration jobs that form a build pipeline.
+The visualization helps users understand the current state of a group of related jobs (either freestyle or multi-configuration).
+In addition, it offers the ability to define manual triggers for jobs that require intervention prior to execution (e.g., an approval process outside of Jenkins).
+
+The plugin does **not** support Jenkins [Pipeline jobs](https://www.jenkins.io/doc/book/pipeline/).
+Use the [Pipeline Graph View plugin](https://plugins.jenkins.io/pipeline-graph-view/) or the [Pipeline Stage View plugin](https://plugins.jenkins.io/pipeline-stage-view/) for Jenkins Pipeline jobs.
+
+The plugin has known issues with Jenkins [Content Security Policy](https://www.jenkins.io/doc/book/security/csp/#notable-plugins-with-known-incompatibilities).
+Installations requiring this plugin cannot enforce CSP protection without breaking its functionality.
 
 ## Overview
 
@@ -49,10 +55,6 @@ configuration page.
 | Restrict triggers to most recent successful builds | Select this option to restrict the display of a Trigger button to only the most recent successful build pipelines.                                                     |
 | Always allow manual trigger on pipeline steps      | Select this option if you want to manually execute or re-execute any step of the pipeline at any time.                                                                 |
 | Show pipeline parameters                           | Select this option if you want to display the parameters used to run the first job in the pipeline.                                                                    |
-
-The configuration page looks like this:
-
-![](images/configuration.png)
 
 ### Job Configuration
 
