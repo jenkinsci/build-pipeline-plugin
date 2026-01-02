@@ -1,26 +1,15 @@
 # Build Pipeline Plugin
 
-* [Wiki][wiki]
-* [Issue Tracking][issues]
-* [How to Contribute][contributing]
-
-## Summary
-
 This plugin provides a *Build Pipeline View* of upstream and downstream connected jobs that typically
 form a build pipeline.  In addition, it offers the ability to define manual triggers for jobs that
-require intervention prior to execution (e.g., an approval process outisde of Jenkins).
-
-*WARNING*: The current version of this plugin may not be safe to use.  Please review the following
-warnings before use:
-
-- [Stored XSS vulnerability](https://jenkins.io/security/advisory/2019-08-07/#SECURITY-879)
+require intervention prior to execution (e.g., an approval process outside of Jenkins).
 
 ## Overview
 
 Continuous Integration has become a widely adopted practice in modern software development.  Jenkins
-and Hudson are great tools for supporting Continuous Integration.
+is a great tool for Continuous Integration.
 
-**Taking it to the next level**: Continous Integration can become the centerpeice of your
+**Taking it to the next level**: Continuous Integration can become the centerpiece of your
 [deployment pipeline](http://www.informit.com/articles/article.aspx?p=1621865), orchestrating the promotion
 of a version of software through quality gates and into production.  By extending the concepts of CI
 you can create a chain of jobs, each one subjecting your build to quality assurance steps.  These
@@ -39,7 +28,7 @@ in the chain based on it revision number in VCS.
 
 #### The Pipeline View
 
-![](https://wiki.jenkins.io/download/attachments/54723106/bpp1.png?version=2&modificationDate=1340695983000&api=v2)
+![](images/build-pipeline.png)
 
 ## Configuration
 
@@ -50,7 +39,20 @@ in the chain based on it revision number in VCS.
 configuration page.
 3. The table below outlines each interesting parameters controls:
 
-![](https://wiki.jenkins.io/download/attachments/54723106/config.png?version=1&modificationDate=1340758239000&api=v2)
+| Parameter                                          | Description                                                                                                                                                            |
+|----------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Name                                               | The name of the Build Pipeline View                                                                                                                                    |
+| Description                                        | This message will be displayed on the view page. Useful for describing what this view is about, or linking to relevant resources. Can contain HTML tags.               |
+| Build Pipeline View Title                          | Gives a title to the page that displays the view                                                                                                                       |
+| Select Initial Job                                 | This is the first job in the build pipeline. It will traverse through the downstream jobs to build up the entire build pipeline. Select from a drop-down list of jobs. |
+| No of Displayed Builds                             | The number of historical builds to be displayed on a page.                                                                                                             |
+| Restrict triggers to most recent successful builds | Select this option to restrict the display of a Trigger button to only the most recent successful build pipelines.                                                     |
+| Always allow manual trigger on pipeline steps      | Select this option if you want to manually execute or re-execute any step of the pipeline at any time.                                                                 |
+| Show pipeline parameters                           | Select this option if you want to display the parameters used to run the first job in the pipeline.                                                                    |
+
+The configuration page looks like this:
+
+![](images/configuration.png)
 
 ### Job Configuration
 
@@ -70,57 +72,20 @@ configuration page.
 
 ### Automatic & Manual Downstream Build Steps
 
-The **Build Pipeline Plugin** handles teh creation of multiple automatic or manually triggered downstream
+The **Build Pipeline Plugin** handles the creation of multiple automatic or manually triggered downstream
 build steps on the same project.
 
-![](https://wiki.jenkins.io/download/attachments/54723106/JobConfig.PNG?version=2&modificationDate=1346302165000&api=v2)
+![](images/downstream-build-steps.png)
 
 ### Upgrading from Release 1.0.0
 
 When upgrading from 1.0.0 to 1.1.x some of the previous view and job configuration fields have been
 removed.  You may notice some errors appearing in the Jenkins log:
 
-> WARNING: Skipping a non-existen field downstreamProjectName com.thoughtworks.xstream.converters.reflection.NonExistentFieldException:
+> WARNING: Skipping a non-existent field downstreamProjectName com.thoughtworks.xstream.converters.reflection.NonExistentFieldException:
 No such field
 au.com.centrumsystems.hudson.plugin.buildpipeline.trigger.BuildPipelineTrigger.downstreamProjectName
 
 This is because the configuration files refer to old fields that may no longer exist.  In order to
 correct these issues, go to the Job Configuration page, confirm that all of the details are correct,
 and click on the *Save* button.
-
-## More on Pipelines
-
-The canonical reference for pipelines in the book [Continuous Delivery](http://www.amazon.com/gp/product/B003YMNVC0/).
-
-[Chapter 5]([here](http://www.informit.com/articles/article.aspx?p=1621865)) of the book, which
-describes how deployment pipelines work, is available for free.
-
-## Building the Project
-
-### Dependencies
-
-* [Apache Maven][maven] 3.0.4 or later
-
-### Targets
-
-```shell
-  $ mvn clean install
-```
-
-## Installing Plugin Locally
-
-1. Build the project to produce `target/build-pipeline-plugin.hpi`
-2. Remove any installation of the build-pipeline-plugin in `$user.home/.jenkins/plugins/`
-3. Copy `target/build-pipeline-plugin.hpi` to `$user.home/.jenkins/plugins/`
-4. Start/Restart Jenkins
-
-## Continuous Integration
-
-After a pull request is accepted, it is run through a [Jenkins job][job] hosted on CloudBees.
-
-[wiki]: https://wiki.jenkins-ci.org/display/JENKINS/Build+Pipeline+Plugin
-[issues]: http://issues.jenkins-ci.org/secure/IssueNavigator.jspa?mode=hide&reset=true&jqlQuery=project+%3D+JENKINS+AND+status+in+%28Open%2C+%22In+Progress%22%2C+Reopened%29+AND+component+%3D+%27build-pipeline-plugin%27
-[contributing]: https://wiki.jenkins-ci.org/display/JENKINS/Build+Pipeline+Plugin+-+How+to+Contribute
-[maven]: https://maven.apache.org/
-[job]: https://jenkins.ci.cloudbees.com/job/plugins/job/build-pipeline-plugin/
-
