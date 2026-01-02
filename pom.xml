@@ -11,7 +11,7 @@
     <version>${revision}${changelist}</version>
     <packaging>hpi</packaging>
     <name>Build Pipeline Plugin</name>
-    <description>This plugin provides build pipeline functionality to Hudson and Jenkins. This allows a chain of jobs to be visualised in a new view.  Manual jobs in the pipeline can be triggered by a user with the appropriate permissions manually confirming.</description>
+    <description>This plugin provides build pipeline visualation for Jenkins. This allows a chain of jobs to be visualised in a new view.  Manual jobs in the pipeline can be triggered by a user with the appropriate permissions manually confirming.</description>
     <url>https://github.com/jenkinsci/${project.artifactId}</url>
     <licenses>
         <license>
