@@ -6,34 +6,36 @@ import au.com.centrumsystems.hudson.plugin.buildpipeline.testsupport.BuildCardCo
 import au.com.centrumsystems.hudson.plugin.buildpipeline.testsupport.PipelinePage;
 import hudson.model.FreeStyleProject;
 import hudson.tasks.BuildTrigger;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 import org.openqa.selenium.WebDriver;
+
+import static org.junit.jupiter.api.Assertions.*;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
 
-import static org.junit.Assert.*;
-
-public class BuildPipelineViewTest {
+@WithJenkins
+class BuildPipelineViewTest {
     protected WebDriver webDriver;
 
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
+    private JenkinsRule jenkins;
 
-    @Before
-    public void before() {
+    @BeforeEach
+    void beforeEach(JenkinsRule rule) {
+        jenkins = rule;
         webDriver = new FirefoxDriver();
         WebDriverWait wait = new WebDriverWait(webDriver, Duration.ofSeconds(30));
     }
 
-    @After
-    public void cleanUpWebDriver() {
+    @AfterEach
+    void afterEach() {
         if (webDriver != null) {
             webDriver.close();
             webDriver.quit();
@@ -43,17 +45,17 @@ public class BuildPipelineViewTest {
     /**
      * checks that UI re-run button works
      */
-    @Ignore
+    @Disabled
     @Test
-    public void testReRunButton() throws Exception {
-        final FreeStyleProject freestyle1 = j.createFreeStyleProject("freestyle1");
-        final FreeStyleProject freestyle2 = j.createFreeStyleProject("freestyle2");
+    void testReRunButton() throws Exception {
+        final FreeStyleProject freestyle1 = jenkins.createFreeStyleProject("freestyle1");
+        final FreeStyleProject freestyle2 = jenkins.createFreeStyleProject("freestyle2");
         freestyle1.getPublishersList().add(new BuildTrigger("freestyle2", true));
-        final FreeStyleProject freestyle3 = j.createFreeStyleProject("freestyle3");
+        final FreeStyleProject freestyle3 = jenkins.createFreeStyleProject("freestyle3");
         freestyle2.getPublishersList().add(new BuildTrigger("freestyle3", true));
 
         freestyle1.scheduleBuild();
-        j.waitUntilNoActivity();
+        jenkins.waitUntilNoActivity();
 
         BuildPipelineView pipeline = new BuildPipelineView("pipeline", "",
                 new DownstreamProjectGridBuilder(freestyle1.getFullName()),
@@ -65,19 +67,19 @@ public class BuildPipelineViewTest {
                 false, //definition header
                 1, null, null, null, null, null);
 
-        j.getInstance().addView(pipeline);
+        jenkins.getInstance().addView(pipeline);
 
-        PipelinePage pipelinePage = new PipelinePage(webDriver, pipeline.getViewName(), j.getURL());
+        PipelinePage pipelinePage = new PipelinePage(webDriver, pipeline.getViewName(), jenkins.getURL());
         pipelinePage.open();
 
         BuildCardComponent buildCardComponent = pipelinePage.buildCard(1, 1, 2);
         buildCardComponent.clickTriggerButton();
 
-        j.waitUntilNoActivity();
+        jenkins.waitUntilNoActivity();
         pipelinePage.reload();
 
-        assertEquals(freestyle1.getBuilds().size(), 1);
-        assertEquals(freestyle2.getBuilds().size(), 2);
-        assertEquals(freestyle3.getBuilds().size(), 2);
+        assertEquals(1, freestyle1.getBuilds().size());
+        assertEquals(2, freestyle2.getBuilds().size());
+        assertEquals(2, freestyle3.getBuilds().size());
     }
 }

@@ -1,41 +1,38 @@
 package au.com.centrumsystems.hudson.plugin.buildpipeline;
 
-import au.com.centrumsystems.hudson.plugin.buildpipeline.BuildPipelineView;
-import au.com.centrumsystems.hudson.plugin.buildpipeline.DownstreamProjectGridBuilder;
-import au.com.centrumsystems.hudson.plugin.buildpipeline.extension.NullColumnHeader;
-import au.com.centrumsystems.hudson.plugin.buildpipeline.extension.PipelineHeaderExtension;
 import au.com.centrumsystems.hudson.plugin.buildpipeline.testsupport.BuildCardComponent;
 import au.com.centrumsystems.hudson.plugin.buildpipeline.testsupport.PipelinePage;
 import hudson.model.FreeStyleProject;
-import hudson.tasks.BuildTrigger;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 import org.openqa.selenium.WebDriver;
+
+import static org.junit.jupiter.api.Assertions.*;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
 
-import static org.junit.Assert.*;
-
-public class BuildPipelineViewDisplayNameTest {
+@WithJenkins
+class BuildPipelineViewDisplayNameTest {
     protected WebDriver webDriver;
 
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
+    private JenkinsRule jenkins;
 
-    @Before
-    public void before() {
+    @BeforeEach
+    void beforeEach(JenkinsRule rule) {
+        jenkins = rule;
         webDriver = new FirefoxDriver();
         WebDriverWait wait = new WebDriverWait(webDriver, Duration.ofSeconds(30));
     }
 
-    @After
-    public void cleanUpWebDriver() {
+    @AfterEach
+    void afterEach() {
         if (webDriver != null) {
             webDriver.close();
             webDriver.quit();
@@ -45,15 +42,15 @@ public class BuildPipelineViewDisplayNameTest {
     /**
      * checks that pipeline box uses displayName
      */
-    @Ignore
+    @Disabled
     @Test
-    public void testDisplayName() throws Exception {
-        final FreeStyleProject freestyle1 = j.createFreeStyleProject("freestyle1");
+    void testDisplayName() throws Exception {
+        final FreeStyleProject freestyle1 = jenkins.createFreeStyleProject("freestyle1");
 
         freestyle1.setDisplayName("fancyname1");
 
         freestyle1.scheduleBuild();
-        j.waitUntilNoActivity();
+        jenkins.waitUntilNoActivity();
 
         BuildPipelineView pipeline = new BuildPipelineView("pipeline", "",
                 new DownstreamProjectGridBuilder(freestyle1.getFullName()),
@@ -67,14 +64,14 @@ public class BuildPipelineViewDisplayNameTest {
 
 
 
-        j.getInstance().addView(pipeline);
+        jenkins.getInstance().addView(pipeline);
 
-        PipelinePage pipelinePage = new PipelinePage(webDriver, pipeline.getViewName(), j.getURL());
+        PipelinePage pipelinePage = new PipelinePage(webDriver, pipeline.getViewName(), jenkins.getURL());
         pipelinePage.open();
 
         BuildCardComponent buildCardComponent = pipelinePage.buildCard(1, 1, 2);
 
-        assertTrue("The displayName should be visible",
-                buildCardComponent.hasDisplayName("fancyname1"));
+        assertTrue(buildCardComponent.hasDisplayName("fancyname1"),
+                "The displayName should be visible");
     }
 }

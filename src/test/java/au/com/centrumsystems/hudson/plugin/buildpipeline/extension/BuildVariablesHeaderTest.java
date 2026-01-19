@@ -25,41 +25,43 @@
 package au.com.centrumsystems.hudson.plugin.buildpipeline.extension;
 
 import hudson.model.AbstractBuild;
-import org.junit.Before;
-import org.junit.Test;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author dalvizu
  */
-public class BuildVariablesHeaderTest {
+class BuildVariablesHeaderTest {
 
     private Map<String, String> buildVariableMap;
 
-    @Before
-    public void setup() {
-        buildVariableMap = new HashMap<String, String>();
+    @BeforeEach
+    void beforeEach() {
+        buildVariableMap = new HashMap<>();
         buildVariableMap.put("FOO", "BAR");
         buildVariableMap.put("SECRET", "PASSWORD");
     }
 
     @Test
-    public void testGetParameters() {
+    void testGetParameters() {
         AbstractBuild build = mock(AbstractBuild.class);
         when(build.getBuildVariables()).thenReturn(buildVariableMap);
-        when(build.getSensitiveBuildVariables()).thenReturn(new HashSet<String>(Arrays.asList("SECRET")));
+        when(build.getSensitiveBuildVariables()).thenReturn(new HashSet<>(Arrays.asList("SECRET")));
         BuildVariablesHeader provider = new BuildVariablesHeader();
         Map<String, String> result = provider.getParameters(build);
         assertEquals(2, result.size());
-        assertEquals(result.get("SECRET"), "********");
-        assertEquals(result.get("FOO"), "BAR");
+        assertEquals("********", result.get("SECRET"));
+        assertEquals("BAR", result.get("FOO"));
     }
 }

@@ -29,36 +29,39 @@ import hudson.model.ParameterValue;
 import hudson.model.ParametersAction;
 import hudson.model.PasswordParameterValue;
 import hudson.model.StringParameterValue;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author dalvizu
  */
-public class SimpleRowHeaderTest {
+@WithJenkins
+class SimpleRowHeaderTest {
 
     private SimpleRowHeader provider;
 
-    @Rule
-    public JenkinsRule jenkinsRule = new JenkinsRule();
+    private JenkinsRule jenkins;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void beforeEach(JenkinsRule rule) {
+        jenkins = rule;
         provider = new SimpleRowHeader();
     }
 
     @Test
-    public void testGetParameters() {
-        List<ParameterValue> parameterList = new ArrayList<ParameterValue>();
+    void testGetParameters() {
+        List<ParameterValue> parameterList = new ArrayList<>();
         ParameterValue sensitiveParameter = new PasswordParameterValue("password", "123");
         ParameterValue nonsensitiveParameter = new StringParameterValue("foo", "bar");
         parameterList.add(sensitiveParameter);

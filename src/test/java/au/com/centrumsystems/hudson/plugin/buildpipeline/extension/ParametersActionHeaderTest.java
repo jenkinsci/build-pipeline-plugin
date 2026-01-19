@@ -29,44 +29,46 @@ import hudson.model.ParameterValue;
 import hudson.model.ParametersAction;
 import hudson.model.PasswordParameterValue;
 import hudson.model.StringParameterValue;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
  * @author dalvizu
  */
-public class ParametersActionHeaderTest {
+@WithJenkins
+class ParametersActionHeaderTest {
 
-    private ParametersActionHeader provider = new ParametersActionHeader();
+    private final ParametersActionHeader provider = new ParametersActionHeader();
 
-    @Rule
-    public JenkinsRule jenkinsRule = new JenkinsRule();
+    private JenkinsRule jenkins;
 
-    @Before
-    public void setup() {
-
+    @BeforeEach
+    void beforeEach(JenkinsRule rule) {
+        jenkins = rule;
     }
 
     @Test
-    public void testNoParameterAction() {
+    void testNoParameterAction() {
         AbstractBuild build = mock(AbstractBuild.class);
         assertTrue(provider.getParameters(build).isEmpty());
     }
 
     @Test
-    public void testGetParameters() {
-        List<ParameterValue> parameterList = new ArrayList<ParameterValue>();
+    void testGetParameters() {
+        List<ParameterValue> parameterList = new ArrayList<>();
         ParameterValue sensitiveParameter = new PasswordParameterValue("password", "123");
         ParameterValue nonsensitiveParameter = new StringParameterValue("foo", "bar");
         parameterList.add(sensitiveParameter);
@@ -76,8 +78,8 @@ public class ParametersActionHeaderTest {
         AbstractBuild build = mock(AbstractBuild.class);
         when(build.getAction(ParametersAction.class)).thenReturn(action);
         Map<String, String> result = provider.getParameters(build);
-        assertEquals(result.size(), 2);
-        assertEquals(result.get("password"), "********");
-        assertEquals(result.get("foo"), "bar");
+        assertEquals(2, result.size());
+        assertEquals("********", result.get("password"));
+        assertEquals("bar", result.get("foo"));
     }
 }

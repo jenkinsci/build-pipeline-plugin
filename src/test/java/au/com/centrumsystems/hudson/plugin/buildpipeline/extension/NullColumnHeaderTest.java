@@ -25,20 +25,22 @@
 package au.com.centrumsystems.hudson.plugin.buildpipeline.extension;
 
 import hudson.model.AbstractBuild;
-import org.junit.Test;
 
 import java.util.Map;
 
-import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.Test;
+
 import static org.mockito.Mockito.mock;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author dalvizu
  */
-public class NullColumnHeaderTest {
+class NullColumnHeaderTest {
 
     @Test
-    public void testGetParameters() {
+    void testGetParameters() {
         SimpleRowHeader provider = new SimpleRowHeader();
         AbstractBuild build = mock(AbstractBuild.class);
         Map<String, String> result = provider.getParameters(build);

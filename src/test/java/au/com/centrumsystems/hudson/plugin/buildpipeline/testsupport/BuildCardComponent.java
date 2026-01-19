@@ -34,7 +34,7 @@ public class BuildCardComponent {
         return this;
     }
 
-    public BuildCardComponent waitForBuildToStart() throws Exception {
+    public BuildCardComponent waitForBuildToStart() {
         waitForElement(By.xpath(".//table[@class='progress-bar']"), webDriver);
         return this;
     }
@@ -62,7 +62,7 @@ public class BuildCardComponent {
         return elementIsPresent(By.xpath(RETRY_IMG_XPATH), webDriver);
     }
 
-    public BuildCardComponent clickTriggerButton() throws Exception {
+    public BuildCardComponent clickTriggerButton() {
         triggerButtonHtmlElement().click();
         return this;
     }

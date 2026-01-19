@@ -5,85 +5,84 @@ import au.com.centrumsystems.hudson.plugin.buildpipeline.testsupport.PipelineWeb
 import au.com.centrumsystems.hudson.plugin.buildpipeline.trigger.BuildPipelineTrigger;
 import hudson.model.FreeStyleProject;
 import hudson.model.Item;
-import hudson.plugins.parameterizedtrigger.AbstractBuildParameters;
 import hudson.security.GlobalMatrixAuthorizationStrategy;
 import hudson.security.Permission;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class BuildSecurityTest extends PipelineWebDriverTestBase {
+class BuildSecurityTest extends PipelineWebDriverTestBase {
 
-    static final String UNPRIVILEGED_USER = "unprivilegeduser";
-    static final String PRIVILEGED_USER = "privilegeduser";
+    private static final String UNPRIVILEGED_USER = "unprivilegeduser";
+    private static final String PRIVILEGED_USER = "privilegeduser";
 
-    FreeStyleProject secondJob;
+    private FreeStyleProject secondJob;
 
-    @Before
-    public void init() throws Exception {
+    @BeforeEach
+    void beforeEach() throws Exception {
         GlobalMatrixAuthorizationStrategy authorizationStrategy = new GlobalMatrixAuthorizationStrategy();
         authorizationStrategy.add(Permission.READ, UNPRIVILEGED_USER);
         authorizationStrategy.add(Permission.READ, PRIVILEGED_USER);
         authorizationStrategy.add(Item.BUILD, PRIVILEGED_USER);
         authorizationStrategy.add(Item.CONFIGURE, PRIVILEGED_USER);
-        jr.jenkins.setAuthorizationStrategy(authorizationStrategy);
+        jenkins.jenkins.setAuthorizationStrategy(authorizationStrategy);
 
         secondJob = createFailingJob(SECOND_JOB);
-        initialJob.getPublishersList().add(new BuildPipelineTrigger(secondJob.getName(), Collections.<AbstractBuildParameters>emptyList()));
-        jr.jenkins.rebuildDependencyGraph();
+        initialJob.getPublishersList().add(new BuildPipelineTrigger(secondJob.getName(), Collections.emptyList()));
+        jenkins.jenkins.rebuildDependencyGraph();
     }
 
     @Test
-    public void pipelineShouldNotShowRunButtonIfUserNotPermittedToTriggerBuild() throws Exception {
+    void pipelineShouldNotShowRunButtonIfUserNotPermittedToTriggerBuild() {
         loginLogoutPage.login(UNPRIVILEGED_USER);
         pipelinePage.open();
 
-        assertTrue("The Run button should not be present",
-                pipelinePage.runButtonIsAbsent());
+        assertTrue(pipelinePage.runButtonIsAbsent(),
+                "The Run button should not be present");
     }
 
     @Test
-    public void pipelineShouldShowRunButtonIfUserPermittedToTriggerBuild() throws Exception {
+    void pipelineShouldShowRunButtonIfUserPermittedToTriggerBuild() {
         loginLogoutPage.login(PRIVILEGED_USER);
         pipelinePage.open();
 
-        assertTrue("The Run button should be present",
-                pipelinePage.runButtonIsPresent());
+        assertTrue(pipelinePage.runButtonIsPresent(),
+                "The Run button should be present");
     }
 
-    @Ignore
+    @Disabled
     @Test
-    public void manualBuildTriggerShouldNotBeShownIfNotPeritted() throws Exception {
-        jr.buildAndAssertSuccess(initialJob);
+    void manualBuildTriggerShouldNotBeShownIfNotPeritted() throws Exception {
+        jenkins.buildAndAssertSuccess(initialJob);
 
         loginLogoutPage.login(UNPRIVILEGED_USER);
         pipelinePage.open();
 
-        assertFalse("Second card in pipeline should not have a trigger button",
-                pipelinePage.buildCard(1, 1, 2).hasManualTriggerButton());
+        assertFalse(pipelinePage.buildCard(1, 1, 2).hasManualTriggerButton(),
+                "Second card in pipeline should not have a trigger button");
     }
 
-    @Ignore
+    @Disabled
     @Test
-    public void manualBuildTriggerShouldBeShownIfPermitted() throws Exception {
-        jr.buildAndAssertSuccess(initialJob);
+    void manualBuildTriggerShouldBeShownIfPermitted() throws Exception {
+        jenkins.buildAndAssertSuccess(initialJob);
 
         loginLogoutPage.login(PRIVILEGED_USER);
         pipelinePage.open();
 
-        assertTrue("Second card in pipeline should have a trigger button",
-                pipelinePage.buildCard(1, 1, 2).hasManualTriggerButton());
+        assertTrue(pipelinePage.buildCard(1, 1, 2).hasManualTriggerButton(),
+                "Second card in pipeline should have a trigger button");
     }
 
-    @Ignore
+    @Disabled
     @Test
-    public void retryButtonShouldNotBeShownIfNotPermitted() throws Exception {
-        jr.buildAndAssertSuccess(initialJob);
+    void retryButtonShouldNotBeShownIfNotPermitted() throws Exception {
+        jenkins.buildAndAssertSuccess(initialJob);
         loginLogoutPage.login(PRIVILEGED_USER);
         pipelinePage.open();
         BuildCardComponent secondBuildCard = pipelinePage.buildCard(1, 1, 2);
@@ -94,15 +93,15 @@ public class BuildSecurityTest extends PipelineWebDriverTestBase {
         loginLogoutPage.login(UNPRIVILEGED_USER);
         pipelinePage.open();
 
-        assertFalse("Second card in pipeline should not have a retry button",
-                pipelinePage.buildCard(1, 1, 2).hasRetryButton());
+        assertFalse(pipelinePage.buildCard(1, 1, 2).hasRetryButton(),
+                "Second card in pipeline should not have a retry button");
     }
 
-    @Ignore
+    @Disabled
     @Test
-    public void retryButtonShouldBeShownIfPermitted() throws Exception {
-        jr.buildAndAssertSuccess(initialJob);
-        jr.waitUntilNoActivity();
+    void retryButtonShouldBeShownIfPermitted() throws Exception {
+        jenkins.buildAndAssertSuccess(initialJob);
+        jenkins.waitUntilNoActivity();
 
         loginLogoutPage.login(PRIVILEGED_USER);
         pipelinePage.open();
@@ -111,7 +110,7 @@ public class BuildSecurityTest extends PipelineWebDriverTestBase {
         secondBuildCard.clickTriggerButton();
         secondBuildCard.waitForFailure();
 
-        assertTrue("Second card in pipeline should have a retry button",
-                pipelinePage.buildCard(1, 1, 2).hasRetryButton());
+        assertTrue(pipelinePage.buildCard(1, 1, 2).hasRetryButton(),
+                "Second card in pipeline should have a retry button");
     }
 }

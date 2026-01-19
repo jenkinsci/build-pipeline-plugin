@@ -1,37 +1,43 @@
 package au.com.centrumsystems.hudson.plugin.buildpipeline;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import au.com.centrumsystems.hudson.plugin.buildpipeline.extension.NullColumnHeader;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.tasks.BuildTrigger;
 
-import java.io.IOException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.jvnet.hudson.test.HudsonTestCase;
+import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
-public class ProjectFormTest extends HudsonTestCase {
-    @Override
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
+@WithJenkins
+class ProjectFormTest {
+
+    private JenkinsRule jenkins;
+
+    @BeforeEach
+    void beforeEach(JenkinsRule rule) {
+        jenkins = rule;
     }
 
     @Test
-    public void testConstructor() throws Exception {
+    void testConstructor() throws Exception {
         final String proj1 = "Project1";
         final String proj2 = "Project2";
-        final FreeStyleProject project1 = createFreeStyleProject(proj1);
-        final FreeStyleProject project2 = createFreeStyleProject(proj2);
+        final FreeStyleProject project1 = jenkins.createFreeStyleProject(proj1);
+        final FreeStyleProject project2 = jenkins.createFreeStyleProject(proj2);
         project1.getPublishersList().add(new BuildTrigger(proj2, false));
-        hudson.rebuildDependencyGraph();
-        final FreeStyleBuild build1 = buildAndAssertSuccess(project1);
-        waitUntilNoActivity();
+        jenkins.getInstance().rebuildDependencyGraph();
+        final FreeStyleBuild build1 = jenkins.buildAndAssertSuccess(project1);
+        jenkins.waitUntilNoActivity();
 
         final PipelineBuild pb = new PipelineBuild(build1, project1, null);
         final ProjectForm pf = new ProjectForm(project1, new NullColumnHeader());
@@ -43,13 +49,13 @@ public class ProjectFormTest extends HudsonTestCase {
     }
 
     @Test
-    public void testEquals() throws IOException {
+    void testEquals() throws Exception {
         final String proj1 = "Project1";
         final String proj2 = "Project2";
-        final FreeStyleProject project1 = createFreeStyleProject(proj1);
-        final FreeStyleProject project2 = createFreeStyleProject(proj2);
+        final FreeStyleProject project1 = jenkins.createFreeStyleProject(proj1);
+        final FreeStyleProject project2 = jenkins.createFreeStyleProject(proj2);
         project1.getPublishersList().add(new BuildTrigger(proj2, false));
-        hudson.rebuildDependencyGraph();
+        jenkins.getInstance().rebuildDependencyGraph();
 
         final ProjectForm pf = new ProjectForm(project1, new NullColumnHeader());
         final ProjectForm pf1 = new ProjectForm(project1, new NullColumnHeader());
@@ -57,22 +63,22 @@ public class ProjectFormTest extends HudsonTestCase {
         final String proj3 = null;
         final ProjectForm pf3 = new ProjectForm(proj3);
 
-        assertTrue(pf.equals(pf1));
-        assertFalse(pf.equals(pf2));
+        assertEquals(pf, pf1);
+        assertNotEquals(pf, pf2);
         assertNotNull(pf);
-        assertFalse(pf.equals(pf3));
+        assertNotEquals(pf, pf3);
 
     }
 
     @Test
-    public void testNoInfiniteRecursion() throws IOException {
+    void testNoInfiniteRecursion() throws Exception {
         final String proj1 = "Project1";
         final String proj2 = "Project2";
-        final FreeStyleProject project1 = createFreeStyleProject(proj1);
-        final FreeStyleProject project2 = createFreeStyleProject(proj2);
+        final FreeStyleProject project1 = jenkins.createFreeStyleProject(proj1);
+        final FreeStyleProject project2 = jenkins.createFreeStyleProject(proj2);
         project1.getPublishersList().add(new BuildTrigger(proj2, false));
         project2.getPublishersList().add(new BuildTrigger(proj1, false));
-        hudson.rebuildDependencyGraph();
+        jenkins.getInstance().rebuildDependencyGraph();
 
         final ProjectForm form1 = new ProjectForm(project1, new NullColumnHeader());
         assertThat(form1.getDependencies(), hasSize(1));

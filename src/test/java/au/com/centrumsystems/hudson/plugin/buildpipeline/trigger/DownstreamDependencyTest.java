@@ -24,47 +24,52 @@
  */package au.com.centrumsystems.hudson.plugin.buildpipeline.trigger;
 
 import hudson.model.FreeStyleProject;
-import hudson.model.Hudson;
 import hudson.tasks.BuildTrigger;
 
-import java.io.IOException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.jvnet.hudson.test.HudsonTestCase;
+import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
  * @author Centrum Systems
  * 
  */
-public class DownstreamDependencyTest extends HudsonTestCase {
+@WithJenkins
+class DownstreamDependencyTest {
 
-    @Override
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
+    private JenkinsRule jenkins;
+
+    @BeforeEach
+    void beforeEach(JenkinsRule rule) {
+        jenkins = rule;
     }
 
     @Test
-    public void testDownstreamDependency() throws IOException {
+    void testDownstreamDependency() throws Exception {
         final String proj1 = "Proj1";
         final String proj2 = "Proj2";
-        final FreeStyleProject project1 = createFreeStyleProject(proj1);
-        final FreeStyleProject project2 = createFreeStyleProject(proj2);
+        final FreeStyleProject project1 = jenkins.createFreeStyleProject(proj1);
+        final FreeStyleProject project2 = jenkins.createFreeStyleProject(proj2);
 
         final DownstreamDependency myDD = new DownstreamDependency(project1, project2);
-        assertEquals("Upstream project should be " + proj1, project1, myDD.getUpstreamProject());
-        assertEquals("Downstream project should be " + proj2, project2, myDD.getDownstreamProject());
+        assertEquals(project1, myDD.getUpstreamProject(), "Upstream project should be " + proj1);
+        assertEquals(project2, myDD.getDownstreamProject(), "Downstream project should be " + proj2);
     }
 
     @Test
-    public void testShouldTriggerBuild() throws Exception {
+    void testShouldTriggerBuild() throws Exception {
         final String proj1 = "Proj1";
         final String proj2 = "Proj2";
         final String proj3 = "Proj3";
-        final FreeStyleProject project1 = createFreeStyleProject(proj1);
-        final FreeStyleProject project2 = createFreeStyleProject(proj2);
-        final FreeStyleProject project3 = createFreeStyleProject(proj3);
+        final FreeStyleProject project1 = jenkins.createFreeStyleProject(proj1);
+        final FreeStyleProject project2 = jenkins.createFreeStyleProject(proj2);
+        final FreeStyleProject project3 = jenkins.createFreeStyleProject(proj3);
 
         // Add TEST_PROJECT2 as a Manually executed pipeline project
         // Add TEST_PROJECT3 as a Post-build action -> build other projects
@@ -72,11 +77,11 @@ public class DownstreamDependencyTest extends HudsonTestCase {
         project1.getPublishersList().add(new BuildTrigger(proj3, true));
 
         // Important; we must do this step to ensure that the dependency graphs are updated
-        Hudson.getInstance().rebuildDependencyGraph();
+        jenkins.getInstance().rebuildDependencyGraph();
 
         // Build project1 and wait until completion
-        buildAndAssertSuccess(project1);
-        waitUntilNoActivity();
+        jenkins.buildAndAssertSuccess(project1);
+        jenkins.waitUntilNoActivity();
 
         assertNull(project2.getLastBuild());
         assertNotNull(project3.getLastBuild());

@@ -28,64 +28,64 @@ import hudson.model.FreeStyleBuild;
 import hudson.model.AbstractBuild;
 import hudson.model.Cause.UserCause;
 import hudson.model.FreeStyleProject;
-import hudson.model.Hudson;
 import hudson.model.ParametersAction;
 import hudson.model.ParametersDefinitionProperty;
 import hudson.model.StringParameterDefinition;
 import hudson.model.StringParameterValue;
 import hudson.tasks.BuildTrigger;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.jvnet.hudson.test.HudsonTestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.RunLoadCounter;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 import java.util.concurrent.Callable;
 
-public class BuildUtilTest extends HudsonTestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-    @Override
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
+@WithJenkins
+class BuildUtilTest {
+
+    private JenkinsRule jenkins;
+
+    @BeforeEach
+    void beforeEach(JenkinsRule rule) {
+        jenkins = rule;
     }
 
     @Test
-    public void testGetDownstreamBuildWithLimit() throws Exception {
+    void testGetDownstreamBuildWithLimit() throws Exception {
         int max_upstream_depth = 3;
         int total_proj2_builds = 10;
         System.setProperty(BuildUtil.class.getCanonicalName() + ".MAX_DOWNSTREAM_DEPTH", String.valueOf(max_upstream_depth));
 
-        final FreeStyleProject proj1 = createFreeStyleProject();
-        final FreeStyleProject proj2 = createFreeStyleProject();
+        final FreeStyleProject proj1 = jenkins.createFreeStyleProject();
+        final FreeStyleProject proj2 = jenkins.createFreeStyleProject();
 
 
         final FreeStyleBuild freeStyleBuild = proj1.scheduleBuild2(0).get();
-        assertBuildStatusSuccess(freeStyleBuild);
+        jenkins.assertBuildStatusSuccess(freeStyleBuild);
 
         proj1.getPublishersList().add(new BuildTrigger(proj2.getName(), true));
 
-        jenkins.rebuildDependencyGraph();
+        jenkins.getInstance().rebuildDependencyGraph();
 
         // Schedule a build 10 times
         for (int i = 0; i < total_proj2_builds; i++) {
-            assertBuildStatusSuccess(proj1.scheduleBuild2(0));
-            waitUntilNoActivity();
+            jenkins.assertBuildStatusSuccess(proj1.scheduleBuild2(0));
+            jenkins.waitUntilNoActivity();
         }
-        assertEquals("Proj2 does not have the correct number of builds.", total_proj2_builds + 1, proj2.getNextBuildNumber());
+        assertEquals(total_proj2_builds + 1, proj2.getNextBuildNumber(), "Proj2 does not have the correct number of builds.");
         RunLoadCounter.prepare(proj2);
 
-        assertNull(RunLoadCounter.assertMaxLoads(proj2, max_upstream_depth + 2, new Callable<AbstractBuild<?, ?>>() {
-            @Override
-            public AbstractBuild<?, ?> call() throws Exception {
-                return BuildUtil.getDownstreamBuild(proj2, freeStyleBuild);
-            }
-        }));
+        assertNull(RunLoadCounter.assertMaxLoads(proj2, max_upstream_depth + 2, (Callable<AbstractBuild<?, ?>>) () -> BuildUtil.getDownstreamBuild(proj2, freeStyleBuild)));
     }
 
-
     @Test
-    public void testGetDownstreamBuild() throws Exception {
+    void testGetDownstreamBuild() throws Exception {
         final String proj1 = "Proj1";
         final String proj2 = "Proj2";
         final String proj3 = "Proj3";
@@ -96,36 +96,36 @@ public class BuildUtilTest extends HudsonTestCase {
         final FreeStyleBuild build4 = null;
 
         // Create test projects and associated builders
-        project1 = createFreeStyleProject(proj1);
-        project2 = createFreeStyleProject(proj2);
-        project3 = createFreeStyleProject(proj3);
+        project1 = jenkins.createFreeStyleProject(proj1);
+        project2 = jenkins.createFreeStyleProject(proj2);
+        project3 = jenkins.createFreeStyleProject(proj3);
 
         // Add project2 as a post build action: build other project
         project1.getPublishersList().add(new BuildTrigger(proj2, true));
         project2.getPublishersList().add(new BuildTrigger(proj3, true));
 
         // Important; we must do this step to ensure that the dependency graphs are updated
-        Hudson.getInstance().rebuildDependencyGraph();
+        jenkins.getInstance().rebuildDependencyGraph();
 
         // Build project1, upon completion project2 will be built
-        build1 = buildAndAssertSuccess(project1);
+        build1 = jenkins.buildAndAssertSuccess(project1);
         // When all building is complete retrieve the last build from project2
-        waitUntilNoActivity();
+        jenkins.waitUntilNoActivity();
         build2 = project2.getLastBuild();
         build3 = project3.getLastBuild();
 
         AbstractBuild<?, ?> nextBuild = BuildUtil.getDownstreamBuild(project2, build1);
-        assertEquals("The next build should be " + proj1 + build2.number, build2, nextBuild);
+        assertEquals(build2, nextBuild, "The next build should be " + proj1 + build2.number);
 
         nextBuild = BuildUtil.getDownstreamBuild(project3, nextBuild);
-        assertEquals("The next build should be " + proj1 + build3.number, build3, nextBuild);
+        assertEquals(build3, nextBuild, "The next build should be " + proj1 + build3.number);
 
         nextBuild = BuildUtil.getDownstreamBuild(project4, build4);
         assertNull(nextBuild);
     }
 
     @Test
-    public void testGetAllBuildParametersAction() throws Exception {
+    void testGetAllBuildParametersAction() throws Exception {
         final String proj1 = "Proj1";
         final String proj2 = "Proj2";
         final String key1 = "testKey";
@@ -138,8 +138,8 @@ public class BuildUtilTest extends HudsonTestCase {
         FreeStyleBuild build1;
 
         // Create test projects and associated builders
-        project1 = createFreeStyleProject(proj1);
-        project2 = createFreeStyleProject(proj2);
+        project1 = jenkins.createFreeStyleProject(proj1);
+        project2 = jenkins.createFreeStyleProject(proj2);
         // Add a String parameter
         project1.addProperty((new ParametersDefinitionProperty(new StringParameterDefinition(key1, value1))));
         project1.addProperty((new ParametersDefinitionProperty(new StringParameterDefinition(key2, value3))));
@@ -149,21 +149,21 @@ public class BuildUtilTest extends HudsonTestCase {
         project1.getPublishersList().add(new BuildTrigger(proj2, true));
 
         // Important; we must do this step to ensure that the dependency graphs are updated
-        Hudson.getInstance().rebuildDependencyGraph();
+        jenkins.getInstance().rebuildDependencyGraph();
 
         // Build project1, upon completion project2 will be built
         // build1 = buildAndAssertSuccess(project1);
         build1 = project1.scheduleBuild2(0, new UserCause(),
                 new ParametersAction(new StringParameterValue(key1, value1), new StringParameterValue(key2, value3))).get();
         // When all building is complete retrieve the last build from project2
-        waitUntilNoActivity();
+        jenkins.waitUntilNoActivity();
 
         final ParametersAction params = (ParametersAction) BuildUtil.getAllBuildParametersAction(build1, project2);
-        assertEquals(((StringParameterValue) params.getParameter(key1)).value, value2);
+        assertEquals(value2, ((StringParameterValue) params.getParameter(key1)).value);
     }
 
     @Test
-    public void testGetBuildParametersAction() throws Exception {
+    void testGetBuildParametersAction() throws Exception {
         final String proj1 = "Proj1";
         final String key1 = "testKey";
         final String key2 = "testKey2";
@@ -175,29 +175,29 @@ public class BuildUtilTest extends HudsonTestCase {
         final FreeStyleBuild build2 = null;
 
         // Create test projects and associated builders
-        project1 = createFreeStyleProject(proj1);
+        project1 = jenkins.createFreeStyleProject(proj1);
 
         // Add a String parameter
         project1.addProperty((new ParametersDefinitionProperty(new StringParameterDefinition(key1, value1))));
         project1.addProperty((new ParametersDefinitionProperty(new StringParameterDefinition(key2, value3))));
 
         // Important; we must do this step to ensure that the dependency graphs are updated
-        Hudson.getInstance().rebuildDependencyGraph();
+        jenkins.getInstance().rebuildDependencyGraph();
 
         // Build project1 with the two StringParameterValues
         build1 = project1.scheduleBuild2(0, new UserCause(),
                 new ParametersAction(new StringParameterValue(key1, value1), new StringParameterValue(key2, value3))).get();
-        waitUntilNoActivity();
+        jenkins.waitUntilNoActivity();
 
         ParametersAction params = BuildUtil.getBuildParametersAction(build1);
-        assertEquals(((StringParameterValue) params.getParameter(key1)).value, value1);
+        assertEquals(value1, ((StringParameterValue) params.getParameter(key1)).value);
 
         params = BuildUtil.getBuildParametersAction(build2);
         assertNull(params);
     }
 
     @Test
-    public void testMergeParameters() throws Exception {
+    void testMergeParameters() {
         final String key1 = "testKey";
         final String key2 = "testKey2";
         final String value1 = "testValue";
@@ -208,12 +208,12 @@ public class BuildUtilTest extends HudsonTestCase {
         ParametersAction extraParams = new ParametersAction(new StringParameterValue(key2, value2));
 
         ParametersAction params = BuildUtil.mergeParameters(baseParams, extraParams);
-        assertEquals(((StringParameterValue) params.getParameter(key1)).value, value1);
-        assertEquals(((StringParameterValue) params.getParameter(key2)).value, value2);
+        assertEquals(value1, ((StringParameterValue) params.getParameter(key1)).value);
+        assertEquals(value2, ((StringParameterValue) params.getParameter(key2)).value);
 
         baseParams = null;
         extraParams = null;
         params = BuildUtil.mergeParameters(baseParams, extraParams);
-        assertEquals(params.getParameters().size(), 0);
+        assertEquals(0, params.getParameters().size());
     }
 }

@@ -26,64 +26,68 @@ package au.com.centrumsystems.hudson.plugin.util;
 
 import hudson.model.AbstractProject;
 import hudson.model.FreeStyleProject;
-import hudson.model.Hudson;
 import hudson.model.ParametersAction;
 import hudson.model.ParametersDefinitionProperty;
 import hudson.model.StringParameterDefinition;
 import hudson.tasks.BuildTrigger;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.jvnet.hudson.test.HudsonTestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import au.com.centrumsystems.hudson.plugin.buildpipeline.PipelineBuild;
 import au.com.centrumsystems.hudson.plugin.buildpipeline.trigger.BuildPipelineTrigger;
+import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
-public class ProjectUtilTest extends HudsonTestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-    @Override
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
+@WithJenkins
+class ProjectUtilTest {
+
+    private JenkinsRule jenkins;
+
+    @BeforeEach
+    void beforeEach(JenkinsRule rule) {
+        jenkins = rule;
     }
 
     @Test
-    public void testGetDownstreamProjects() throws IOException {
+    void testGetDownstreamProjects() throws Exception {
         final String proj1 = "Proj1";
         final String proj2 = "Proj2";
         final String proj3 = "Proj3";
 
         // Create a test project
-        final FreeStyleProject project1 = createFreeStyleProject(proj1);
-        final FreeStyleProject project2 = createFreeStyleProject(proj2);
+        final FreeStyleProject project1 = jenkins.createFreeStyleProject(proj1);
+        final FreeStyleProject project2 = jenkins.createFreeStyleProject(proj2);
 
         // Add project2 as a post build action: build other project
         project1.getPublishersList().add(new BuildPipelineTrigger(proj2, null));
         project1.getPublishersList().add(new BuildPipelineTrigger(proj3, null));
 
         // Important; we must do this step to ensure that the dependency graphs are updated
-        Hudson.getInstance().rebuildDependencyGraph();
+        jenkins.getInstance().rebuildDependencyGraph();
 
         // Test the method
         final List<AbstractProject<?, ?>> dsProjects = ProjectUtil.getDownstreamProjects(project1);
-        assertEquals(project1.getName() + " should have a downstream project " + project2.getName(), project2, dsProjects.get(0));
+        assertEquals(project2, dsProjects.get(0), project1.getName() + " should have a downstream project " + project2.getName());
     }
 
     @Test
-    public void testIsManualTrigger() throws IOException {
+    void testIsManualTrigger() throws Exception {
         final String proj1 = "Proj1";
         final String proj2 = "Proj2";
         final String proj3 = "Proj3";
 
         // Create a test project
-        final FreeStyleProject project1 = createFreeStyleProject(proj1);
-        final FreeStyleProject project2 = createFreeStyleProject(proj2);
-        final FreeStyleProject project3 = createFreeStyleProject(proj3);
+        final FreeStyleProject project1 = jenkins.createFreeStyleProject(proj1);
+        final FreeStyleProject project2 = jenkins.createFreeStyleProject(proj2);
+        final FreeStyleProject project3 = jenkins.createFreeStyleProject(proj3);
 
         // Add TEST_PROJECT2 as a Manually executed pipeline project
         // Add TEST_PROJECT3 as a Post-build action -> build other projects
@@ -91,68 +95,68 @@ public class ProjectUtilTest extends HudsonTestCase {
         project1.getPublishersList().add(new BuildTrigger(proj3, true));
 
         // Important; we must do this step to ensure that the dependency graphs are updated
-        Hudson.getInstance().rebuildDependencyGraph();
+        jenkins.getInstance().rebuildDependencyGraph();
 
         // Test the method
-        assertTrue(proj2 + " should be a manual trigger", ProjectUtil.isManualTrigger(project1, project2));
-        assertFalse(proj3 + " should be an automatic trigger", ProjectUtil.isManualTrigger(project1, project3));
+        assertTrue(ProjectUtil.isManualTrigger(project1, project2), proj2 + " should be a manual trigger");
+        assertFalse(ProjectUtil.isManualTrigger(project1, project3), proj3 + " should be an automatic trigger");
 
         assertFalse(ProjectUtil.isManualTrigger(null, null));
     }
 
     @Test
-    public void testHasDownstreamProjects() throws IOException {
+    void testHasDownstreamProjects() throws Exception {
         final String proj1 = "Proj1";
         final String proj2 = "Proj2";
         final String proj3 = "Proj3";
 
         // Create a test project
-        final FreeStyleProject project1 = createFreeStyleProject(proj1);
-        createFreeStyleProject(proj2);
-        createFreeStyleProject(proj3);
+        final FreeStyleProject project1 = jenkins.createFreeStyleProject(proj1);
+        jenkins.createFreeStyleProject(proj2);
+        jenkins.createFreeStyleProject(proj3);
 
         // Add project2 as a post build action: build other project
         project1.getPublishersList().add(new BuildPipelineTrigger(proj2, null));
         project1.getPublishersList().add(new BuildTrigger(proj3, true));
 
         // Important; we must do this step to ensure that the dependency graphs are updated
-        Hudson.getInstance().rebuildDependencyGraph();
+        jenkins.getInstance().rebuildDependencyGraph();
 
         // Test the method
-        assertTrue(project1.getName() + " should have downstream projects", ProjectUtil.hasDownstreamProjects(project1));
+        assertTrue(ProjectUtil.hasDownstreamProjects(project1), project1.getName() + " should have downstream projects");
     }
 
     @Test
-    public void testGetProjectURL() throws URISyntaxException, IOException {
+    void testGetProjectURL() throws Exception {
         final String proj1 = "Proj 1";
         final String proj1Url = "job/Proj%201/";
 
         // Create a test project
-        final FreeStyleProject project1 = createFreeStyleProject(proj1);
+        final FreeStyleProject project1 = jenkins.createFreeStyleProject(proj1);
         final PipelineBuild pipelineBuild = new PipelineBuild(project1);
 
-        assertEquals("The project URL should have been " + proj1Url, proj1Url, pipelineBuild.getProjectURL());
+        assertEquals(proj1Url, pipelineBuild.getProjectURL(), "The project URL should have been " + proj1Url);
     }
 
     @Test
-    public void testGetProjectParametersAction() throws IOException, InterruptedException, ExecutionException {
+    void testGetProjectParametersAction() throws Exception {
         final String proj1 = "Proj1";
         final String proj2 = "Proj2";
         final String paramKey = "testKey";
         final String paramValue = "testValue";
 
         // Create a test project
-        final FreeStyleProject project1 = createFreeStyleProject(proj1);
+        final FreeStyleProject project1 = jenkins.createFreeStyleProject(proj1);
         // Add a String parameter
         project1.addProperty((new ParametersDefinitionProperty(new StringParameterDefinition(paramKey, paramValue))));
-        final FreeStyleProject project2 = createFreeStyleProject(proj2);
+        final FreeStyleProject project2 = jenkins.createFreeStyleProject(proj2);
 
         // Important; we must do this step to ensure that the dependency graphs are updated
-        Hudson.getInstance().rebuildDependencyGraph();
+        jenkins.getInstance().rebuildDependencyGraph();
 
         // Test the method
         ParametersAction params = ProjectUtil.getProjectParametersAction(project1);
-        assertEquals(params.getParameter(paramKey).getName(), paramKey);
+        assertEquals(paramKey, params.getParameter(paramKey).getName());
         params = ProjectUtil.getProjectParametersAction(project2);
         assertNull(params);
 

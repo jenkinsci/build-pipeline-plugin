@@ -19,11 +19,7 @@ public class TestUtils {
     public static WebElement waitForElement(final By findBy, WebDriver driver, Duration timeout) {
         return new WebDriverWait(driver, Duration.ofSeconds(10))
                 .withTimeout(timeout)
-                .until(new Function<WebDriver, WebElement>() {
-                    public WebElement apply(WebDriver driver) {
-                        return driver.findElement(findBy);
-                    }
-                });
+                .until((Function<WebDriver, WebElement>) driver1 -> driver1.findElement(findBy));
     }
 
     public static WebElement waitForElement(final By findBy, WebElement parentElement) {
@@ -31,14 +27,10 @@ public class TestUtils {
     }
 
     public static WebElement waitForElement(final By findBy, WebElement parentElement, Duration timeout) {
-        return new FluentWait<WebElement>(parentElement)
+        return new FluentWait<>(parentElement)
                 .withTimeout(timeout)
                 .ignoring(NoSuchElementException.class)
-                .until(new Function<WebElement, WebElement>() {
-            public WebElement apply(WebElement element) {
-                return element.findElement(findBy);
-            }
-        });
+                .until((Function<WebElement, WebElement>) element -> element.findElement(findBy));
     }
 
     public static void checkState(boolean condition, String message) {

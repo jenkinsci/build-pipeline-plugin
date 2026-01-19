@@ -34,53 +34,53 @@ import hudson.model.Action;
 import hudson.model.BuildListener;
 import hudson.model.Cause;
 import hudson.model.FreeStyleProject;
-import hudson.model.Hudson;
-import hudson.model.ParameterValue;
 import hudson.model.ParametersAction;
 import hudson.model.Run;
 import hudson.model.StringParameterValue;
 import hudson.triggers.SCMTrigger;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.TestBuilder;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
-import java.io.IOException;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Arrays;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
+import static org.junit.jupiter.api.Assertions.*;
+
 import static org.mockito.Mockito.mock;
 
 /**
  * @author dalvizu
  */
-public class BuildCardExtensionTest
-{
+@WithJenkins
+class BuildCardExtensionTest {
 
-    @Rule
-    public JenkinsRule jenkins = new JenkinsRule();
+    private JenkinsRule jenkins;
+
+    @BeforeEach
+    void beforeEach(JenkinsRule rule) {
+        jenkins = rule;
+    }
 
     @Test
-    public void testBuildCards() {
+    void testBuildCards() {
         assertEquals(1, BuildCardExtension.all().size());
     }
 
     @Test
     @Issue("JENKINS-30801")
-    public void testRetriggerSuccessfulBuild() throws Exception {
+    void testRetriggerSuccessfulBuild() throws Exception {
         final FreeStyleProject upstreamBuild = jenkins.createFreeStyleProject("upstream");
         final FreeStyleProject downstreamBuild = jenkins.createFreeStyleProject("downstream");
         upstreamBuild.getPublishersList().add(new BuildPipelineTrigger("downstream", null));
-        downstreamBuild.getBuildersList().add(new TestBuilder()
-        {
+        downstreamBuild.getBuildersList().add(new TestBuilder() {
             @Override
-            public boolean perform(AbstractBuild<?, ?> abstractBuild, Launcher launcher, BuildListener buildListener)
-                    throws InterruptedException, IOException
-            {
+            public boolean perform(AbstractBuild<?, ?> abstractBuild, Launcher launcher, BuildListener buildListener) {
                 abstractBuild.addAction(new MockAction());
                 return true;
             }
@@ -88,16 +88,16 @@ public class BuildCardExtensionTest
 
         // Important; we must do this step to ensure that the dependency graphs
         // are updated
-        Hudson.getInstance().rebuildDependencyGraph();
+        jenkins.getInstance().rebuildDependencyGraph();
 
         // mock the upstream build as being caused by SCM trigger
         Cause mockScmTriggerCause = new SCMTrigger.SCMTriggerCause("mock");
         upstreamBuild.scheduleBuild2(0, mockScmTriggerCause);
         jenkins.waitUntilNoActivity();
 
-        // mock trigget the downstream build as being triggered by upstream
+        // mock trigger the downstream build as being triggered by upstream
         ParametersAction parametersAction = new ParametersAction(
-                Arrays.asList((ParameterValue) new StringParameterValue("foo", "bar")));
+                Arrays.asList(new StringParameterValue("foo", "bar")));
         Cause.UpstreamCause upstreamCause = new hudson.model.Cause.UpstreamCause(
                 (Run<?, ?>) upstreamBuild.getLastBuild());
         downstreamBuild.scheduleBuild2(0, upstreamCause, parametersAction);
@@ -126,13 +126,13 @@ public class BuildCardExtensionTest
     }
 
     @Test
-    public void testFilterUserIdCause() throws Exception {
+    void testFilterUserIdCause() throws Exception {
         final FreeStyleProject upstreamBuild = jenkins.createFreeStyleProject("upstream");
         final FreeStyleProject downstreamBuild = jenkins.createFreeStyleProject("downstream");
         upstreamBuild.getPublishersList().add(new BuildPipelineTrigger("downstream", null));
         // Important; we must do this step to ensure that the dependency graphs
         // are updated
-        Hudson.getInstance().rebuildDependencyGraph();
+        jenkins.getInstance().rebuildDependencyGraph();
         Cause mockUserIdCause = mock(Cause.UserIdCause.class);
         upstreamBuild.scheduleBuild2(0, mockUserIdCause);
         jenkins.waitUntilNoActivity();
@@ -155,26 +155,23 @@ public class BuildCardExtensionTest
                 mockUserIdCause);
     }
 
-    public static class MockAction implements Action, Serializable
-    {
+    public static class MockAction implements Action, Serializable {
 
+        @Serial
         private static final long serialVersionUID = 5677631606354259250L;
 
         @Override
-        public String getIconFileName()
-        {
+        public String getIconFileName() {
             return null;
         }
 
         @Override
-        public String getDisplayName()
-        {
+        public String getDisplayName() {
             return null;
         }
 
         @Override
-        public String getUrlName()
-        {
+        public String getUrlName() {
             return null;
         }
     }
