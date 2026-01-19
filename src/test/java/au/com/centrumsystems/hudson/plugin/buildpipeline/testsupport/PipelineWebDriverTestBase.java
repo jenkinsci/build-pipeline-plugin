@@ -7,7 +7,7 @@ import au.com.centrumsystems.hudson.plugin.buildpipeline.extension.SimpleColumnH
 import au.com.centrumsystems.hudson.plugin.buildpipeline.extension.SimpleRowHeader;
 import au.com.centrumsystems.hudson.plugin.buildpipeline.extension.StandardBuildCard;
 import hudson.model.FreeStyleProject;
-import org.apache.commons.lang.StringUtils;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -36,7 +36,7 @@ public class PipelineWebDriverTestBase {
     protected WebDriver webDriver;
 
     protected static boolean isCi() {
-        return StringUtils.isNotBlank(System.getenv("CI"));
+        return System.getenv("CI") != null && !System.getenv("CI").isBlank();
     }
 
     @BeforeClass
