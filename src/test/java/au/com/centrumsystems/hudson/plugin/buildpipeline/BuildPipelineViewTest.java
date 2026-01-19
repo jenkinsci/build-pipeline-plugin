@@ -33,22 +33,23 @@ import hudson.model.*;
 import hudson.model.Cause.UpstreamCause;
 import hudson.security.ACL;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import jenkins.model.Jenkins;
 
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.MockAuthorizationStrategy;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 import org.jvnet.hudson.test.recipes.LocalData;
 
 import au.com.centrumsystems.hudson.plugin.buildpipeline.trigger.BuildPipelineTrigger;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test Build Pipeline View
@@ -56,14 +57,18 @@ import static org.junit.Assert.*;
  * @author Centrum Systems
  * 
  */
+@WithJenkins
 public class BuildPipelineViewTest {
 
-    @Rule
-    public JenkinsRule jenkins = new JenkinsRule();
+    private JenkinsRule jenkins;
 
+    @BeforeEach
+    void beforeEach(JenkinsRule rule) {
+        jenkins = rule;
+    }
 
     @Test
-    public void testGetSelectedProject() throws IOException {
+    void testGetSelectedProject() throws Exception {
         final String bpViewName = "MyTestView";
         final String bpViewTitle = "MyTestViewTitle";
         final String proj1 = "Proj1";
@@ -88,7 +93,7 @@ public class BuildPipelineViewTest {
     }
 
     @Test
-    public void testHasBuildPermission() throws IOException {
+    void testHasBuildPermission() throws Exception {
         final String bpViewName = "MyTestView";
         final String bpViewTitle = "MyTestViewTitle";
         final String proj1 = "Proj1";
@@ -102,7 +107,7 @@ public class BuildPipelineViewTest {
 	}
 
     @Test
-    public void testTriggerOnlyLatestJob() throws IOException {
+    void testTriggerOnlyLatestJob() throws Exception {
         final String bpViewName = "MyTestView";
         final String bpViewTitle = "MyTestViewTitle";
         final String proj1 = "Proj1";
@@ -112,16 +117,16 @@ public class BuildPipelineViewTest {
 		// True
 		BuildPipelineView testView = new BuildPipelineView(bpViewName, bpViewTitle, new DownstreamProjectGridBuilder(proj1), noOfBuilds, true, null);
         testView.setBuildCard(new StandardBuildCard());
-		assertTrue(proj1, testView.isTriggerOnlyLatestJob());
+		assertTrue(testView.isTriggerOnlyLatestJob(), proj1);
 
 		// False
 		testView = new BuildPipelineView(bpViewName, bpViewTitle, new DownstreamProjectGridBuilder(""), noOfBuilds, false, null);
         testView.setBuildCard(new StandardBuildCard());
-		assertFalse(proj1, testView.isTriggerOnlyLatestJob());
+		assertFalse(testView.isTriggerOnlyLatestJob(), proj1);
 	}
 
     @Test
-    public void testAlwaysAllowManualTrigger() throws IOException {
+    void testAlwaysAllowManualTrigger() throws Exception {
         final String bpViewName = "MyTestView";
         final String bpViewTitle = "MyTestViewTitle";
         final String proj1 = "Proj1";
@@ -130,15 +135,15 @@ public class BuildPipelineViewTest {
 
 		// True
 		BuildPipelineView testView = new BuildPipelineView(bpViewName, bpViewTitle, new DownstreamProjectGridBuilder(proj1), noOfBuilds, true, true, false, false, false, 2, null, null, null, null, new StandardBuildCard());
-		assertTrue("Failed to set AlwaysAllowManualTrigger flag", testView.isAlwaysAllowManualTrigger());
+		assertTrue(testView.isAlwaysAllowManualTrigger(), "Failed to set AlwaysAllowManualTrigger flag");
 
 		// False
 		testView = new BuildPipelineView(bpViewName, bpViewTitle, new DownstreamProjectGridBuilder(""), noOfBuilds, true, false, false, false, false, 2, null, null, null, null, new StandardBuildCard());
-		assertFalse("Failed to unset AlwaysAllowManualTrigger flag", testView.isAlwaysAllowManualTrigger());
+		assertFalse(testView.isAlwaysAllowManualTrigger(), "Failed to unset AlwaysAllowManualTrigger flag");
 	}
 
     @Test
-    public void testShowPipelineDefinitionHeader() throws IOException {
+    void testShowPipelineDefinitionHeader() throws Exception {
         final String bpViewName = "MyTestView";
         final String bpViewTitle = "MyTestViewTitle";
         final String proj1 = "Proj1";
@@ -147,15 +152,15 @@ public class BuildPipelineViewTest {
 
 		// True
 		BuildPipelineView testView = new BuildPipelineView(bpViewName, bpViewTitle, new DownstreamProjectGridBuilder(proj1), noOfBuilds, true, false, false, false, true, 2, null, null, null, null, new StandardBuildCard());
-		assertTrue("Failed to set ShowPipelineDefinitionHeader flag", testView.isShowPipelineDefinitionHeader());
+		assertTrue(testView.isShowPipelineDefinitionHeader(), "Failed to set ShowPipelineDefinitionHeader flag");
 
 		// False
 		testView = new BuildPipelineView(bpViewName, bpViewTitle, new DownstreamProjectGridBuilder(""), noOfBuilds, true, false, false, false, false, 2, null, null, null, null, new StandardBuildCard());
-		assertFalse("Failed to unset ShowPipelineDefinitionHeader flag", testView.isShowPipelineDefinitionHeader());
+		assertFalse(testView.isShowPipelineDefinitionHeader(), "Failed to unset ShowPipelineDefinitionHeader flag");
 	}
 
     @Test
-    public void testMigration() throws IOException {
+    void testMigration() throws Exception {
         jenkins.createFreeStyleProject("Sample Project");
 
         BuildPipelineView testView = new BuildPipelineView("My Build Pipeline Name",
@@ -235,8 +240,8 @@ public class BuildPipelineViewTest {
         assertEquals(StandardBuildCard.class, testView.getBuildCard().getClass());
     }
 
-	@Test
-	public void testHasDownstreamProjects() throws IOException {
+    @Test
+    void testHasDownstreamProjects() throws Exception {
 		final String bpViewName = "MyTestView";
 		final String bpViewTitle = "MyTestViewTitle";
 		final String proj1 = "Proj1";
@@ -250,7 +255,7 @@ public class BuildPipelineViewTest {
 
         // Important; we must do this step to ensure that the dependency graphs
         // are updated
-        Hudson.getInstance().rebuildDependencyGraph();
+        jenkins.getInstance().rebuildDependencyGraph();
 
 		// Test a valid case
 		final BuildPipelineView testView = new BuildPipelineView(bpViewName, bpViewTitle, new DownstreamProjectGridBuilder(proj1), noOfBuilds, false, null);
@@ -260,7 +265,7 @@ public class BuildPipelineViewTest {
     }
 
     @Test
-    public void testGetDownstreamProjects() throws IOException {
+    void testGetDownstreamProjects() throws Exception {
         final String bpViewName = "MyTestView";
         final String bpViewTitle = "MyTestViewTitle";
         final String proj1 = "Proj1";
@@ -274,17 +279,17 @@ public class BuildPipelineViewTest {
 
         // Important; we must do this step to ensure that the dependency graphs
         // are updated
-        Hudson.getInstance().rebuildDependencyGraph();
+        jenkins.getInstance().rebuildDependencyGraph();
 
 		// Test a valid case
 		final BuildPipelineView testView = new BuildPipelineView(bpViewName, bpViewTitle, new DownstreamProjectGridBuilder(proj1), noOfBuilds, false, null);
         testView.setBuildCard(new StandardBuildCard());
         assertEquals(testView.getDownstreamProjects(project1).get(0), project2);
-        assertEquals(testView.getDownstreamProjects(project2).size(), 0);
+        assertEquals(0, testView.getDownstreamProjects(project2).size());
     }
 
     @Test
-    public void testGetBuildPipelineForm() throws Exception {
+    void testGetBuildPipelineForm() throws Exception {
         final String bpViewName = "MyTestView";
         final String bpViewTitle = "MyTestViewTitle";
         final String proj1 = "Proj1";
@@ -302,7 +307,7 @@ public class BuildPipelineViewTest {
 
         // Important; we must do this step to ensure that the dependency graphs
         // are updated
-        Hudson.getInstance().rebuildDependencyGraph();
+        jenkins.getInstance().rebuildDependencyGraph();
 
         // Build project1
         build1 = jenkins.buildAndAssertSuccess(project1);
@@ -312,22 +317,22 @@ public class BuildPipelineViewTest {
         testView.setBuildCard(new StandardBuildCard());
         UpstreamCause upstreamCause = new hudson.model.Cause.UpstreamCause(
                 (Run<?, ?>) build1);
-        final List<Action> buildActions = new ArrayList<Action>();
+        final List<Action> buildActions = new ArrayList<>();
         project2.scheduleBuild(0, upstreamCause,
-                buildActions.toArray(new Action[buildActions.size()]));
+                buildActions.toArray(new Action[0]));
         jenkins.waitUntilNoActivity();
 
         upstreamCause = new hudson.model.Cause.UpstreamCause(
                 (Run<?, ?>) project2.getBuildByNumber(1));
         project3.scheduleBuild(0, upstreamCause,
-                buildActions.toArray(new Action[buildActions.size()]));
+                buildActions.toArray(new Action[0]));
         jenkins.waitUntilNoActivity();
 
         final BuildPipelineForm testForm = testView.getBuildPipelineForm();
 
-        assertEquals(testForm.getProjectGrid().get(0, 0).getName(), proj1);
-        assertEquals(testForm.getProjectGrid().get(0, 1).getName(), proj2);
-        assertEquals(testForm.getProjectGrid().get(0, 2).getName(), proj3);
+        assertEquals(proj1, testForm.getProjectGrid().get(0, 0).getName());
+        assertEquals(proj2, testForm.getProjectGrid().get(0, 1).getName());
+        assertEquals(proj3, testForm.getProjectGrid().get(0, 2).getName());
 
         // Test a null case
         testView.setGridBuilder(new DownstreamProjectGridBuilder(""));
@@ -335,7 +340,7 @@ public class BuildPipelineViewTest {
     }
 
     @Test
-    public void testOnJobRenamed() throws IOException {
+    void testOnJobRenamed() throws Exception {
         final String bpViewName = "MyTestView";
         final String bpViewTitle = "MyTestViewTitle";
         final String proj1 = "Proj1";
@@ -349,7 +354,7 @@ public class BuildPipelineViewTest {
 
         // Important; we must do this step to ensure that the dependency graphs
         // are updated
-        Hudson.getInstance().rebuildDependencyGraph();
+        jenkins.getInstance().rebuildDependencyGraph();
 
 		// Test a valid case
 		final BuildPipelineView testView = BuildPipelineViewFactory.getBuildPipelineView(bpViewName, bpViewTitle, new DownstreamProjectGridBuilder(proj1), noOfBuilds, false);
@@ -360,7 +365,7 @@ public class BuildPipelineViewTest {
     }
 
     @Test
-    public void testGetItems() throws IOException {
+    void testGetItems() throws Exception {
         final String bpViewName = "MyTestView";
         final String bpViewTitle = "MyTestViewTitle";
         final String proj1 = "Proj1";
@@ -369,19 +374,19 @@ public class BuildPipelineViewTest {
 
 		final BuildPipelineView testView = new BuildPipelineView(bpViewName, bpViewTitle,
                 new DownstreamProjectGridBuilder(proj1), noOfBuilds, false, null);
-		TopLevelItem item1 = Jenkins.getInstance().getItem(proj1);
+		TopLevelItem item1 = Jenkins.get().getItem(proj1);
 		assertNotNull(item1);
 		assertTrue(testView.getItems().contains(item1));
 
         final String proj2 = "Proj2";
         final FreeStyleProject project2 = jenkins.createFreeStyleProject(proj2);
-        TopLevelItem item2 = Jenkins.getInstance().getItem(proj2);
+        TopLevelItem item2 = Jenkins.get().getItem(proj2);
         assertNotNull(item2);
         assertFalse(testView.getItems().contains(item2));
     }
 
     @Test
-    public void testHasPermission() throws IOException {
+    void testHasPermission() throws Exception {
         final String bpViewName = "MyTestView";
         final String bpViewTitle = "MyTestViewTitle";
         final String proj1 = "Proj1";
@@ -403,57 +408,39 @@ public class BuildPipelineViewTest {
         auth.grant(Item.READ).onItems(downstream).to("alice", "bob");
         
         /* Add Tests */
-        ACL.impersonate(User.get("alice").impersonate(), new Runnable() {
-            @Override
-            public void run() {
-                assertTrue(testView.hasPermission(View.READ));
-                assertTrue(testView.hasPermission(View.CONFIGURE));
-            }
+        ACL.impersonate(User.get("alice").impersonate(), () -> {
+            assertTrue(testView.hasPermission(View.READ));
+            assertTrue(testView.hasPermission(View.CONFIGURE));
         });
-        ACL.impersonate(User.get("bob").impersonate(), new Runnable() {
-            @Override
-            public void run() {
-                assertTrue(testView.hasPermission(View.READ));
-                assertFalse(testView.hasPermission(View.CONFIGURE));
-            }
+        ACL.impersonate(User.get("bob").impersonate(), () -> {
+            assertTrue(testView.hasPermission(View.READ));
+            assertFalse(testView.hasPermission(View.CONFIGURE));
         });
-        ACL.impersonate(User.get("charlie").impersonate(), new Runnable() {
-            @Override
-            public void run() {
-                assertTrue(testView.hasPermission(View.READ));
-                assertFalse(testView.hasPermission(View.CONFIGURE));
-            }
+        ACL.impersonate(User.get("charlie").impersonate(), () -> {
+            assertTrue(testView.hasPermission(View.READ));
+            assertFalse(testView.hasPermission(View.CONFIGURE));
         });
 
         // Test Empty view
         final BuildPipelineView emptyView = new BuildPipelineView(bpViewName, bpViewTitle, null, noOfBuilds, false, null);
-        ACL.impersonate(User.get("alice").impersonate(), new Runnable() {
-            @Override
-            public void run() {
-                assertTrue(emptyView.hasPermission(View.READ));
-                assertTrue(emptyView.hasPermission(View.CONFIGURE));
-            }
+        ACL.impersonate(User.get("alice").impersonate(), () -> {
+            assertTrue(emptyView.hasPermission(View.READ));
+            assertTrue(emptyView.hasPermission(View.CONFIGURE));
         });
-        ACL.impersonate(User.get("bob").impersonate(), new Runnable() {
-            @Override
-            public void run() {
-                assertTrue(emptyView.hasPermission(View.READ));
-                assertFalse(emptyView.hasPermission(View.CONFIGURE));
-            }
+        ACL.impersonate(User.get("bob").impersonate(), () -> {
+            assertTrue(emptyView.hasPermission(View.READ));
+            assertFalse(emptyView.hasPermission(View.CONFIGURE));
         });
-        ACL.impersonate(User.get("charlie").impersonate(), new Runnable() {
-            @Override
-            public void run() {
-                assertFalse(emptyView.hasPermission(View.READ));
-                assertFalse(emptyView.hasPermission(View.CONFIGURE));
-            }
+        ACL.impersonate(User.get("charlie").impersonate(), () -> {
+            assertFalse(emptyView.hasPermission(View.READ));
+            assertFalse(emptyView.hasPermission(View.CONFIGURE));
         });
     }
 
     @Test
     @LocalData
     @Issue("JENKINS-19755")
-    public void testMyUserIdCauseConversion() throws Exception {
+    void testMyUserIdCauseConversion() {
         FreeStyleProject projectB = (FreeStyleProject) jenkins.getInstance().getItem("B");
         FreeStyleBuild buildB = projectB.getBuildByNumber(1);
         assertNotNull(buildB);
@@ -475,14 +462,14 @@ public class BuildPipelineViewTest {
 
                 @Override
                 public ItemGroup<? extends TopLevelItem> getOwnerItemGroup() {
-                    return Hudson.getInstance();
+                    return Jenkins.get();
                 }
             };
         }
     }
 
     @Test
-    public void testDescriptorDiscovery() {
+    void testDescriptorDiscovery() {
         BuildPipelineView.DescriptorImpl descriptor = new BuildPipelineView.DescriptorImpl();
         assertEquals(5, descriptor.getColumnHeaderDescriptors().size());
         assertEquals(4, descriptor.getRowHeaderDescriptors().size());

@@ -42,7 +42,7 @@ public class PipelinePage implements Page {
         return this;
     }
 
-    public void reload() throws Exception {
+    public void reload() {
         webDriver.navigate().refresh();
     }
 

@@ -25,40 +25,44 @@
 package au.com.centrumsystems.hudson.plugin.buildpipeline.extension;
 
 import hudson.model.AbstractBuild;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasKey;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
  * @author dalvizu
  */
-public class FilteredVariablesHeaderTest {
+@WithJenkins
+class FilteredVariablesHeaderTest {
 
-    @Rule
-    public JenkinsRule jenkinsRule = new JenkinsRule();
+    private JenkinsRule jenkins;
+
+    @BeforeEach
+    void beforeEach(JenkinsRule rule) {
+        jenkins = rule;
+    }
 
     @Test
-    public void testGetParameters() {
+    void testGetParameters() {
         FilteredVariablesHeader.FilteredVariable fooVariable = new FilteredVariablesHeader.FilteredVariable("foo");
         FilteredVariablesHeader.FilteredVariable passwordVariable =
                 new FilteredVariablesHeader.FilteredVariable("password");
         FilteredVariablesHeader provider = new FilteredVariablesHeader(Arrays.asList(fooVariable, passwordVariable));
 
-        Map<String, String> buildVariables = new HashMap<String, String>();
+        Map<String, String> buildVariables = new HashMap<>();
 
         buildVariables.put("foo", "bar");
         buildVariables.put("bar", "baz");
@@ -74,7 +78,7 @@ public class FilteredVariablesHeaderTest {
     }
 
     @Test
-    public void testNullConfig() {
+    void testNullConfig() {
         FilteredVariablesHeader provider = new FilteredVariablesHeader(null);
         AbstractBuild build = mock(AbstractBuild.class);
         when(build.getBuildVariables()).thenReturn(new HashMap<String, String>());

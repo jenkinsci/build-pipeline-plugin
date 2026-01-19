@@ -2,22 +2,24 @@ package au.com.centrumsystems.hudson.plugin.buildpipeline.dashboard;
 
 import au.com.centrumsystems.hudson.plugin.buildpipeline.BuildPipelineView;
 import au.com.centrumsystems.hudson.plugin.buildpipeline.DownstreamProjectGridBuilder;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
-import static junit.framework.TestCase.assertFalse;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class BuildPipelineDashboardTest
-{
-	@Rule public JenkinsRule jenkins = new JenkinsRule();
+@WithJenkins
+class BuildPipelineDashboardTest {
 
-	BuildPipelineDashboard cut;
+	private JenkinsRule jenkins;
 
-	@Before public void setUp()
-	{
+	private BuildPipelineDashboard cut;
+
+    @BeforeEach
+    void beforeEach(JenkinsRule rule) {
+		jenkins = rule;
 		cut = new BuildPipelineDashboard(
 			"TestProject",
 			"Test Description",
@@ -26,27 +28,25 @@ public class BuildPipelineDashboardTest
 		);
 	}
 
-	@Test public void shouldReturnANewBuildPipelineView()
-	{
+    @Test
+    void shouldReturnANewBuildPipelineView() {
 		BuildPipelineView bpv = cut.getBuildPipelineView();
-
-
 		assertNotNull(bpv);
-		assertTrue(bpv instanceof ReadOnlyBuildPipelineView);
-		assertEquals("Job10", ((DownstreamProjectGridBuilder)bpv.getGridBuilder()).getFirstJob());
+        assertInstanceOf(ReadOnlyBuildPipelineView.class, bpv);
+		assertEquals("Job10", ((DownstreamProjectGridBuilder) bpv.getGridBuilder()).getFirstJob());
 		assertEquals("5", bpv.getNoOfDisplayedBuilds());
 		assertEquals("TestProject", bpv.getBuildViewTitle());
 	}
 
-	@Test public void shouldNotHaveBuildPermissions() {
+    @Test
+    void shouldNotHaveBuildPermissions() {
 		BuildPipelineView bpv = cut.getBuildPipelineView();
-
 		assertFalse(bpv.hasBuildPermission());
 	}
 
-	@Test public void shouldNotHaveAnyPermission() {
+    @Test
+    void shouldNotHaveAnyPermission() {
 		BuildPipelineView bpv = cut.getBuildPipelineView();
-
 		assertFalse(bpv.hasPermission(null));
 	}
 }

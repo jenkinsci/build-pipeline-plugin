@@ -8,24 +8,25 @@ import au.com.centrumsystems.hudson.plugin.buildpipeline.extension.SimpleRowHead
 import au.com.centrumsystems.hudson.plugin.buildpipeline.extension.StandardBuildCard;
 import hudson.model.FreeStyleProject;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Rule;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+
 import org.jvnet.hudson.test.FailureBuilder;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 import org.openqa.selenium.NoSuchSessionException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 
+@WithJenkins
 public class PipelineWebDriverTestBase {
 
     protected static final String INITIAL_JOB = "initial-job";
     protected static final String SECOND_JOB = "second-job";
 
-    @Rule
-    public JenkinsRule jr = new JenkinsRule();
+    protected JenkinsRule jenkins;
 
     protected FreeStyleProject initialJob;
 
@@ -39,8 +40,8 @@ public class PipelineWebDriverTestBase {
         return System.getenv("CI") != null && !System.getenv("CI").isBlank();
     }
 
-    @BeforeClass
-    public static void setUpClass() {
+    @BeforeAll
+    static void beforeAll() {
         if (isCi()) {
             // The browserVersion needs to match what is provided by the Jenkins Infrastructure
             // If you see an exception like this:
@@ -55,37 +56,40 @@ public class PipelineWebDriverTestBase {
         }
     }
 
-    @Before
-    public void initSharedComponents() throws Exception {
-        realm = jr.createDummySecurityRealm();
-        jr.jenkins.setSecurityRealm(realm);
+    @BeforeEach
+    void beforeEach(JenkinsRule rule) throws Exception {
+        jenkins = rule;
+        realm = jenkins.createDummySecurityRealm();
+        jenkins.jenkins.setSecurityRealm(realm);
 
-        initialJob = jr.createFreeStyleProject(INITIAL_JOB);
+        initialJob = jenkins.createFreeStyleProject(INITIAL_JOB);
 
         pipelineView = new BuildPipelineView("pipeline", "Pipeline", new DownstreamProjectGridBuilder(INITIAL_JOB), "5", false, true, false, false, false, 1, null, null, new SimpleColumnHeader(), new SimpleRowHeader(), new StandardBuildCard());
-        jr.jenkins.addView(pipelineView);
+        jenkins.jenkins.addView(pipelineView);
 
         if (isCi()) {
             webDriver = new ChromeDriver(new ChromeOptions().addArguments("--headless", "--disable-dev-shm-usage", "--no-sandbox"));
         } else {
             webDriver = new ChromeDriver(new ChromeOptions());
         }
-        loginLogoutPage = new LoginLogoutPage(webDriver, jr.getURL());
-        pipelinePage = new PipelinePage(webDriver, pipelineView.getViewName(), jr.getURL());
+        loginLogoutPage = new LoginLogoutPage(webDriver, jenkins.getURL());
+        pipelinePage = new PipelinePage(webDriver, pipelineView.getViewName(), jenkins.getURL());
     }
 
-    @After
-    public void cleanUpWebDriver() {
-        webDriver.close();
-        try {
-          webDriver.quit();
-        } catch (NoSuchSessionException e) {
-            // Ignore
+    @AfterEach
+    void afterEach() {
+        if (webDriver != null) {
+            webDriver.close();
+            try {
+                webDriver.quit();
+            } catch (NoSuchSessionException e) {
+                // Ignore
+            }
         }
     }
 
     protected FreeStyleProject createFailingJob(String name) throws Exception{
-        FreeStyleProject failingJob = jr.createFreeStyleProject(name);
+        FreeStyleProject failingJob = jenkins.createFreeStyleProject(name);
         failingJob.getBuildersList().add(new FailureBuilder());
         return failingJob;
     }

@@ -26,8 +26,9 @@ package au.com.centrumsystems.hudson.plugin.buildpipeline.trigger;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 import au.com.centrumsystems.hudson.plugin.buildpipeline.BuildPipelineView;
 import au.com.centrumsystems.hudson.plugin.buildpipeline.DownstreamProjectGridBuilder;
@@ -40,16 +41,14 @@ import hudson.tasks.Publisher;
 import hudson.util.DescribableList;
 import hudson.util.FormValidation;
 
-import java.io.IOException;
 import java.util.Collections;
 
 
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import org.jvnet.hudson.test.*;
-
-
-import static org.junit.Assert.*;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 /**
  * BuildPipelineTrigger test class
@@ -57,35 +56,40 @@ import static org.junit.Assert.*;
  * @author Centrum Systems
  *
  */
-public class BuildPipelineTriggerTest {
+@WithJenkins
+class BuildPipelineTriggerTest {
 
-    @Rule
-    public JenkinsRule jenkins = new JenkinsRule();
+    private JenkinsRule jenkins;
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testInvalidConstructor() {
-        new BuildPipelineTrigger(null, null);
+    @BeforeEach
+    void beforeEach(JenkinsRule rule) {
+        jenkins = rule;
     }
 
     @Test
-    public void testBuildPipelineTrigger() throws IOException {
+    void testInvalidConstructor() {
+        assertThrows(IllegalArgumentException.class, () -> new BuildPipelineTrigger(null, null));
+    }
+
+    @Test
+    void testBuildPipelineTrigger() throws Exception {
         final String proj1 = "Proj1";
         final String proj2 = "Proj2";
         final FreeStyleProject project1 = jenkins.createFreeStyleProject(proj1);
         // Add TEST_PROJECT2 as a post build action: build other project
         project1.getPublishersList().add(new BuildPipelineTrigger(proj2, null));
         // Important; we must do this step to ensure that the dependency graphs are updated
-        Hudson.getInstance().rebuildDependencyGraph();
+        jenkins.getInstance().rebuildDependencyGraph();
 
         final BuildPipelineTrigger myBPTrigger = new BuildPipelineTrigger(proj1, null);
 
-        assertNotNull("A valid BuildPipelineTrigger should have been created.", myBPTrigger);
+        assertNotNull(myBPTrigger, "A valid BuildPipelineTrigger should have been created.");
 
-        assertEquals("BuildPipelineTrigger downstream project is " + proj1, proj1, myBPTrigger.getDownstreamProjectNames());
+        assertEquals(proj1, myBPTrigger.getDownstreamProjectNames(), "BuildPipelineTrigger downstream project is " + proj1);
     }
 
     @Test
-    public void testOnDownstreamProjectRenamed() throws IOException {
+    void testOnDownstreamProjectRenamed() {
         final String proj1 = "Proj1";
         final String proj2 = "Proj2";
         final String proj3 = "Proj3";
@@ -101,7 +105,7 @@ public class BuildPipelineTriggerTest {
     }
 
     @Test
-    public void testOnDownstreamProjectDeleted() {
+    void testOnDownstreamProjectDeleted() {
         final String proj1 = "Proj1";
         final String proj2 = "Proj2";
         final String proj3 = "Proj3";
@@ -117,14 +121,14 @@ public class BuildPipelineTriggerTest {
     }
 
     @Test
-    public void testOnRenamed() throws IOException {
+    void testOnRenamed() throws Exception {
         final String proj1 = "Proj1";
         final String proj2 = "Proj2";
         final String proj3 = "Proj3";
         final FreeStyleProject project1 = jenkins.createFreeStyleProject(proj1);
         final FreeStyleProject project2 = jenkins.createFreeStyleProject(proj2);
         project1.getPublishersList().add(new BuildPipelineTrigger(proj2 + "," + proj3, null));
-        Hudson.getInstance().rebuildDependencyGraph();
+        jenkins.getInstance().rebuildDependencyGraph();
 
         project2.renameTo(proj2 + "NEW");
 
@@ -138,14 +142,14 @@ public class BuildPipelineTriggerTest {
     }
 
     @Test
-    public void testOnDeleted() throws IOException, InterruptedException {
+    void testOnDeleted() throws Exception {
         final String proj1 = "Proj1";
         final String proj2 = "Proj2";
         final String proj3 = "Proj3";
         final FreeStyleProject project1 = jenkins.createFreeStyleProject(proj1);
         final FreeStyleProject project2 = jenkins.createFreeStyleProject(proj2);
         project1.getPublishersList().add(new BuildPipelineTrigger(proj2 + "," + proj3, null));
-        Hudson.getInstance().rebuildDependencyGraph();
+        jenkins.getInstance().rebuildDependencyGraph();
 
         project2.delete();
 
@@ -159,7 +163,7 @@ public class BuildPipelineTriggerTest {
     }
 
     @Test
-    public void testDoCheckDownstreamProjectNames() throws IOException, InterruptedException {
+    void testDoCheckDownstreamProjectNames() throws Exception {
         final AbstractProject upstreamProject = jenkins.createFreeStyleProject("Upstream");
 
         final String proj1 = "Proj1";
@@ -174,13 +178,13 @@ public class BuildPipelineTriggerTest {
     }
 
     @Test
-    public void testRemoveDownstreamTrigger() throws IOException, InterruptedException {
+    void testRemoveDownstreamTrigger() throws Exception {
         final String proj1 = "Proj1";
         final String proj2 = "Proj2";
         final FreeStyleProject project1 = jenkins.createFreeStyleProject(proj1);
         final BuildPipelineTrigger buildPipelineTrigger = new BuildPipelineTrigger(proj2, null);
         project1.getPublishersList().add(buildPipelineTrigger);
-        Hudson.getInstance().rebuildDependencyGraph();
+        jenkins.getInstance().rebuildDependencyGraph();
 
         buildPipelineTrigger.removeDownstreamTrigger(buildPipelineTrigger, project1, proj2);
 
@@ -194,12 +198,12 @@ public class BuildPipelineTriggerTest {
     }
 
     @Test
-    public void testCyclicDownstreamTrigger() throws IOException, InterruptedException {
+    void testCyclicDownstreamTrigger() throws Exception {
         final String proj1 = "Proj1";
         final FreeStyleProject project1 = jenkins.createFreeStyleProject(proj1);
         final BuildPipelineTrigger cyclicPipelineTrigger = new BuildPipelineTrigger(proj1, null);
         project1.getPublishersList().add(cyclicPipelineTrigger);
-        Hudson.getInstance().rebuildDependencyGraph();
+        jenkins.getInstance().rebuildDependencyGraph();
 
         final DescribableList<Publisher, Descriptor<Publisher>> downstreamPublishersList = project1.getPublishersList();
         for (final Publisher downstreamPub : downstreamPublishersList) {
@@ -212,7 +216,7 @@ public class BuildPipelineTriggerTest {
     }
 
     @Test
-    public void testGetBuilderConfigDescriptors() throws Exception {
+    void testGetBuilderConfigDescriptors() {
         final BuildPipelineTrigger.DescriptorImpl di = new BuildPipelineTrigger.DescriptorImpl();
 
         assertThat(di.getBuilderConfigDescriptors(), is(not(Collections.<Descriptor<AbstractBuildParameters>>emptyList())));
@@ -220,8 +224,7 @@ public class BuildPipelineTriggerTest {
 
     @Test
     @Issue("JENKINS-22665")
-    public void testManualTriggerCause() throws Exception
-    {
+    void testManualTriggerCause() throws Exception {
         FreeStyleProject projectA = jenkins.createFreeStyleProject("A");
         FreeStyleProject projectB = jenkins.createFreeStyleProject("B");
         projectA.getPublishersList().add(new BuildPipelineTrigger("B", null));
@@ -246,9 +249,8 @@ public class BuildPipelineTriggerTest {
 
     @Test
     @Issue("JENKINS-23532")
-    public void testTriggerProjectInFolderUsingParameteriezedTriggerAndFullPath()
-        throws Exception
-    {
+    void testTriggerProjectInFolderUsingParameterizedTriggerAndFullPath()
+            throws Exception {
         //root folder
         MockFolder folder1 = jenkins.createFolder("Folder1");
         MockFolder folder2 = jenkins.createFolder("Folder2");
@@ -264,7 +266,7 @@ public class BuildPipelineTriggerTest {
         FreeStyleProject downstreamProject = (FreeStyleProject) folder2.getItem(projDown);
 
         BuildTriggerConfig notFakeConfig = new BuildTriggerConfig("Folder2/downstream", ResultCondition.ALWAYS, false,
-                Collections.singletonList((AbstractBuildParameters) new CurrentBuildParameters()));
+                Collections.singletonList(new CurrentBuildParameters()));
         upstreamProject.getPublishersList().add(new hudson.plugins.parameterizedtrigger.BuildTrigger(notFakeConfig));
         jenkins.getInstance().rebuildDependencyGraph();
 
@@ -288,9 +290,8 @@ public class BuildPipelineTriggerTest {
     }
 
     @Test
-    public void testTriggerProjectInFolderUsingParameteriezedTriggerAndRelativePath()
-            throws Exception
-    {
+    void testTriggerProjectInFolderUsingParameterizedTriggerAndRelativePath()
+            throws Exception {
         //root folder
         MockFolder folder1 = jenkins.createFolder("Folder1");
         MockFolder folder2 = jenkins.createFolder("Folder2");
@@ -306,7 +307,7 @@ public class BuildPipelineTriggerTest {
         FreeStyleProject downstreamProject = (FreeStyleProject) folder2.getItem(projDown);
 
         BuildTriggerConfig notFakeConfig = new BuildTriggerConfig("../Folder2/downstream", ResultCondition.ALWAYS, false,
-                Collections.singletonList((AbstractBuildParameters) new CurrentBuildParameters()));
+                Collections.singletonList(new CurrentBuildParameters()));
         upstreamProject.getPublishersList().add(new hudson.plugins.parameterizedtrigger.BuildTrigger(notFakeConfig));
         jenkins.getInstance().rebuildDependencyGraph();
 
@@ -332,9 +333,8 @@ public class BuildPipelineTriggerTest {
     }
 
     @Test
-    public void testTriggerProjectInFolderUsingHudsonTriggerWithFullPath()
-        throws Exception
-    {
+    void testTriggerProjectInFolderUsingHudsonTriggerWithFullPath()
+            throws Exception {
         //root folder
         MockFolder folder1 = jenkins.createFolder("Folder1");
         MockFolder folder2 = jenkins.createFolder("Folder2");
@@ -371,9 +371,8 @@ public class BuildPipelineTriggerTest {
     }
 
     @Test
-    public void testTriggerProjectInFolderUsingHudsonTriggerWithRelativePath()
-            throws Exception
-    {
+    void testTriggerProjectInFolderUsingHudsonTriggerWithRelativePath()
+            throws Exception {
         //root folder
         MockFolder folder1 = jenkins.createFolder("Folder1");
         MockFolder folder2 = jenkins.createFolder("Folder2");
@@ -410,9 +409,8 @@ public class BuildPipelineTriggerTest {
     }
 
     @Test
-    public void testTriggerProjectInFolderUsingBuildPipelineTriggerWithFullPath()
-            throws Exception
-    {
+    void testTriggerProjectInFolderUsingBuildPipelineTriggerWithFullPath()
+            throws Exception {
         //root folder
         MockFolder folder1 = jenkins.createFolder("Folder1");
         MockFolder folder2 = jenkins.createFolder("Folder2");
@@ -449,9 +447,8 @@ public class BuildPipelineTriggerTest {
     }
 
     @Test
-    public void testTriggerProjectInFolderUsingBuildPipelineTriggerWithRelativePath()
-            throws Exception
-    {
+    void testTriggerProjectInFolderUsingBuildPipelineTriggerWithRelativePath()
+            throws Exception {
         //root folder
         MockFolder folder1 = jenkins.createFolder("Folder1");
         MockFolder folder2 = jenkins.createFolder("Folder2");
@@ -489,9 +486,8 @@ public class BuildPipelineTriggerTest {
 
     @Test
     @Issue("JENKINS-24883")
-    public void testReRunBuildPipelineTrigger()
-        throws Exception
-    {
+    void testReRunBuildPipelineTrigger()
+            throws Exception {
         FreeStyleProject projectA = jenkins.createFreeStyleProject("A");
         FreeStyleProject projectB = jenkins.createFreeStyleProject("B");
         projectA.getPublishersList().add(new BuildPipelineTrigger("B", null));
@@ -523,9 +519,8 @@ public class BuildPipelineTriggerTest {
     }
 
     @Test
-    public void testParseDownstreamJobs()
-            throws Exception
-    {
+    void testParseDownstreamJobs()
+            throws Exception {
         //root folder
         MockFolder folder1 = jenkins.createFolder("Folder1");
         MockFolder folder2 = jenkins.createFolder("Folder2");

@@ -6,6 +6,7 @@ import org.openqa.selenium.WebElement;
 
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 import static au.com.centrumsystems.hudson.plugin.buildpipeline.testsupport.TestUtils.waitForElement;
 
@@ -69,7 +70,7 @@ public class LoginLogoutPage implements Page {
 
     private String encodeSafely(String s) {
         try {
-            return URLEncoder.encode(s, "utf-8");
+            return URLEncoder.encode(s, StandardCharsets.UTF_8);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

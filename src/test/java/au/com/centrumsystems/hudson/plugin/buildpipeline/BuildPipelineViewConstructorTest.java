@@ -1,47 +1,53 @@
 package au.com.centrumsystems.hudson.plugin.buildpipeline;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import hudson.model.Hudson;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import hudson.model.ItemGroup;
 import hudson.model.TopLevelItem;
 
-import java.io.IOException;
+import jenkins.model.Jenkins;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import org.junit.Rule;
-import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
-public class BuildPipelineViewConstructorTest {
+@WithJenkins
+class BuildPipelineViewConstructorTest {
 
-    @Rule
-    public JenkinsRule jenkins = new JenkinsRule();
+    private static final String BP_VIEW_NAME = "MyTestView";
+    private static final String BP_VIEW_TITLE = "MyTestViewTitle";
+    private static final String PROJ_1 = "Proj1";
+    private final DownstreamProjectGridBuilder gridBuilder = new DownstreamProjectGridBuilder(PROJ_1);
+    private final DownstreamProjectGridBuilder nullGridBuilder = new DownstreamProjectGridBuilder("");
+    private static final String NO_OF_BUILDS = "5";
 
-    final String bpViewName = "MyTestView";
-    final String bpViewTitle = "MyTestViewTitle";
-    final String proj1 = "Proj1";
-    final DownstreamProjectGridBuilder gridBuilder = new DownstreamProjectGridBuilder(proj1);
-    final DownstreamProjectGridBuilder nullGridBuilder = new DownstreamProjectGridBuilder("");
-    final String noOfBuilds = "5";
+    private JenkinsRule jenkins;
+
+    @BeforeEach
+    void beforeEach(JenkinsRule rule) {
+        jenkins = rule;
+    }
 
     @Test
-    public void testAlwaysAllowManualTrigger() throws IOException {
+    void testAlwaysAllowManualTrigger() {
         // True
-        BuildPipelineView testView = new BuildPipelineView(bpViewName, bpViewTitle, gridBuilder, noOfBuilds, true, true, false, false, false, 2, null, null, null, null, null);
+        BuildPipelineView testView = new BuildPipelineView(BP_VIEW_NAME, BP_VIEW_TITLE, gridBuilder, NO_OF_BUILDS, true, true, false, false, false, 2, null, null, null, null, null);
         assertTrue(testView.isAlwaysAllowManualTrigger());
 
         // False
-        testView = new BuildPipelineView(bpViewName, bpViewTitle, nullGridBuilder, noOfBuilds, true, false, false, false, false, 2, null, null, null, null, null);
+        testView = new BuildPipelineView(BP_VIEW_NAME, BP_VIEW_TITLE, nullGridBuilder, NO_OF_BUILDS, true, false, false, false, false, 2, null, null, null, null, null);
         assertFalse(testView.isAlwaysAllowManualTrigger());
     }
 
     @Test
-    public void testRefreshFrequency() throws IOException {
+    void testRefreshFrequency() {
 
         // False
-        final BuildPipelineView testView = new BuildPipelineView(bpViewName, bpViewTitle, nullGridBuilder, noOfBuilds, true, false, false, false, false, 2, null, null, null, null, null);
+        final BuildPipelineView testView = new BuildPipelineView(BP_VIEW_NAME, BP_VIEW_TITLE, nullGridBuilder, NO_OF_BUILDS, true, false, false, false, false, 2, null, null, null, null, null);
         assertThat(testView.getRefreshFrequency(), is(2));
         assertThat(testView.getRefreshFrequencyInMillis(), is(2000));
     }
@@ -57,7 +63,7 @@ public class BuildPipelineViewConstructorTest {
 
                 @Override
                 public ItemGroup<? extends TopLevelItem> getOwnerItemGroup() {
-                    return Hudson.getInstance();
+                    return Jenkins.get();
                 }
             };
         }
