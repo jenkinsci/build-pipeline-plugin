@@ -32,7 +32,7 @@
         <jenkins.version>${jenkins.baseline}.3</jenkins.version>
         <gitHubRepo>jenkinsci/${project.artifactId}</gitHubRepo>
         <code.coverage.percentage>50</code.coverage.percentage>
-        <selenium.version>4.40.0</selenium.version>
+        <selenium.version>4.41.0</selenium.version>
         <!-- TODO fix existing violations -->
         <spotbugs.threshold>High</spotbugs.threshold>
         <ban-commons-lang-2.skip>false</ban-commons-lang-2.skip>
