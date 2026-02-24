@@ -61,7 +61,7 @@
         {{#unless project.disabled}}
         <div class="status-bar" id="status-bar-{{id}}">
             {{#if build.isBuilding}}
-                <div onclick="buildPipeline.fillDialog('${app.rootUrl}{{build.url}}console', 'Console output for {{project.name}} #{{build.number}}')">
+                <div class="bct-progress-bar-onclick" data-fill-dialog-href="${app.rootUrl}{{build.url}}console" data-fill-dialog-title="Console output for {{project.name}} #{{build.number}}">
                     <table class="progress-bar" align="center">
                         <tbody>
                             <tr title="Estimated remaining time: {{build.estimatedRemainingTime}}">
@@ -94,7 +94,7 @@
                             </a>
                         </j:when>
                         <j:otherwise>
-                            <span onclick="buildPipeline.fillDialog('${app.rootUrl}{{build.url}}console', 'Console output for {{project.name}} #{{build.number}}')">
+                            <span class="bct-console-icon-onclick" data-fill-dialog-href="${app.rootUrl}{{build.url}}console" data-fill-dialog-title="Console output for {{project.name}} #{{build.number}}">
                                 <l:icon src="${consoleOutputIconUrl} icon-sm" alt="console" />
                             </span>
                         </j:otherwise>
@@ -106,7 +106,7 @@
                 {{#if build.isSuccess}}
                     {{#if ${!it.triggerOnlyLatestJob}}}
                     <j:if test="${it.hasBuildPermission()}">
-                    <span onclick="buildPipeline.showSpinner({{id}}); buildPipeline.rerunBuild({{id}}, '{{build.extId}}', [{{build.dependencyIds}}])">
+                    <span class="bct-rerun-successful-build-onclick" data-show-spinner-id="{{id}}" data-rerun-build-ext-id="{{build.extId}}" data-rerun-build-dependency-ids="{{build.dependencyIds}}">
                         <l:icon src="icon-clock icon-sm" alt="re-run" />
                     </span>
                     </j:if>
@@ -115,18 +115,18 @@
                     {{#if ${it.triggerOnlyLatestJob}}}
                         {{#if build.isLatestBuild}}
                             {{#if build.isUpstreamBuildLatest}}
-                            <span onclick="buildPipeline.showSpinner({{id}}); buildPipeline.rerunBuild({{id}}, '{{build.extId}}', [{{build.dependencyIds}}])">
+                            <span class="bct-rerun-failed-latest-build-onclick" data-show-spinner-id="{{id}}" data-rerun-build-ext-id="{{build.extId}}" data-rerun-build-dependency-ids="{{build.dependencyIds}}">
                                 <l:icon src="icon-clock icon-sm" alt="retry" />
                             </span>
                             {{/if}}
                         {{/if}}
                     {{else}}
-                        {{#if build.isManual}}
-                            <span onclick="buildPipeline.showSpinner({{id}}); buildPipeline.triggerBuild({{id}}, '{{upstream.projectName}}', {{upstream.buildNumber}}, '{{project.name}}', [{{build.dependencyIds}}])">
+                        {{#if build.isManualTrigger}}
+                            <span class="bct-rerun-failed-manual-build-onclick" data-show-spinner-id="{{id}}" data-upstream-project-name="{{upstream.projectName}}" data-upstream-build-number="{{upstream.buildNumber}}" data-project-name="{{project.name}}" data-dependency-ids="{{build.dependencyIds}}">
                                 <l:icon src="icon-clock icon-sm" alt="retry" />
                             </span>
                         {{else}}
-                            <span onclick="buildPipeline.showSpinner({{id}}); buildPipeline.rerunBuild({{id}}, '{{build.extId}}', [{{build.dependencyIds}}])">
+                            <span class="bct-rerun-failed-build-onclick" data-show-spinner-id="{{id}}" data-rerun-build-ext-id="{{build.extId}}" data-rerun-build-dependency-ids="{{build.dependencyIds}}">
                                 <l:icon src="icon-clock icon-sm" alt="retry" />
                             </span>
                         {{/if}}
@@ -137,12 +137,12 @@
             {{#if build.isReadyToBeManuallyBuilt}}
                 {{#if ${it.triggerOnlyLatestJob}}}
                     {{#if build.isUpstreamBuildLatestSuccess}}
-                    <span onclick="buildPipeline.showSpinner({{id}}); buildPipeline.triggerBuild({{id}}, '{{upstream.projectName}}', {{upstream.buildNumber}}, '{{project.name}}', [{{build.dependencyIds}}])">
+                    <span class="bct-trigger-manual-build-latest-onclick" data-show-spinner-id="{{id}}" data-upstream-project-name="{{upstream.projectName}}" data-upstream-build-number="{{upstream.buildNumber}}" data-project-name="{{project.name}}" data-dependency-ids="{{build.dependencyIds}}">
                         <l:icon src="icon-clock icon-sm" alt="trigger" />
                     </span>
                     {{/if}}
                 {{else}}
-                <span onclick="buildPipeline.showSpinner({{id}}); buildPipeline.triggerBuild({{id}}, '{{upstream.projectName}}', {{upstream.buildNumber}}, '{{project.name}}', [{{build.dependencyIds}}])">
+                <span class="bct-trigger-manual-build-onclick" data-show-spinner-id="{{id}}" data-upstream-project-name="{{upstream.projectName}}" data-upstream-build-number="{{upstream.buildNumber}}" data-project-name="{{project.name}}" data-dependency-ids="{{build.dependencyIds}}">
                     <l:icon src="icon-clock icon-sm" alt="trigger" />
                 </span>
                 {{/if}}
