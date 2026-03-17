@@ -22,7 +22,7 @@
                         </ul>
                     </div>
                     <script>
-                        jQuery('#build-parameters-trigger-${buildGrid.get(0,0).getId()}').tooltip({
+                        jQuery('#build-parameters-${buildGrid.get(0,0).getId()}').tooltip({
                             bodyHandler: function() {
                                 return jQuery('#build-parameters-${buildGrid.get(0,0).getId()}').html();
                             }
