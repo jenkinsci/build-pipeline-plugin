@@ -105,7 +105,7 @@ public final class ProjectUtil {
                     final String manualDownstreamProjects = ((BuildPipelineTrigger) upstreamPub).getDownstreamProjectNames();
                     final String[] downstreamProjs = manualDownstreamProjects.split(",");
                     for (final String nextProj : downstreamProjs) {
-                        if (Jenkins.getInstance().getItem(nextProj.trim(), upstreamProject) == downstreamProject) {
+                        if (Jenkins.getInstance().getItem(nextProj.trim(), upstreamProject).getName().equals(downstreamProject.getName())) {
                             manualTrigger = true;
                             break;
                         }
