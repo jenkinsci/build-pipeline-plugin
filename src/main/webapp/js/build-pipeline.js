@@ -26,7 +26,7 @@ BuildPipeline.prototype = {
                         buildPipeline.updateAllBuildCards(dependencies);
                         // trigger all dependency tracking
                         jQuery.each(dependencies, function(){
-                            jQuery("#pipelines").trigger("show-status-" + this);
+                            jQuery("table.pipelines").trigger("show-status-" + this);
                         });
                     }
                 });
