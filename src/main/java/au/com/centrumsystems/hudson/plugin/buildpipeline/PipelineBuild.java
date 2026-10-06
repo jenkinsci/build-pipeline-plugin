@@ -310,15 +310,15 @@ public class PipelineBuild {
         final String upstreamBuildName;
         final PipelineBuild previousPB = new PipelineBuild();
         if (this.upstreamBuild != null) {
-            upstreamBuildName = this.upstreamBuild.getProject().getName();
+            upstreamBuildName = this.upstreamBuild.getProject().getFullName();
         } else {
             upstreamBuildName = "";
         }
         if (upstreamProjects.size() > 0) {
             for (AbstractProject upstreamProject : upstreamProjects) {
-                if (upstreamProject.getName().equals(upstreamBuildName)) {
+                if (upstreamProject.getFullName().equals(upstreamBuildName)) {
                     previousProject = upstreamProject;
-                  break;
+                    break;
                 }
             }
             if (previousProject == null) {
