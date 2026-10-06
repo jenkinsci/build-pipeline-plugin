@@ -27,11 +27,9 @@
                                             <td id="project-${project.getId()}"></td>
                                         </j:otherwise>
                                     </j:choose>
-                                    <script>
-                                        //save project proxies for future reference (being able to refresh project cards)
-                                        buildPipeline.projectProxies[${project.getId()}] = <st:bind value="${project}" />;
-                                        jQuery("#project-${project.getId()}").append(buildPipeline.projectCardTemplate(${project.asJSON()}));
-                                    </script>
+                                    <st:adjunct includes="au.com.centrumsystems.hudson.plugin.buildpipeline.extension.PipelineHeaderExtension.pipeline-column-headers"/>
+                                    <st:bind value="${project}" var="projectProxy${project.getId()}"/>
+                                    <span class="ch-project-data-holder" data-project-id="${project.getId()}" data-project-json="${project.asJSON()}" style="display:none"/>
                                     <j:if test="${(y + 1 != buildPipelineForm.getGridWidth())}">
                                         <td class="next">
                                             <!-- Changing length to size() to get rid of arrows when there are no more child jobs.-->
