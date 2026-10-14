@@ -12,6 +12,8 @@
     </j:if>
 
     <st:adjunct includes="io.jenkins.plugins.jquery3"/>
+    <st:adjunct includes="au.com.centrumsystems.hudson.plugin.buildpipeline.extension.BuildCardExtension.build-card-template-onclicks"/>
+    <st:adjunct includes="au.com.centrumsystems.hudson.plugin.buildpipeline.BuildPipelineView.bpp-trigger-pipeline"/>
     <script src="${rootURL}/plugin/build-pipeline-plugin/js/jquery-migrate-1.2.1.min.js"></script>
     <script type="text/javascript" src="${rootURL}/plugin/build-pipeline-plugin/js/jquery-ui-1.8.14.custom.min.js"></script>
     <script type="text/javascript" src="${rootURL}/plugin/build-pipeline-plugin/js/handlebars-1.0.0.beta.6.js"></script>
@@ -19,24 +21,21 @@
     <script src="${rootURL}/plugin/build-pipeline-plugin/js/jquery.tooltip.min.js"></script>
     <script src="${rootURL}/plugin/build-pipeline-plugin/js/build-pipeline.js"></script>
 
-<script id="build-card-template" type="text/x-handlebars-template">
+<span id="build-card-template" type="text/x-handlebars-template" style="display: none">
     <st:include page="buildCardTemplate.jelly"
                 from="${from.getBuildCard()}"
                 it="${from}"/>
-</script>
+</span>
 
-<script id="project-card-template" type="text/x-handlebars-template">
+<span id="project-card-template" type="text/x-handlebars-template" style="display: none">
     <st:include page="projectCardTemplate.jelly"
                 from="${from.getColumnHeaders()}"
                 it="${from}" />
-</script>
+</span>
 
     <st:bind var="buildPipelineViewProxy" value="${from}" />
-    <script type="text/javascript">
-        var buildCardTemplateSource = jQuery("#build-card-template").html();
-        var projectCardTemplateSource = jQuery("#project-card-template").html();
-        var buildPipeline = new BuildPipeline(buildPipelineViewProxy, Handlebars.compile(buildCardTemplateSource), Handlebars.compile(projectCardTemplateSource), ${from.getRefreshFrequencyInMillis()});
-    </script>
+    <span class="pipeline-refresh-frequency" data-refresh-frequency="${from.getRefreshFrequencyInMillis()}" style="display: none"/>
+    <st:adjunct includes="au.com.centrumsystems.hudson.plugin.buildpipeline.BuildPipelineView.build-pipeline-init"/>
 
     <st:include page="buildCardHelpers.jelly"
                 from="${from.getBuildCard()}"
@@ -62,13 +61,13 @@
         <j:if test="${hasBuildPermission}">
             <div class="icon-container">
             <j:if test="${from.isProjectParameterized()}">
-                <span class="pointer" onclick="buildPipeline.fillDialog('${app.rootUrl}${from.gridBuilder.firstJobLink}/build?delay=0sec', 'Starts the pipeline with parameters')">
+                <span class="bpp-trigger-pipeline-parameterized pointer" data-fill-dialog-href="${app.rootUrl}${from.gridBuilder.firstJobLink}/build?delay=0sec" data-fill-dialog-title="Starts the pipeline with parameters">
                     <l:icon src="icon-clock icon-md" alt="Trigger a Pipeline" />
                                 <span>Run</span>
                 </span>
             </j:if>
             <j:if test="${!from.isProjectParameterized()}">
-              <a id="trigger-pipeline-button" href='#' onclick="document.getElementById('triggerPipelineForm').submit()">
+              <a id="trigger-pipeline-button" href='#'>
                 <l:icon src="icon-clock icon-md" alt="Trigger a Pipeline" />
                                 <span>Run</span>
               </a>
@@ -131,29 +130,17 @@
                                 <j:forEach begin="${0}" end="${buildPipelineForm.getGridWidth() - 1}" indexVar="y">
                                     <j:set var="build" type="au.com.centrumsystems.hudson.plugin.buildpipeline.BuildForm" value="${buildGrid.get(x,y)}" />
                                     <j:if test="${build != null}">
-                                        <td id="build-${build.getId()}"></td>
-                                        <script>
-                                            // generate build-card
-                                            var buildData = ${build.asJSON()};
-                                            jQuery("#build-${build.getId()}").append(buildPipeline.buildCardTemplate(buildData));
-                                            // add build proxy to proxies for future use
-                                            buildPipeline.buildProxies[${build.getId()}] = <st:bind value="${build}" />;
-                                            <j:if test="${build.getStatus() == 'BUILDING'}">
-                                                buildPipeline.showProgress(${build.getId()}, ${build.getDependencyIds()});
-                                            </j:if>
-                                            <j:if test="${build.getStatus() == 'PENDING'}">
-                                                jQuery("#pipelines").bind("show-status-${build.getId()}", function() {
-                                                <j:choose>
-                                                    <j:when test="${build.isManualTrigger()}">
-                                                        buildPipeline.updateBuildCard(${build.getId()});
-                                                    </j:when>
-                                                    <j:otherwise>
-                                                        buildPipeline.updateNextBuildAndShowProgress(${build.getId()}, ${build.getNextBuildNumber()}, ${build.getDependencyIds()});
-                                                    </j:otherwise>
-                                                </j:choose>
-                                                });
-                                            </j:if>
-                                        </script>
+                                        <td id="build-${build.getId()}">
+                                            <j:set var="buildDataJson" value="${build.asJSON()}" />
+                                            <span class="build-data"
+                                                 data-build-id="${build.getId()}"
+                                                 data-build-info="${buildDataJson}"
+                                                 data-build-status="${build.getStatus()}"
+                                                 data-is-manual-trigger="${build.isManualTrigger()}"
+                                                 data-next-build-number="${build.getNextBuildNumber()}"
+                                                 data-dependency-ids="${build.getDependencyIds()}"/>
+                                            <st:bind var="buildProxy_${build.getId()}" value="${build}" />
+                                        </td>
                                         <j:if test="${(y + 1 != buildPipelineForm.getGridWidth())}">
                                             <!-- Changing length to size() to get rid of arrows when there are no more child jobs.-->
                                         <td class="next">
