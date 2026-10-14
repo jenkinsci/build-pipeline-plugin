@@ -141,8 +141,7 @@
                                             <j:if test="${build.getStatus() == 'BUILDING'}">
                                                 buildPipeline.showProgress(${build.getId()}, ${build.getDependencyIds()});
                                             </j:if>
-                                            <j:if test="${build.getStatus() == 'PENDING'}">
-                                                jQuery("#pipelines").bind("show-status-${build.getId()}", function() {
+                                                jQuery("table.pipelines").on("show-status-${build.getId()}", function() {
                                                 <j:choose>
                                                     <j:when test="${build.isManualTrigger()}">
                                                         buildPipeline.updateBuildCard(${build.getId()});
@@ -152,7 +151,6 @@
                                                     </j:otherwise>
                                                 </j:choose>
                                                 });
-                                            </j:if>
                                         </script>
                                         <j:if test="${(y + 1 != buildPipelineForm.getGridWidth())}">
                                             <!-- Changing length to size() to get rid of arrows when there are no more child jobs.-->
