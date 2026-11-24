@@ -12,6 +12,7 @@
     </j:if>
 
     <st:adjunct includes="io.jenkins.plugins.jquery3"/>
+    <st:adjunct includes="au.com.centrumsystems.hudson.plugin.buildpipeline.extension.BuildCardExtension.build-card-template-onclicks"/>
     <script src="${rootURL}/plugin/build-pipeline-plugin/js/jquery-migrate-1.2.1.min.js"></script>
     <script type="text/javascript" src="${rootURL}/plugin/build-pipeline-plugin/js/jquery-ui-1.8.14.custom.min.js"></script>
     <script type="text/javascript" src="${rootURL}/plugin/build-pipeline-plugin/js/handlebars-1.0.0.beta.6.js"></script>
