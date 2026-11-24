@@ -12,6 +12,7 @@
     </j:if>
 
     <st:adjunct includes="io.jenkins.plugins.jquery3"/>
+    <st:adjunct includes="au.com.centrumsystems.hudson.plugin.buildpipeline.BuildPipelineView.bpp-trigger-pipeline"/>
     <script src="${rootURL}/plugin/build-pipeline-plugin/js/jquery-migrate-1.2.1.min.js"></script>
     <script type="text/javascript" src="${rootURL}/plugin/build-pipeline-plugin/js/jquery-ui-1.8.14.custom.min.js"></script>
     <script type="text/javascript" src="${rootURL}/plugin/build-pipeline-plugin/js/handlebars-1.0.0.beta.6.js"></script>
@@ -62,13 +63,13 @@
         <j:if test="${hasBuildPermission}">
             <div class="icon-container">
             <j:if test="${from.isProjectParameterized()}">
-                <span class="pointer" onclick="buildPipeline.fillDialog('${app.rootUrl}${from.gridBuilder.firstJobLink}/build?delay=0sec', 'Starts the pipeline with parameters')">
+                <span class="bpp-trigger-pipeline-parameterized pointer" data-fill-dialog-href="${app.rootUrl}${from.gridBuilder.firstJobLink}/build?delay=0sec" data-fill-dialog-title="Starts the pipeline with parameters">
                     <l:icon src="icon-clock icon-md" alt="Trigger a Pipeline" />
                                 <span>Run</span>
                 </span>
             </j:if>
             <j:if test="${!from.isProjectParameterized()}">
-              <a id="trigger-pipeline-button" href='#' onclick="document.getElementById('triggerPipelineForm').submit()">
+              <a id="trigger-pipeline-button" href='#'>
                 <l:icon src="icon-clock icon-md" alt="Trigger a Pipeline" />
                                 <span>Run</span>
               </a>
